@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from src.agent.graph import graph
 from src.storage.query_log import log_query_to_postgres
 from src.api.tracing import get_current_run_id
+from src.api.documents import router as documents_router
 
 app = FastAPI()
 
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(documents_router)
 
 class QueryRequest(BaseModel):
     raw_query: str

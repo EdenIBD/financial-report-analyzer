@@ -1,7 +1,7 @@
 from google import genai
 
 genai_client = genai.Client()
-CONTEXT_MODEL = "gemini-flash-lite-latest"  # Gemini Flash Lite — confirmat
+CONTEXT_MODEL = "gemini-3.1-flash-lite"  # exact cum a cerut spec-ul — verificat direct, functioneaza
 
 def llm_call(prompt: str) -> str:
     response = genai_client.models.generate_content(model=CONTEXT_MODEL, contents=prompt)

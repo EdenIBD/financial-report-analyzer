@@ -36,6 +36,22 @@ CREATE TABLE query_logs (
     status VARCHAR
 );
 
+CREATE TABLE document_uploads (
+    document_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    doc_id VARCHAR,
+    original_filename VARCHAR NOT NULL,
+    status VARCHAR NOT NULL DEFAULT 'processing',
+    company VARCHAR,
+    ticker VARCHAR,
+    fiscal_year INT,
+    filing_type VARCHAR,
+    sections_found INT,
+    chunks_indexed INT,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
 CREATE TABLE eval_set (
     eval_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     question TEXT NOT NULL,

@@ -2,44 +2,44 @@
   {
     "chunk_id": "AAPL_2023_Item1_0",
     "section": "Item1",
-    "question": "What operating system is the Company's line of Mac personal computers based on?",
-    "fact": "Mac is the Company's line of personal computers based on its macOS operating system."
+    "question": "On which day of the year does the Company's fiscal year end?",
+    "fact": "The Company\u2019s fiscal year ends on the last Saturday of September."
   },
   {
     "chunk_id": "AAPL_2023_Item1_1",
     "section": "Item1",
-    "question": "What operating system is the iPad line of multipurpose tablets based on?",
-    "fact": "iPad is the Company's line of multipurpose tablets based on its iPadOS operating system, which includes the iPad Pro, iPad Air, iPad, and iPad mini."
+    "question": "What operating system does the iPad line of tablets use?",
+    "fact": "The iPad is a line of multipurpose tablets based on the iPadOS operating system."
   },
   {
     "chunk_id": "AAPL_2023_Item1A_0",
     "section": "Item1A",
-    "question": "What aspects of the Company can be affected by a number of known or unknown factors?",
-    "fact": "The Company\u2019s business, reputation, results of operations, financial condition and stock price can be affected by a number of factors, including both currently known and unknown factors."
+    "question": "Can the Company's financial condition be affected by factors that are currently unknown?",
+    "fact": "The Company\u2019s business, reputation, results of operations, financial condition and stock price can be affected by various factors, including those that are currently unknown."
   },
   {
     "chunk_id": "AAPL_2023_Item1A_1",
     "section": "Item1A",
-    "question": "Why should investors not use historical trends to anticipate results or trends in future periods?",
-    "fact": "Past financial performance should not be considered to be a reliable indicator of future performance, and investors should not use historical trends to anticipate results or trends in future periods."
+    "question": "Why should investors not rely on past financial performance when predicting future results?",
+    "fact": "Past financial performance should not be considered a reliable indicator of future performance."
   },
   {
     "chunk_id": "AAPL_2023_Item2_0",
     "section": "Item2",
-    "question": "Where is the Company\u2019s headquarters located?",
+    "question": "In which city and state is the Company\u2019s headquarters located?",
     "fact": "The Company\u2019s headquarters is located in Cupertino, California."
   },
   {
     "chunk_id": "AAPL_2023_Item3_0",
     "section": "Item3",
-    "question": "Ce companie este men\u021bionat\u0103 \u00een text?",
-    "fact": "Epic Games este compania men\u021bionat\u0103 \u00een text."
+    "question": "Care este numele companiei men\u021bionate \u00een fragmentul furnizat?",
+    "fact": "Epic Games este numele companiei men\u021bionate \u00een text."
   },
   {
     "chunk_id": "AAPL_2023_Item3_1",
     "section": "Item3",
-    "question": "How many out of the ten counts in Epic's claim did the District Court rule in favor of the Company on, and when did this ruling occur?",
-    "fact": "On September 10, 2021, the U.S. District Court for the Northern District of California ruled in favor of the Company with respect to nine out of the ten counts included in Epic's claim."
+    "question": "On what date did the District Court rule in favor of the Company on nine out of ten counts in Epic's lawsuit?",
+    "fact": "On September 10, 2021, the District Court ruled in favor of the Company with respect to nine out of the ten counts included in Epic\u2019s claim."
   },
   {
     "chunk_id": "AAPL_2023_Item5_0",
@@ -50,55 +50,55 @@
   {
     "chunk_id": "AAPL_2023_Item5_1",
     "section": "Item5",
-    "question": "What was the average price paid per share for open market and privately negotiated purchases between July 2, 2023 and August 5, 2023?",
-    "fact": "From July 2, 2023 to August 5, 2023, the number of shares purchased through open market and privately negotiated purchases was 33,864 at an average price paid per share of $191.62."
+    "question": "Care a fost pre\u021bul mediu pl\u0103tit pe ac\u021biune pentru r\u0103scump\u0103rarea de ac\u021biuni \u00een perioada 2 iulie 2023 - 5 august 2023?",
+    "fact": "\u00centre 2 iulie 2023 \u0219i 5 august 2023, pre\u021bul mediu pl\u0103tit pe ac\u021biune pentru r\u0103scump\u0103rarea de ac\u021biuni proprii a fost de 191,62$."
   },
   {
     "chunk_id": "AAPL_2023_Item7_0",
     "section": "Item7",
-    "question": "Where can discussions of 2021 items and year-to-year comparisons between 2022 and 2021 be found?",
-    "fact": "Discussions of 2021 items and year-to-year comparisons between 2022 and 2021 can be found in Part II, Item 7 of the Company\u2019s Annual Report on Form 10-K for the fiscal year ended September 24, 2022."
+    "question": "Where can the discussion of 2021 financial items and the comparisons between 2022 and 2021 be found?",
+    "fact": "The Company\u2019s Annual Report on Form 10-K for the fiscal year ended September 24, 2022, contains the discussion of 2021 items and year-to-year comparisons between 2022 and 2021."
   },
   {
     "chunk_id": "AAPL_2023_Item7_1",
     "section": "Item7",
-    "question": "How many weeks did the Company's fiscal year 2023 span compared to fiscal years 2022 and 2021?",
-    "fact": "The Company's fiscal year 2023 spanned 53 weeks, whereas fiscal years 2022 and 2021 spanned 52 weeks each."
+    "question": "On which day of the week and month does the Company\u2019s fiscal year end?",
+    "fact": "The Company\u2019s fiscal year ends on the last Saturday of September."
   },
   {
     "chunk_id": "AAPL_2023_Item7A_0",
     "section": "Item7A",
-    "question": "What two sources of economic risk is the Company exposed to?",
+    "question": "What two types of economic risks is the Company exposed to?",
     "fact": "The Company is exposed to economic risk from interest rates and foreign exchange rates."
   },
   {
     "chunk_id": "AAPL_2023_Item7A_1",
     "section": "Item7A",
-    "question": "What effect do increases in U.S. interest rates have on the fair value of the Company's investment portfolio and its term debt?",
-    "fact": "Increases in U.S. interest rates will negatively affect the fair value of the Company\u2019s investment portfolio and increase the interest expense on the Company\u2019s term debt."
+    "question": "What effect do interest rate increases have on the Company\u2019s term debt interest expense?",
+    "fact": "Increases in interest rates will increase the interest expense on the Company\u2019s term debt."
   },
   {
     "chunk_id": "AAPL_2023_Item8_0",
     "section": "Item8",
-    "question": "As of which dates are the Consolidated Balance Sheets provided?",
-    "fact": "The Consolidated Balance Sheets are provided as of September 30, 2023 and September 24, 2022."
+    "question": "As of which two dates are the Consolidated Balance Sheets provided?",
+    "fact": "The Consolidated Balance Sheets are provided for the dates of September 30, 2023, and September 24, 2022."
   },
   {
     "chunk_id": "AAPL_2023_Item8_1",
     "section": "Item8",
-    "question": "What are the two specific dates mentioned in the text?",
-    "fact": "The dates mentioned in the text are September 24, 2022, and September 25, 2021."
+    "question": "Which date is listed in the text following September 24, 2022?",
+    "fact": "The date September 25, 2021 is mentioned in the text."
   },
   {
     "chunk_id": "AAPL_2023_Item9A_0",
     "section": "Item9A",
-    "question": "What is the title of the provided text?",
-    "fact": "The text is titled 'Evaluation of Disclosure Controls and Procedures'."
+    "question": "What is the subject of the evaluation described in the text?",
+    "fact": "The text refers to the Evaluation of Disclosure Controls and Procedures."
   },
   {
     "chunk_id": "AAPL_2023_Item9A_1",
     "section": "Item9A",
-    "question": "As of what date were the Company's disclosure controls and procedures concluded to be effective by its principal executive and financial officers?",
-    "fact": "The Company's principal executive officer and principal financial officer concluded that the Company's disclosure controls and procedures were effective as of September 30, 2023."
+    "question": "As of what date were the Company\u2019s disclosure controls and procedures concluded to be effective?",
+    "fact": "The Company\u2019s disclosure controls and procedures were effective as of September 30, 2023."
   }
 ]

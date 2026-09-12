@@ -1,31 +1,32 @@
 # Cost trends
 
-Generat automat de `scripts/cost_trends.py` din `query_logs` (9 query-uri cu cost logat).
+Generat automat de `scripts/cost_trends.py` din `query_logs` (27 query-uri cu cost logat).
 
 ## Cost mediu per query_type
 
 | query_type | n | cost mediu (USD) |
 |---|---|---|
-| comparison | 1 | 0.000108 |
-| factual | 2 | 0.000168 |
-| risk_analysis | 1 | 0.000122 |
+| comparison | 10 | 0.003444 |
+| factual | 8 | 0.001492 |
+| risk_analysis | 4 | 0.000504 |
 
-**Observatie:** Query-urile de comparatie costa de ~0.6x fata de cele factuale ($0.000108 vs $0.000168 in medie).
+**Observatie:** Query-urile de comparatie costa de ~2.3x fata de cele factuale ($0.003444 vs $0.001492 in medie).
 
 ## Cost mediu per persona
 
 | persona | n | cost mediu (USD) |
 |---|---|---|
 | investment_bank | 1 | 0.000179 |
-| investment_firm | 1 | 0.000108 |
-| legal | 1 | 0.000122 |
-| treasury | 1 | 0.000156 |
+| investment_firm | 13 | 0.002795 |
+| legal | 2 | 0.000395 |
+| treasury | 6 | 0.001849 |
 
 ## Cost mediu per status
 
 | status | n | cost mediu (USD) |
 |---|---|---|
-| error | 9 | 0.000063 |
+| error | 16 | 0.000128 |
+| valid | 11 | 0.004213 |
 
 ## Ce nu poate fi calculat din query_logs
 

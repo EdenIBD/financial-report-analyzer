@@ -3,39 +3,41 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from src.agent.state import AgentState, QueryClassification
 from src.storage.cost import calculate_cost_usd
 
-CLASSIFY_MODEL = "gemini-flash-latest"  # gemini-2.5-flash raspundea 404 (retras) — vezi wiki/pages/failure-patterns
+CLASSIFY_MODEL = "gemini-3-flash-preview"  # TODO: treci pe "gemini-3-flash" stabil cand apare (verificat: nu exista inca)
 
-CLASSIFY_SYSTEM_PROMPT = """Ești un clasificator de întrebări pentru un sistem de analiză a rapoartelor financiare
-(10-K) ale Apple, Microsoft și Google.
+CLASSIFY_SYSTEM_PROMPT = """You are a query classifier for a system that analyzes financial reports
+(10-K filings) from Apple, Microsoft, and Google.
 
-Pentru fiecare întrebare, determină:
+For each question, determine:
 
-1. PERSONA — cine ar pune o astfel de întrebare:
-   - legal: procese, litigii, riscuri de conformitate/reglementare
-   - audit_firm: situații financiare, controale interne, acuratețea raportării
-   - investment_firm: performanță, strategie, factori care influențează rezultatele
-   - investment_bank: structură de capital, datorii, fuziuni/achiziții
-   - treasury: lichiditate, cash flow, expunere valutară/dobândă
+1. PERSONA — who would ask this kind of question:
+   - legal: litigation, compliance/regulatory risk
+   - audit_firm: financial statements, internal controls, reporting accuracy
+   - investment_firm: performance, strategy, factors driving results
+   - investment_bank: capital structure, debt, M&A
+   - treasury: liquidity, cash flow, FX/interest rate exposure
 
 2. QUERY_TYPE:
-   - factual: o singură informație, dintr-un singur document/an
-   - comparison: compară între companii sau între ani
-   - risk_analysis: cere analiză/interpretare, nu doar un fapt
+   - factual: a single fact, from a single document/year
+   - comparison: compares across companies or years
+   - risk_analysis: requires analysis/interpretation, not just a fact
 
-Exemple:
-Q: "Ce spune Apple despre riscul din lanțul de aprovizionare?"
+The question may be asked in English or Romanian — classify it the same way regardless of language.
+
+Examples:
+Q: "What does Apple say about supply chain risk?"
 → persona: investment_firm, query_type: risk_analysis
 
-Q: "Cum s-a schimbat cifra de afaceri Microsoft față de anul trecut?"
+Q: "How did Microsoft's revenue change from last year?"
 → persona: investment_firm, query_type: comparison
 
-Q: "Există procese antitrust în curs împotriva Google?"
+Q: "Are there any antitrust proceedings against Google?"
 → persona: legal, query_type: factual
 
-Q: "Care e nivelul de lichiditate al Apple?"
+Q: "What is Apple's liquidity level?"
 → persona: treasury, query_type: factual
 
-Q: "Ce controale interne raportează Microsoft pentru situațiile financiare?"
+Q: "What internal controls does Microsoft report for its financial statements?"
 → persona: audit_firm, query_type: factual"""
 
 classify_llm = ChatGoogleGenerativeAI(model=CLASSIFY_MODEL).with_structured_output(
@@ -50,7 +52,7 @@ def classify(state: AgentState) -> AgentState:
 
     usage = result["raw"].usage_metadata or {}
     cost = calculate_cost_usd(
-        "gemini-classify-model", usage.get("input_tokens", 0), usage.get("output_tokens", 0)
+        CLASSIFY_MODEL, usage.get("input_tokens", 0), usage.get("output_tokens", 0)
     )
     state["cost_usd"] = state.get("cost_usd", 0.0) + cost
     return state

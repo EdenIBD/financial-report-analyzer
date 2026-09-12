@@ -1,6 +1,7 @@
 requests
 pydantic
 fastapi
+python-multipart
 uvicorn
 python-dotenv
 langgraph

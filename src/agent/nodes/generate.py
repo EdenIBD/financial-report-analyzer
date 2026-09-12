@@ -3,30 +3,31 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from src.agent.state import AgentState, Persona
 from src.storage.cost import calculate_cost_usd
 
-GENERATE_MODEL = "gemini-pro-latest"  # gemini-2.5-pro raspundea 404 (retras) — vezi wiki/pages/failure-patterns
+GENERATE_MODEL = "gemini-3-flash-preview"  # TODO: treci pe "gemini-3-flash" stabil cand apare (verificat: nu exista inca)
 
 PERSONA_TONE = {
-    Persona.LEGAL: "Fii precis, citeaza exact sectiunea/clauza, ton prudent, semnaleaza explicit riscul legal.",
-    Persona.AUDIT_FIRM: "Concentreaza-te pe cifre si controale, citeaza exact situatia/nota, semnaleaza orice discrepanta.",
-    Persona.INVESTMENT_FIRM: "Ton narativ, concentreaza-te pe factorii care determina performanta, perspectiva forward-looking.",
-    Persona.INVESTMENT_BANK: "Concis, concentrat pe structura de capital si metrici relevante pentru tranzactii.",
-    Persona.TREASURY: "Concentreaza-te pe cifre de lichiditate/cash, semnaleaza riscul de deficit de numerar.",
+    Persona.LEGAL: "Be precise, quote the exact section/clause, cautious tone, explicitly flag legal risk.",
+    Persona.AUDIT_FIRM: "Focus on figures and controls, cite the exact statement/note, flag any discrepancy.",
+    Persona.INVESTMENT_FIRM: "Narrative tone, focus on the factors driving performance, forward-looking perspective.",
+    Persona.INVESTMENT_BANK: "Concise, focused on capital structure and metrics relevant to transactions.",
+    Persona.TREASURY: "Focus on liquidity/cash figures, flag cash-shortfall risk.",
 }
 
-BASE_PROMPT = """Esti un asistent care raspunde la intrebari despre rapoarte financiare 10-K
-(Apple, Microsoft, Google), folosind EXCLUSIV fragmentele de context furnizate.
+BASE_PROMPT = """You are an assistant that answers questions about 10-K financial reports
+(Apple, Microsoft, Google), using ONLY the provided context fragments.
 
-Reguli:
-- Raspunde doar din context; daca informatia nu e in context, spune explicit asta.
-- Pentru fiecare afirmatie, citeaza sursa in formatul [chunk_id] (identificatorul din paranteze la inceputul fiecarui fragment de context).
-- Nu inventa cifre sau fapte care nu apar in context.
+Rules:
+- Answer only from the context; if the information isn't there, say so explicitly.
+- Cite the source for every claim in the format [chunk_id] (the identifier in brackets at the start of each context fragment).
+- Do not invent figures or facts that don't appear in the context.
+- Answer in the same language the question was asked in (English or Romanian). Default to English if that's unclear.
 
 {persona_tone}
 
 Context:
 {context}
 
-Intrebare: {query}"""
+Question: {query}"""
 
 generate_llm = ChatGoogleGenerativeAI(model=GENERATE_MODEL)
 
@@ -49,7 +50,7 @@ def generate_answer(state: AgentState) -> AgentState:
 
     usage = response.usage_metadata or {}
     cost = calculate_cost_usd(
-        "gemini-generate-model", usage.get("input_tokens", 0), usage.get("output_tokens", 0)
+        GENERATE_MODEL, usage.get("input_tokens", 0), usage.get("output_tokens", 0)
     )
     state["cost_usd"] = state.get("cost_usd", 0.0) + cost
     return state

@@ -9,14 +9,18 @@ from src.retrieval.fusion import reciprocal_rank_fusion
 # QDRANT_URL: "http://localhost:6333" local (implicit), "http://qdrant:6333" in docker-compose
 qdrant_client = QdrantClient(url=os.environ.get("QDRANT_URL", "http://localhost:6333"))
 
+# Categorii canonice (src/ingestion/sections.py), nu numere brute de Item —
+# 10-K si 10-Q numeroteaza acelasi continut diferit (MD&A e Item7 la 10-K,
+# Item2 la 10-Q), deci filtrarea trebuie sa fie pe categorie semantica,
+# comuna intre tipurile de filing, nu pe Item.
 PERSONA_SECTIONS = {
-    Persona.LEGAL: ["Item3", "Item1A"],
-    Persona.AUDIT_FIRM: ["Item8", "Item9A"],
-    Persona.INVESTMENT_FIRM: ["Item7", "Item8"],
-    Persona.INVESTMENT_BANK: ["Item7", "Item7A", "Item8"],
-    Persona.TREASURY: ["Item7A", "Item8"],
+    Persona.LEGAL: ["legal_proceedings", "risk_factors"],
+    Persona.AUDIT_FIRM: ["financial_statements", "controls_procedures"],
+    Persona.INVESTMENT_FIRM: ["mdna", "financial_statements"],
+    Persona.INVESTMENT_BANK: ["mdna", "market_risk", "financial_statements"],
+    Persona.TREASURY: ["market_risk", "financial_statements"],
 }
-FALLBACK_SECTIONS = ["Item1A", "Item7", "Item7A", "Item8"]
+FALLBACK_SECTIONS = ["risk_factors", "mdna", "market_risk", "financial_statements"]
 
 KNOWN_ENTITIES = {
     "AAPL": ["apple", "aapl"],
@@ -87,33 +91,27 @@ def retrieve_multi(state: AgentState) -> AgentState:
         entities = list(KNOWN_ENTITIES.keys())
     dense_vec = embed_query(query_text)
 
-    all_results = []
-    for ticker in entities:
+    all_chunks = []
+    for entity in entities:
+        base_filter = [
+            {"key": "section", "match": {"any": allowed_sections}},
+            {"key": "company", "match": {"value": entity}},
+        ]
         dense_results = qdrant_client.query_points(
             collection_name="financial_reports",
             query=dense_vec,
-            query_filter={
-                "must": [
-                    {"key": "section", "match": {"any": allowed_sections}},
-                    {"key": "company", "match": {"value": ticker}},
-                ]
-            },
-            limit=15,
+            query_filter={"must": base_filter},
+            limit=10,
         ).points
         keyword_results = qdrant_client.query_points(
             collection_name="financial_reports",
-            query_filter={
-                "must": [
-                    {"key": "section", "match": {"any": allowed_sections}},
-                    {"key": "company", "match": {"value": ticker}},
-                    {"key": "text", "match": {"text": query_text}},
-                ]
-            },
-            limit=15,
+            query_filter={"must": base_filter + [{"key": "text", "match": {"text": query_text}}]},
+            limit=10,
         ).points
         # RRF separat per entitate, nu una globala: la o comparatie intre companii,
         # o singura fuziune globala ar putea intoarce top 8 dintr-o singura companie.
-        all_results.extend(reciprocal_rank_fusion(dense_results, keyword_results, top_k=8))
+        merged = reciprocal_rank_fusion(dense_results, keyword_results, top_k=5)
+        all_chunks.extend([format_chunk(r) for r in merged])
 
-    state["retrieved_chunks"] = [format_chunk(r) for r in all_results]
+    state["retrieved_chunks"] = all_chunks
     return state
