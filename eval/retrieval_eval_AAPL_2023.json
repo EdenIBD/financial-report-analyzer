@@ -1,0 +1,104 @@
+[
+  {
+    "chunk_id": "AAPL_2023_Item1_0",
+    "section": "Item1",
+    "question": "What operating system is the Company's line of Mac personal computers based on?",
+    "fact": "Mac is the Company's line of personal computers based on its macOS operating system."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item1_1",
+    "section": "Item1",
+    "question": "What operating system is the iPad line of multipurpose tablets based on?",
+    "fact": "iPad is the Company's line of multipurpose tablets based on its iPadOS operating system, which includes the iPad Pro, iPad Air, iPad, and iPad mini."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item1A_0",
+    "section": "Item1A",
+    "question": "What aspects of the Company can be affected by a number of known or unknown factors?",
+    "fact": "The Company\u2019s business, reputation, results of operations, financial condition and stock price can be affected by a number of factors, including both currently known and unknown factors."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item1A_1",
+    "section": "Item1A",
+    "question": "Why should investors not use historical trends to anticipate results or trends in future periods?",
+    "fact": "Past financial performance should not be considered to be a reliable indicator of future performance, and investors should not use historical trends to anticipate results or trends in future periods."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item2_0",
+    "section": "Item2",
+    "question": "Where is the Company\u2019s headquarters located?",
+    "fact": "The Company\u2019s headquarters is located in Cupertino, California."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item3_0",
+    "section": "Item3",
+    "question": "Ce companie este men\u021bionat\u0103 \u00een text?",
+    "fact": "Epic Games este compania men\u021bionat\u0103 \u00een text."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item3_1",
+    "section": "Item3",
+    "question": "How many out of the ten counts in Epic's claim did the District Court rule in favor of the Company on, and when did this ruling occur?",
+    "fact": "On September 10, 2021, the U.S. District Court for the Northern District of California ruled in favor of the Company with respect to nine out of the ten counts included in Epic's claim."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item5_0",
+    "section": "Item5",
+    "question": "How many shareholders of record were there as of October 20, 2023?",
+    "fact": "As of October 20, 2023, there were 23,763 shareholders of record."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item5_1",
+    "section": "Item5",
+    "question": "What was the average price paid per share for open market and privately negotiated purchases between July 2, 2023 and August 5, 2023?",
+    "fact": "From July 2, 2023 to August 5, 2023, the number of shares purchased through open market and privately negotiated purchases was 33,864 at an average price paid per share of $191.62."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item7_0",
+    "section": "Item7",
+    "question": "Where can discussions of 2021 items and year-to-year comparisons between 2022 and 2021 be found?",
+    "fact": "Discussions of 2021 items and year-to-year comparisons between 2022 and 2021 can be found in Part II, Item 7 of the Company\u2019s Annual Report on Form 10-K for the fiscal year ended September 24, 2022."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item7_1",
+    "section": "Item7",
+    "question": "How many weeks did the Company's fiscal year 2023 span compared to fiscal years 2022 and 2021?",
+    "fact": "The Company's fiscal year 2023 spanned 53 weeks, whereas fiscal years 2022 and 2021 spanned 52 weeks each."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item7A_0",
+    "section": "Item7A",
+    "question": "What two sources of economic risk is the Company exposed to?",
+    "fact": "The Company is exposed to economic risk from interest rates and foreign exchange rates."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item7A_1",
+    "section": "Item7A",
+    "question": "What effect do increases in U.S. interest rates have on the fair value of the Company's investment portfolio and its term debt?",
+    "fact": "Increases in U.S. interest rates will negatively affect the fair value of the Company\u2019s investment portfolio and increase the interest expense on the Company\u2019s term debt."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item8_0",
+    "section": "Item8",
+    "question": "As of which dates are the Consolidated Balance Sheets provided?",
+    "fact": "The Consolidated Balance Sheets are provided as of September 30, 2023 and September 24, 2022."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item8_1",
+    "section": "Item8",
+    "question": "What are the two specific dates mentioned in the text?",
+    "fact": "The dates mentioned in the text are September 24, 2022, and September 25, 2021."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item9A_0",
+    "section": "Item9A",
+    "question": "What is the title of the provided text?",
+    "fact": "The text is titled 'Evaluation of Disclosure Controls and Procedures'."
+  },
+  {
+    "chunk_id": "AAPL_2023_Item9A_1",
+    "section": "Item9A",
+    "question": "As of what date were the Company's disclosure controls and procedures concluded to be effective by its principal executive and financial officers?",
+    "fact": "The Company's principal executive officer and principal financial officer concluded that the Company's disclosure controls and procedures were effective as of September 30, 2023."
+  }
+]

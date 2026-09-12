@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: financial_report_analyzer
+    ports:
+      # 5433 pe host, ca sa nu se suprapuna peste un eventual Postgres de sistem pe 5432
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/storage/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  api:
+    build: .
+    env_file:
+      - .env
+    environment:
+      # in reteaua docker-compose, serviciile se gasesc dupa nume, nu prin localhost
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/financial_report_analyzer
+      QDRANT_URL: http://qdrant:6333
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp-sa.json
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/run/secrets/gcp-sa.json:ro
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - qdrant
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # adresa vazuta de browser-ul utilizatorului, nu de reteaua interna docker-compose
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  qdrant_data:

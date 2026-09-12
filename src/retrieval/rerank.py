@@ -1,0 +1,31 @@
+import os
+
+from google.cloud import discoveryengine_v1 as discoveryengine
+
+from src.storage.cost import RERANK_COST_PER_QUERY_USD
+
+ranking_client = discoveryengine.RankServiceClient()
+RANKING_CONFIG = (
+    f"projects/{os.environ['GOOGLE_CLOUD_PROJECT']}/locations/global/"
+    "rankingConfigs/default_ranking_config"
+)
+
+def rerank(state):
+    query_text = state["raw_query"]
+    chunk_by_id = {c["chunk_id"]: c for c in state["retrieved_chunks"]}
+    request = discoveryengine.RankRequest(
+        ranking_config=RANKING_CONFIG,
+        model="semantic-ranker-default-004",
+        query=query_text,
+        records=[
+            discoveryengine.RankingRecord(id=c["chunk_id"], content=c["text"])
+            for c in state["retrieved_chunks"]
+        ],
+        top_n=8,
+    )
+    response = ranking_client.rank(request=request)
+    state["retrieved_chunks"] = [
+        {**chunk_by_id[r.id], "score": r.score} for r in response.records
+    ]
+    state["cost_usd"] = state.get("cost_usd", 0.0) + RERANK_COST_PER_QUERY_USD
+    return state

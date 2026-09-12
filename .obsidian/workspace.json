@@ -1,0 +1,217 @@
+{
+  "main": {
+    "id": "2f22f2b6988632b0",
+    "type": "split",
+    "children": [
+      {
+        "id": "ff5b6d5bac90b3e0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f0571f6537b05305",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "wiki/log.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "log"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "7381b7fb771f0dda",
+    "type": "split",
+    "children": [
+      {
+        "id": "4219bcde7f3fa81a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4a81db93c5b2e571",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorator de fișiere"
+            }
+          },
+          {
+            "id": "1053aff28987765c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Caută"
+            }
+          },
+          {
+            "id": "767ade102bc73879",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Marcaje"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "7c14f0f72bab38fe",
+    "type": "split",
+    "children": [
+      {
+        "id": "f6abd68422310f1a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "428acd8e3f57d6f6",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "README.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Referințe"
+            }
+          },
+          {
+            "id": "7a8a7d41b5201e8e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing Links"
+            }
+          },
+          {
+            "id": "b7e698eff8bdebfe",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etichete"
+            }
+          },
+          {
+            "id": "a7e40d0911074288",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Toate proprietățile"
+            }
+          },
+          {
+            "id": "41d559b5338ee9ed",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "README.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Sumar"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Deschide comutarea rapidă": false,
+      "graph:Deschide graficul": false,
+      "canvas:Creează o pânză nouă": false,
+      "daily-notes:Deschide nota de azie": false,
+      "templates:Inserează șablon": false,
+      "command-palette:Deschide paleta de comenzi": false,
+      "bases:Creează o bază nouă": false
+    }
+  },
+  "active": "f0571f6537b05305",
+  "lastOpenFiles": [
+    "wiki/agents.md",
+    "presentation.html",
+    "wiki/index.md",
+    "README.md",
+    "wiki/pages/failure-patterns/langsmith-trace-id-always-null.md",
+    "src/agent/nodes/__pycache__/verify.cpython-313.pyc",
+    "tests/__pycache__/test_verify.cpython-313-pytest-9.1.1.pyc",
+    "src/ingestion/__pycache__/tokenizer.cpython-313.pyc",
+    "tests/__pycache__/test_tokenizer.cpython-313-pytest-9.1.1.pyc",
+    "src/storage/__pycache__/query_log.cpython-313.pyc",
+    "tests/__pycache__/test_query_log.cpython-313-pytest-9.1.1.pyc",
+    "src/ingestion/__pycache__/parse.cpython-313.pyc",
+    "tests/__pycache__/test_parse.cpython-313-pytest-9.1.1.pyc",
+    "tests/__pycache__/test_fusion.cpython-313-pytest-9.1.1.pyc",
+    "wiki/pages/failure-patterns/retrieve-multi-no-entity-fallback.md",
+    "wiki/pages/failure-patterns/generate-answer-content-not-string.md",
+    "wiki/pages/failure-patterns/verify-context-infinite-retry-loop.md",
+    "wiki/pages/cost-trends.md",
+    "wiki/pages/failure-patterns/qdrant-query-points-response-shape.md",
+    "wiki/pages/failure-patterns/gemini-2.5-models-retired.md",
+    "wiki/pages/failure-patterns/edgar10q-parser-10k-sections.md",
+    "wiki/pages/failure-patterns/gemini-embedding-2-404.md",
+    "wiki/log.md"
+  ]
+}

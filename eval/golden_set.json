@@ -1,0 +1,107 @@
+[
+  {
+    "question": "Ce riscuri legale semnaleaza Microsoft in legatura cu reglementarile antitrust din UE?",
+    "expected_persona": "legal",
+    "expected_query_type": "risk_analysis",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Ce litigii majore are Microsoft in curs, conform ultimului 10-K?",
+    "expected_persona": "legal",
+    "expected_query_type": "factual",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Cum difera expunerea la riscuri de reglementare intre Google si Apple?",
+    "expected_persona": "legal",
+    "expected_query_type": "comparison",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Ce spune Apple despre eficacitatea controalelor interne asupra raportarii financiare?",
+    "expected_persona": "audit_firm",
+    "expected_query_type": "factual",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Ce discrepante sau puncte slabe in controalele interne raporteaza Google?",
+    "expected_persona": "audit_firm",
+    "expected_query_type": "risk_analysis",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Cum se compara opinia auditorului independent intre Microsoft si Apple?",
+    "expected_persona": "audit_firm",
+    "expected_query_type": "comparison",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Cum s-a schimbat marja operationala a Google fata de anul precedent?",
+    "expected_persona": "investment_firm",
+    "expected_query_type": "comparison",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Ce factori explica evolutia veniturilor Apple in ultimul an fiscal?",
+    "expected_persona": "investment_firm",
+    "expected_query_type": "risk_analysis",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Care a fost venitul net al Microsoft in ultimul an fiscal raportat?",
+    "expected_persona": "investment_firm",
+    "expected_query_type": "factual",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Care este nivelul total al datoriei pe termen lung raportat de Microsoft?",
+    "expected_persona": "investment_bank",
+    "expected_query_type": "factual",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Cum se compara structura de capital (datorie vs. capital propriu) intre Apple si Google?",
+    "expected_persona": "investment_bank",
+    "expected_query_type": "comparison",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Ce impact ar putea avea nivelul actual de indatorare al Google asupra unei eventuale achizitii majore?",
+    "expected_persona": "investment_bank",
+    "expected_query_type": "risk_analysis",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Ce expunere la riscul de curs valutar raporteaza Apple si cum il gestioneaza?",
+    "expected_persona": "treasury",
+    "expected_query_type": "risk_analysis",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Care este pozitia de numerar si echivalente de numerar a Microsoft la finalul anului fiscal?",
+    "expected_persona": "treasury",
+    "expected_query_type": "factual",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  },
+  {
+    "question": "Cum se compara nivelul de lichiditate intre Google si Microsoft?",
+    "expected_persona": "treasury",
+    "expected_query_type": "comparison",
+    "expected_answer": null,
+    "expected_chunk_ids": null
+  }
+]

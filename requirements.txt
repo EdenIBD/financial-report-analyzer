@@ -1,0 +1,16 @@
+requests
+pydantic
+fastapi
+uvicorn
+python-dotenv
+langgraph
+langchain-text-splitters
+sec-parser
+tiktoken
+qdrant-client
+google-genai
+langchain-google-genai
+google-cloud-discoveryengine
+psycopg2-binary
+langsmith
+pytest

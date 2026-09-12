@@ -1,0 +1,772 @@
+<!doctype html>
+<title>Financial Report Analyzer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F7F4EC;
+    --surface: #FFFFFF;
+    --surface-2: #EDE7D6;
+    --border: #DAD2B8;
+    --text: #1B1B16;
+    --text-dim: #6B6555;
+    --accent: #9A6B14;
+    --accent-2: #0E7C6B;
+    --accent-2-soft: #D9EEE9;
+    --accent-soft: #F2E4C4;
+    --danger: #A13A2D;
+    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --sans: 'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif;
+    --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0B0E13;
+      --surface: #131720;
+      --surface-2: #1B2029;
+      --border: #2A3140;
+      --text: #ECEAE0;
+      --text-dim: #93917F;
+      --accent: #E8B94F;
+      --accent-2: #4FD9C4;
+      --accent-2-soft: #16332F;
+      --accent-soft: #332A16;
+      --danger: #E08070;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B0E13;
+    --surface: #131720;
+    --surface-2: #1B2029;
+    --border: #2A3140;
+    --text: #ECEAE0;
+    --text-dim: #93917F;
+    --accent: #E8B94F;
+    --accent-2: #4FD9C4;
+    --accent-2-soft: #16332F;
+    --accent-soft: #332A16;
+    --danger: #E08070;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    overflow: hidden;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  @media (min-width: 769px) {
+    .deck {
+      max-width: calc(100vh * 16 / 9);
+      max-height: calc(100vw * 9 / 16);
+      margin: auto;
+      position: absolute;
+      inset: 0;
+    }
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--bg);
+    padding: 56px 76px 40px;
+    overflow: hidden;
+  }
+  .slide.active { display: flex; }
+
+  .rail {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;
+    background: var(--border);
+  }
+  .rail::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    background: var(--accent);
+    height: calc(var(--progress, 0) * 1%);
+    transition: height .3s ease;
+  }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .kicker .num { color: var(--text-dim); }
+  .kicker::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--accent-2);
+    display: inline-block;
+  }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; color: var(--text); }
+  .h-display {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(40px, 5.6vw, 66px);
+    line-height: 1.04;
+    letter-spacing: -.01em;
+  }
+  .h-slide {
+    font-size: clamp(26px, 3.4vw, 38px);
+    line-height: 1.12;
+    margin-bottom: 4px;
+  }
+  .sub {
+    font-family: var(--sans);
+    color: var(--text-dim);
+    font-size: clamp(14px, 1.5vw, 17px);
+    max-width: 62ch;
+  }
+  .mono { font-family: var(--mono); }
+  p, li { font-size: clamp(13px, 1.35vw, 15.5px); line-height: 1.55; color: var(--text); }
+
+  .accent { color: var(--accent); }
+  .accent2 { color: var(--accent-2); }
+
+  .head-block { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; flex-shrink: 0; }
+
+  .body-area { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+  /* ---- tag / badge ---- */
+  .tag {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .02em;
+    padding: 4px 9px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .tag.on { border-color: var(--accent-2); color: var(--accent-2); background: var(--accent-2-soft); }
+  .tag.gold { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  /* ---- generic panel ---- */
+  .panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 16px 18px;
+  }
+
+  /* ---- SVG diagram wrap ---- */
+  figure.diagram { margin: 0; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  figure.diagram svg { width: 100%; height: 100%; max-height: 100%; }
+  figure.diagram figcaption {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    letter-spacing: .01em;
+    flex-shrink: 0;
+  }
+  svg text { fill: currentColor; font-family: var(--mono); }
+  .svg-label { font-family: var(--sans); }
+
+  /* ---- footer ---- */
+  .foot {
+    position: absolute;
+    left: 76px; right: 76px; bottom: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+  }
+  .foot .brand { letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ---- nav ---- */
+  .nav {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 16px; z-index: 50;
+  }
+  .nav button {
+    font-family: var(--mono); font-size: 15px;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    cursor: pointer;
+  }
+  .nav button:hover { border-color: var(--accent-2); color: var(--accent-2); }
+  .nav .count { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 46px; text-align: center; }
+
+  /* ---- layout helpers ---- */
+  .cols { display: grid; gap: 22px; flex: 1; min-height: 0; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .grid-fill { min-height: 0; }
+
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); font-weight: 500; }
+  td.mono, th.mono { font-family: var(--mono); }
+  tr:last-child td { border-bottom: none; }
+
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat .n { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 3.4vw, 44px); color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1; }
+  .stat .l { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .05em; }
+
+  code.inline { font-family: var(--mono); background: var(--surface-2); padding: 1px 5px; border: 1px solid var(--border); font-size: .92em; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 40px 26px 60px; }
+    .cols-2, .cols-3, .cols-5 { grid-template-columns: 1fr; }
+    .foot { left: 26px; right: 26px; }
+  }
+</style>
+
+<div class="deck" id="deck">
+
+  <!-- 1 : TITLE -->
+  <section class="slide active">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">01</span> — Project Overview</span>
+    </div>
+    <div class="body-area" style="justify-content:center; gap:28px;">
+      <h1 class="h-display">Financial&nbsp;Report<br>Analyzer</h1>
+      <p class="sub" style="font-size:clamp(15px,1.8vw,19px); max-width:56ch;">
+        A persona-aware RAG agent that answers questions about Apple, Microsoft
+        and Google 10-K filings — with citations, cost, and a full trace for every answer.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+        <span class="tag">LangGraph</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">Next.js</span>
+        <span class="tag">Qdrant</span>
+        <span class="tag">PostgreSQL</span>
+        <span class="tag">Gemini</span>
+        <span class="tag">Docker</span>
+      </div>
+    </div>
+    <div class="foot">
+      <span class="brand">Financial Report Analyzer</span>
+      <span>SEC 10-K · AAPL / MSFT / GOOGL · FY2020–2026</span>
+    </div>
+  </section>
+
+  <!-- 2 : WHAT IT DOES -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">02</span> — What It Does</span>
+      <h2 class="h-slide">One question, five different lenses</h2>
+      <p class="sub">The same corpus reads differently to a legal team than to a treasury desk — so the agent classifies <em>who's asking</em> before it decides <em>where to look</em>.</p>
+    </div>
+    <div class="body-area cols cols-2">
+      <div class="panel stack" style="justify-content:center;">
+        <span class="tag gold" style="align-self:flex-start;">Query</span>
+        <p class="mono" style="font-size:15px; line-height:1.5;">"Care e nivelul de lichiditate al Apple în 2023?"</p>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <span class="tag on">treasury</span>
+          <span class="tag on">factual</span>
+        </div>
+      </div>
+      <div class="panel stack" style="justify-content:center;">
+        <span class="tag" style="align-self:flex-start;">Answer · cited</span>
+        <p style="font-size:14.5px;">Nivelul de lichiditate al Apple la 30 septembrie 2023 a fost de
+          <strong>148,3 miliarde USD</strong> <span class="mono accent2">[AAPL_2023_Item7_21]</span> —
+          nu se semnalează risc de deficit de numerar.</p>
+        <div style="display:flex; gap:14px; margin-top:8px; font-family:var(--mono); font-size:11.5px; color:var(--text-dim);">
+          <span>latency <span class="accent2">7.4s</span></span>
+          <span>cost <span class="accent2">$0.00093</span></span>
+          <span>trace <span class="accent2">01a09…</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>02 / 11</span></div>
+  </section>
+
+  <!-- 3 : TECH STACK -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">03</span> — Tech Stack</span>
+      <h2 class="h-slide">Five layers, one docker-compose</h2>
+    </div>
+    <div class="body-area cols cols-5" style="gap:14px;">
+      <div class="panel stack">
+        <span class="tag gold">Interface</span>
+        <p style="font-weight:600;">Next.js 16</p>
+        <p style="color:var(--text-dim); font-size:12.5px;">React 19 · App Router · standalone Docker build</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag gold">API</span>
+        <p style="font-weight:600;">FastAPI</p>
+        <p style="color:var(--text-dim); font-size:12.5px;">uvicorn · Pydantic · CORS · <code class="inline" style="font-size:11px;">/query</code> <code class="inline" style="font-size:11px;">/health</code></p>
+      </div>
+      <div class="panel stack">
+        <span class="tag on">Agent</span>
+        <p style="font-weight:600;">LangGraph</p>
+        <p style="color:var(--text-dim); font-size:12.5px;">Gemini classify + generate · LangSmith tracing</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag on">Retrieval</span>
+        <p style="font-weight:600;">Qdrant</p>
+        <p style="color:var(--text-dim); font-size:12.5px;">gemini-embedding-001 · 3072-d · hybrid + RRF · Discovery Engine rerank</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag on">Storage</span>
+        <p style="font-weight:600;">PostgreSQL 16</p>
+        <p style="color:var(--text-dim); font-size:12.5px;">filings · chunks · query_logs · eval_set</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>03 / 11</span></div>
+  </section>
+
+  <!-- 4 : ARCHITECTURE -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">04</span> — System Architecture</span>
+      <h2 class="h-slide">Four containers, two external APIs</h2>
+    </div>
+    <div class="body-area">
+      <figure class="diagram">
+        <svg viewBox="0 0 1180 460" role="img" aria-label="Browser talks to the frontend container on port 3000, which calls the api container on port 8000 over fetch; the api container reads and writes Postgres on 5432 and Qdrant on 6333, and calls out to Gemini and Discovery Engine APIs on Google Cloud. Postgres, Qdrant, api and frontend are grouped inside a docker-compose boundary.">
+          <defs>
+            <marker id="arrow4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- docker-compose boundary -->
+          <rect x="30" y="30" width="760" height="400" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-dasharray="5 5"/>
+          <text x="46" y="54" font-size="12" letter-spacing="1.5" opacity="0.6">DOCKER COMPOSE</text>
+
+          <!-- browser -->
+          <rect x="-10" y="180" width="0" height="0"/>
+          <g>
+            <rect x="850" y="190" width="0" height="0"/>
+          </g>
+
+          <!-- Browser box (outside left of boundary, actually place left) -->
+          <g>
+            <rect x="855" y="20" width="150" height="0"/>
+          </g>
+
+          <!-- Layout: browser top-left outside box, frontend, api, postgres, qdrant inside; external right -->
+          <!-- Browser -->
+          <rect x="850" y="60" width="150" height="60" fill="none" stroke="currentColor"/>
+          <text x="925" y="85" text-anchor="middle" font-size="13" class="svg-label" font-weight="600">Browser</text>
+          <text x="925" y="103" text-anchor="middle" font-size="11" opacity="0.65">user</text>
+
+          <!-- frontend -->
+          <rect x="70" y="60" width="190" height="72" fill="none" stroke="currentColor"/>
+          <text x="165" y="88" text-anchor="middle" font-size="13" class="svg-label" font-weight="600">frontend</text>
+          <text x="165" y="106" text-anchor="middle" font-size="11" opacity="0.65">Next.js · :3000</text>
+          <text x="165" y="122" text-anchor="middle" font-size="10.5" opacity="0.5">standalone build</text>
+
+          <!-- api -->
+          <rect x="330" y="60" width="200" height="72" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <text x="430" y="88" text-anchor="middle" font-size="13" class="svg-label" font-weight="600">api</text>
+          <text x="430" y="106" text-anchor="middle" font-size="11" opacity="0.65">FastAPI · :8000</text>
+          <text x="430" y="122" text-anchor="middle" font-size="10.5" opacity="0.5">LangGraph agent</text>
+
+          <!-- postgres -->
+          <rect x="120" y="260" width="190" height="72" fill="none" stroke="currentColor"/>
+          <text x="215" y="288" text-anchor="middle" font-size="13" class="svg-label" font-weight="600">postgres</text>
+          <text x="215" y="306" text-anchor="middle" font-size="11" opacity="0.65">:5433&#8594;5432</text>
+          <text x="215" y="322" text-anchor="middle" font-size="10.5" opacity="0.5">query_logs · chunks</text>
+
+          <!-- qdrant -->
+          <rect x="400" y="260" width="190" height="72" fill="none" stroke="currentColor"/>
+          <text x="495" y="288" text-anchor="middle" font-size="13" class="svg-label" font-weight="600">qdrant</text>
+          <text x="495" y="306" text-anchor="middle" font-size="11" opacity="0.65">:6333</text>
+          <text x="495" y="322" text-anchor="middle" font-size="10.5" opacity="0.5">8250 vectors · 3072-d</text>
+
+          <!-- external: gemini -->
+          <rect x="880" y="220" width="230" height="72" fill="none" stroke="var(--accent)"/>
+          <text x="995" y="248" text-anchor="middle" font-size="13" class="svg-label" font-weight="600" fill="var(--accent)">Gemini API / Vertex AI</text>
+          <text x="995" y="266" text-anchor="middle" font-size="11" opacity="0.75" fill="var(--accent)">classify · generate · embed</text>
+          <text x="995" y="282" text-anchor="middle" font-size="10.5" opacity="0.55" fill="var(--accent)">generativelanguage / aiplatform</text>
+
+          <!-- external: discovery engine -->
+          <rect x="880" y="330" width="230" height="60" fill="none" stroke="var(--accent)"/>
+          <text x="995" y="356" text-anchor="middle" font-size="13" class="svg-label" font-weight="600" fill="var(--accent)">Discovery Engine</text>
+          <text x="995" y="374" text-anchor="middle" font-size="11" opacity="0.75" fill="var(--accent)">semantic reranker</text>
+
+          <!-- arrows -->
+          <line x1="850" y1="95" x2="260" y2="95" stroke="currentColor" marker-end="url(#arrow4)"/>
+          <text x="555" y="86" text-anchor="middle" font-size="10.5" opacity="0.7">http :3000</text>
+
+          <line x1="260" y1="112" x2="330" y2="105" stroke="currentColor" marker-end="url(#arrow4)"/>
+          <text x="295" y="145" text-anchor="middle" font-size="10.5" opacity="0.7">fetch /query</text>
+
+          <line x1="400" y1="132" x2="270" y2="258" stroke="currentColor" marker-end="url(#arrow4)"/>
+          <text x="300" y="205" text-anchor="middle" font-size="10.5" opacity="0.7">SQL</text>
+
+          <line x1="460" y1="132" x2="480" y2="258" stroke="currentColor" marker-end="url(#arrow4)"/>
+          <text x="500" y="205" text-anchor="middle" font-size="10.5" opacity="0.7">vector search</text>
+
+          <line x1="530" y1="90" x2="878" y2="245" stroke="var(--accent)" marker-end="url(#arrow4)"/>
+          <text x="720" y="150" text-anchor="middle" font-size="10.5" fill="var(--accent)" opacity="0.85">HTTPS</text>
+
+          <line x1="530" y1="110" x2="878" y2="355" stroke="var(--accent)" marker-end="url(#arrow4)"/>
+          <text x="740" y="270" text-anchor="middle" font-size="10.5" fill="var(--accent)" opacity="0.85">gRPC</text>
+        </svg>
+        <figcaption>fig. 1 — request path from browser through the four docker-compose services out to the two Google Cloud APIs</figcaption>
+      </figure>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>04 / 11</span></div>
+  </section>
+
+  <!-- 5 : INGESTION PIPELINE -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">05</span> — Ingestion Pipeline</span>
+      <h2 class="h-slide">14 filings in, 8,250 chunks out</h2>
+    </div>
+    <div class="body-area">
+      <figure class="diagram">
+        <svg viewBox="0 0 1180 300" role="img" aria-label="SEC EDGAR filings are downloaded, parsed into sections, chunked, given contextual summaries by Gemini Flash Lite, embedded by Vertex AI, then written to both Postgres and Qdrant.">
+          <defs>
+            <marker id="arrow5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <!-- stage boxes -->
+          <g font-size="12" class="svg-label">
+            <!-- 1 -->
+            <rect x="10" y="90" width="150" height="80" fill="none" stroke="currentColor"/>
+            <text x="85" y="122" text-anchor="middle" font-weight="600">SEC EDGAR</text>
+            <text x="85" y="140" text-anchor="middle" opacity="0.6" font-size="10.5">data.sec.gov</text>
+            <text x="85" y="156" text-anchor="middle" opacity="0.6" font-size="10.5">14 10-K filings</text>
+
+            <!-- 2 -->
+            <rect x="212" y="90" width="150" height="80" fill="none" stroke="currentColor"/>
+            <text x="287" y="118" text-anchor="middle" font-weight="600">parse</text>
+            <text x="287" y="136" text-anchor="middle" opacity="0.6" font-size="10.5">sec-parser +</text>
+            <text x="287" y="150" text-anchor="middle" opacity="0.6" font-size="10.5">title regex</text>
+            <text x="287" y="164" text-anchor="middle" opacity="0.6" font-size="10.5">9 sections/filing</text>
+
+            <!-- 3 -->
+            <rect x="414" y="90" width="150" height="80" fill="none" stroke="currentColor"/>
+            <text x="489" y="118" text-anchor="middle" font-weight="600">chunk</text>
+            <text x="489" y="136" text-anchor="middle" opacity="0.6" font-size="10.5">700 chars</text>
+            <text x="489" y="150" text-anchor="middle" opacity="0.6" font-size="10.5">100 overlap</text>
+
+            <!-- 4 -->
+            <rect x="616" y="90" width="160" height="80" fill="none" stroke="var(--accent)"/>
+            <text x="696" y="112" text-anchor="middle" font-weight="600" fill="var(--accent)">contextualize</text>
+            <text x="696" y="130" text-anchor="middle" opacity="0.75" font-size="10.5" fill="var(--accent)">Gemini Flash Lite</text>
+            <text x="696" y="146" text-anchor="middle" opacity="0.75" font-size="10.5" fill="var(--accent)">"situates" each</text>
+            <text x="696" y="160" text-anchor="middle" opacity="0.75" font-size="10.5" fill="var(--accent)">chunk in its filing</text>
+
+            <!-- 5 -->
+            <rect x="828" y="90" width="150" height="80" fill="none" stroke="var(--accent)"/>
+            <text x="903" y="118" text-anchor="middle" font-weight="600" fill="var(--accent)">embed</text>
+            <text x="903" y="136" text-anchor="middle" opacity="0.75" font-size="10.5" fill="var(--accent)">gemini-embedding-001</text>
+            <text x="903" y="152" text-anchor="middle" opacity="0.75" font-size="10.5" fill="var(--accent)">3072-d vector</text>
+
+            <!-- 6a postgres -->
+            <rect x="1030" y="40" width="150" height="60" fill="none" stroke="currentColor"/>
+            <text x="1105" y="65" text-anchor="middle" font-weight="600">Postgres</text>
+            <text x="1105" y="83" text-anchor="middle" opacity="0.6" font-size="10.5">chunks table</text>
+
+            <!-- 6b qdrant -->
+            <rect x="1030" y="160" width="150" height="60" fill="none" stroke="currentColor"/>
+            <text x="1105" y="185" text-anchor="middle" font-weight="600">Qdrant</text>
+            <text x="1105" y="203" text-anchor="middle" opacity="0.6" font-size="10.5">vector store</text>
+          </g>
+
+          <!-- arrows -->
+          <line x1="160" y1="130" x2="210" y2="130" stroke="currentColor" marker-end="url(#arrow5)"/>
+          <line x1="362" y1="130" x2="412" y2="130" stroke="currentColor" marker-end="url(#arrow5)"/>
+          <line x1="564" y1="130" x2="614" y2="130" stroke="currentColor" marker-end="url(#arrow5)"/>
+          <line x1="776" y1="130" x2="826" y2="130" stroke="var(--accent)" marker-end="url(#arrow5)"/>
+          <line x1="978" y1="120" x2="1028" y2="80" stroke="currentColor" marker-end="url(#arrow5)"/>
+          <line x1="978" y1="145" x2="1028" y2="185" stroke="currentColor" marker-end="url(#arrow5)"/>
+
+          <!-- retry annotation -->
+          <text x="590" y="250" text-anchor="middle" font-size="11" opacity="0.55">retry + backoff on transient 503s · per-chunk upsert (crash-safe mid-file)</text>
+        </svg>
+        <figcaption>fig. 2 — ingestion runs once per filing; 8,250 chunks land in Postgres and Qdrant in lock-step</figcaption>
+      </figure>
+      <div style="display:flex; gap:28px; margin-top:6px;">
+        <div class="stat"><span class="n">14</span><span class="l">filings</span></div>
+        <div class="stat"><span class="n">8,250</span><span class="l">chunks</span></div>
+        <div class="stat"><span class="n">~16.5k</span><span class="l">API calls</span></div>
+        <div class="stat"><span class="n">3</span><span class="l">companies</span></div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>05 / 11</span></div>
+  </section>
+
+  <!-- 6 : AGENT GRAPH -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">06</span> — Agent Graph</span>
+      <h2 class="h-slide">LangGraph: classify, retrieve, rerank, verify, generate</h2>
+    </div>
+    <div class="body-area">
+      <figure class="diagram">
+        <svg viewBox="0 0 1180 420" role="img" aria-label="The graph starts, classifies the query into a persona and query type, branches to single or multi-company retrieval, merges into reranking, then a verify step either loops back to retrieval up to two times when context is insufficient, or proceeds to generate the final answer and end.">
+          <defs>
+            <marker id="arrow6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g class="svg-label" font-size="12.5">
+            <!-- START -->
+            <circle cx="90" cy="60" r="24" fill="none" stroke="currentColor"/>
+            <text x="90" y="64" text-anchor="middle" font-size="11">START</text>
+
+            <!-- classify -->
+            <rect x="220" y="30" width="170" height="60" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <text x="305" y="55" text-anchor="middle" font-weight="600">classify</text>
+            <text x="305" y="73" text-anchor="middle" font-size="10.5" opacity="0.6">persona + query_type</text>
+
+            <!-- retrieve_single -->
+            <rect x="500" y="10" width="190" height="55" fill="none" stroke="currentColor"/>
+            <text x="595" y="33" text-anchor="middle" font-weight="600" font-size="12">retrieve_single</text>
+            <text x="595" y="50" text-anchor="middle" font-size="10" opacity="0.6">factual / risk_analysis</text>
+
+            <!-- retrieve_multi -->
+            <rect x="500" y="95" width="190" height="55" fill="none" stroke="currentColor"/>
+            <text x="595" y="118" text-anchor="middle" font-weight="600" font-size="12">retrieve_multi</text>
+            <text x="595" y="135" text-anchor="middle" font-size="10" opacity="0.6">comparison</text>
+
+            <!-- rerank -->
+            <rect x="770" y="50" width="170" height="60" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+            <text x="855" y="75" text-anchor="middle" font-weight="600" fill="var(--accent)">rerank</text>
+            <text x="855" y="93" text-anchor="middle" font-size="10.5" opacity="0.75" fill="var(--accent)">Discovery Engine</text>
+
+            <!-- verify_context -->
+            <rect x="770" y="200" width="170" height="65" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <text x="855" y="224" text-anchor="middle" font-weight="600" font-size="12">verify_context</text>
+            <text x="855" y="241" text-anchor="middle" font-size="10" opacity="0.6">score &#8805; 0.55,</text>
+            <text x="855" y="254" text-anchor="middle" font-size="10" opacity="0.6">&#8805; 3 chunks?</text>
+
+            <!-- generate_answer -->
+            <rect x="500" y="200" width="190" height="60" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <text x="595" y="225" text-anchor="middle" font-weight="600">generate_answer</text>
+            <text x="595" y="243" text-anchor="middle" font-size="10.5" opacity="0.6">cited, persona-toned</text>
+
+            <!-- END -->
+            <circle cx="330" cy="230" r="24" fill="none" stroke="currentColor"/>
+            <text x="330" y="234" text-anchor="middle" font-size="12">END</text>
+          </g>
+
+          <!-- edges -->
+          <line x1="114" y1="60" x2="218" y2="55" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="390" y1="50" x2="498" y2="37" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <text x="440" y="32" text-anchor="middle" font-size="10">factual/risk</text>
+          <line x1="390" y1="70" x2="498" y2="118" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <text x="440" y="108" text-anchor="middle" font-size="10">comparison</text>
+
+          <line x1="690" y1="35" x2="768" y2="66" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="690" y1="122" x2="768" y2="85" stroke="currentColor" marker-end="url(#arrow6)"/>
+
+          <line x1="855" y1="110" x2="855" y2="198" stroke="currentColor" marker-end="url(#arrow6)"/>
+
+          <line x1="768" y1="230" x2="692" y2="230" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <text x="730" y="220" text-anchor="middle" font-size="10">sufficient</text>
+
+          <line x1="500" y1="230" x2="356" y2="230" stroke="currentColor" marker-end="url(#arrow6)"/>
+
+          <!-- retry loop (curved, danger-tinted, the bug site) -->
+          <path d="M 855 265 C 855 340, 595 340, 595 265" fill="none" stroke="var(--danger)" stroke-width="1.6" marker-end="url(#arrow6)"/>
+          <text x="725" y="358" text-anchor="middle" font-size="11" fill="var(--danger)">retry (&lt; 2×) · widen sections — infinite-loop bug lived here</text>
+        </svg>
+        <figcaption>fig. 3 — the verify → retrieve retry loop only terminates because <code>verify_context</code> was moved into a real graph node; as a router-only function it never persisted <code>retry_count</code></figcaption>
+      </figure>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>06 / 11</span></div>
+  </section>
+
+  <!-- 7 : PERSONA SECTIONS -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">07</span> — Persona-Aware Retrieval</span>
+      <h2 class="h-slide">Same filing, different sections per reader</h2>
+      <p class="sub">Retrieval is filtered to the 10-K Items each persona actually cares about, before any similarity search runs.</p>
+    </div>
+    <div class="body-area">
+      <table>
+        <thead><tr><th>Persona</th><th>Cares about</th><th class="mono">10-K Sections</th></tr></thead>
+        <tbody>
+          <tr><td>Legal</td><td>Litigation, compliance risk</td><td class="mono">Item3 · Item1A</td></tr>
+          <tr><td>Audit Firm</td><td>Financial statements, internal controls</td><td class="mono">Item8 · Item9A</td></tr>
+          <tr><td>Investment Firm</td><td>Performance drivers, outlook</td><td class="mono">Item7 · Item8</td></tr>
+          <tr><td>Investment Bank</td><td>Capital structure, debt, M&amp;A</td><td class="mono">Item7 · Item7A · Item8</td></tr>
+          <tr><td>Treasury</td><td>Liquidity, cash flow, FX exposure</td><td class="mono">Item7A · Item8</td></tr>
+        </tbody>
+      </table>
+      <div class="panel" style="margin-top:16px;">
+        <p style="font-size:13px;"><span class="tag" style="margin-right:8px;">on retry</span>widens to a fixed fallback —
+          <code class="inline">Item1A · Item7 · Item7A · Item8</code> — instead of reformulating the query. Simpler, and it attacks the most likely cause: a persona filter that was too narrow.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>07 / 11</span></div>
+  </section>
+
+  <!-- 8 : DEMO -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">08</span> — Interface</span>
+      <h2 class="h-slide">One page, everything visible</h2>
+    </div>
+    <div class="body-area" style="align-items:center; justify-content:center;">
+      <div class="panel" style="width:min(720px,100%); padding:0; overflow:hidden;">
+        <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; gap:10px;">
+          <div style="flex:1; border:1px solid var(--border); padding:9px 12px; font-family:var(--mono); font-size:12.5px; color:var(--text-dim);">Care este structura de capital a Microsoft?</div>
+          <div style="border:1px solid var(--text); padding:9px 16px; font-family:var(--mono); font-size:12.5px;">Trimite</div>
+        </div>
+        <div style="padding:20px;">
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <span class="tag on">investment_bank</span>
+            <span class="tag on">factual</span>
+          </div>
+          <p style="font-size:13.5px; margin-bottom:14px;">Microsoft raportează o datorie pe termen lung de
+            <strong>$41.99B</strong> <span class="mono accent2">[MSFT_2025_Item7_9]</span>, susținută de un capital
+            propriu de <strong>$343.5B</strong> la finalul anului fiscal 2025.</p>
+          <div style="display:flex; gap:16px; font-family:var(--mono); font-size:11px; color:var(--text-dim); border-top:1px solid var(--border); padding-top:12px;">
+            <span>Latența: <span class="accent2">6.2s</span></span>
+            <span>Cost: <span class="accent2">$0.00081</span></span>
+            <span style="text-decoration:underline;">Trace ID: 01a090…</span>
+            <span style="text-decoration:underline; margin-left:auto;">Arată fragmentele (8)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>08 / 11</span></div>
+  </section>
+
+  <!-- 9 : ENGINEERING CHALLENGES -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">09</span> — What Broke, and Why</span>
+      <h2 class="h-slide">Nine real bugs, found by running it</h2>
+      <p class="sub">Every one below was caught by executing the pipeline against live data, not by reading the code.</p>
+    </div>
+    <div class="body-area cols cols-3" style="gap:14px;">
+      <div class="panel stack">
+        <span class="tag gold">Parsing</span>
+        <p style="font-weight:600; font-size:13.5px;">sec-parser has no 10-K parser</p>
+        <p style="font-size:12px; color:var(--text-dim);">Only ships an Edgar10Q classifier — fixed by extracting sections on the title regex instead, relaxed for filers (Google) that omit the trailing space.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag gold">Models</span>
+        <p style="font-weight:600; font-size:13.5px;">Two models retired mid-project</p>
+        <p style="font-size:12px; color:var(--text-dim);"><code class="inline" style="font-size:10.5px;">gemini-embedding-2</code> and <code class="inline" style="font-size:10.5px;">gemini-2.5-*</code> both 404'd — caught by calling the API directly, not trusting <code class="inline" style="font-size:10.5px;">models.list()</code>.</p>
+      </div>
+      <div class="panel stack" style="border-color:var(--danger);">
+        <span class="tag" style="border-color:var(--danger); color:var(--danger);">Critical</span>
+        <p style="font-weight:600; font-size:13.5px;">Retry loop never terminated</p>
+        <p style="font-size:12px; color:var(--text-dim);">A router function mutating state doesn't persist in LangGraph — <code class="inline" style="font-size:10.5px;">retry_count</code> stayed at 0. 300+ loop iterations, stopped only by Google's own rate limit.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Response shape</span>
+        <p style="font-weight:600; font-size:13.5px;">qdrant's query_points wraps its result</p>
+        <p style="font-size:12px; color:var(--text-dim);">Returns a <code class="inline" style="font-size:10.5px;">QueryResponse</code>, not a bare list — RRF fusion needs <code class="inline" style="font-size:10.5px;">.points</code> extracted first.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Observability</span>
+        <p style="font-weight:600; font-size:13.5px;">Trace ID was always null</p>
+        <p style="font-size:12px; color:var(--text-dim);">LangSmith's run context only exists inside a traced call — <code class="inline" style="font-size:10.5px;">@traceable</code> on <code class="inline" style="font-size:10.5px;">handle_query</code> fixed it.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Comparison queries</span>
+        <p style="font-weight:600; font-size:13.5px;">No named company, no chunks</p>
+        <p style="font-size:12px; color:var(--text-dim);">"risk factors 2024 vs 2025" names no company — <code class="inline" style="font-size:10.5px;">retrieve_multi</code> now falls back to all three known tickers.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>09 / 11</span></div>
+  </section>
+
+  <!-- 10 : STATUS -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">10</span> — Status</span>
+      <h2 class="h-slide">Where it stands today</h2>
+    </div>
+    <div class="body-area" style="justify-content:center;">
+      <div class="cols cols-5" style="flex:none;">
+        <div class="stat"><span class="n">8,250</span><span class="l">chunks indexed</span></div>
+        <div class="stat"><span class="n">14</span><span class="l">10-K filings</span></div>
+        <div class="stat"><span class="n">37</span><span class="l">tests passing</span></div>
+        <div class="stat"><span class="n">4</span><span class="l">containers</span></div>
+        <div class="stat"><span class="n">9</span><span class="l">bugs documented</span></div>
+      </div>
+      <div style="margin-top:36px; display:flex; gap:10px; flex-wrap:wrap;">
+        <span class="tag on">retrieval — live</span>
+        <span class="tag on">generation — live</span>
+        <span class="tag on">rerank — live</span>
+        <span class="tag on">tracing — live</span>
+        <span class="tag">eval thresholds — pending calibration</span>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>10 / 11</span></div>
+  </section>
+
+  <!-- 11 : END -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="body-area" style="justify-content:center; align-items:flex-start; gap:18px;">
+      <span class="kicker"><span class="num">11</span> — Questions</span>
+      <h1 class="h-display" style="font-size:clamp(34px,4.4vw,54px);">Ask it something<br>it hasn't seen.</h1>
+      <p class="sub mono" style="font-size:14px;">localhost:3000 — AAPL · MSFT · GOOGL · FY2020–2026</p>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>11 / 11</span></div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous slide">&#8592;</button>
+  <span class="count"><span id="cur">1</span> / <span id="tot">11</span></span>
+  <button id="next" aria-label="Next slide">&#8594;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const rails = Array.from(document.querySelectorAll('.rail'));
+  let i = 0;
+  document.getElementById('tot').textContent = slides.length;
+
+  function render() {
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    document.getElementById('cur').textContent = i + 1;
+    const pct = ((i + 1) / slides.length) * 100;
+    rails.forEach(r => r.style.setProperty('--progress', pct));
+  }
+  function go(delta) {
+    i = Math.max(0, Math.min(slides.length - 1, i + delta));
+    render();
+  }
+  document.getElementById('next').addEventListener('click', () => go(1));
+  document.getElementById('prev').addEventListener('click', () => go(-1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+  });
+  document.getElementById('deck').addEventListener('click', (e) => {
+    if (!e.target.closest('.nav') && !e.target.closest('a')) go(1);
+  });
+  render();
+</script>

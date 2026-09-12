@@ -1,0 +1,5 @@
+data/raw/*.html
+.env
+__pycache__/
+*.pyc
+venv/
