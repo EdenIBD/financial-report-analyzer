@@ -75,3 +75,48 @@ test("ingestie esuata — eroare explicita per companie, raspunsul tot apare", a
   // esecul de ingestie nu trebuie sa ascunda raspunsul generat din corpusul existent
   await expect(page.getByText(/no information about Alibaba/)).toBeVisible();
 });
+
+test("comparatie cu doua companii necunoscute — una ingerata, cealalta blocata de limita", async ({ page }) => {
+  // MAX_INGESTIONS_PER_QUERY = 1: a doua companie necunoscuta dintr-un query
+  // de comparatie nu se ingereaza, dar trebuie sa apara ca eroare explicita,
+  // nu ca esec tacut — banner-ul de succes si cel de eroare pot coexista.
+  await page.route("**/query", async (route) => {
+    await route.fulfill({
+      json: {
+        answer: "Tesla's margins are discussed [TSLA_2025_10K_mdna_3]; no data is available for Rivian yet.",
+        sources: ["TSLA_2025_10K_mdna_3"],
+        retrieved_chunks: [
+          {
+            chunk_id: "TSLA_2025_10K_mdna_3",
+            text: "Automotive gross margin was 18.2%.",
+            company: "TSLA",
+            fiscal_year: 2025,
+            section: "mdna",
+            score: 0.87,
+          },
+        ],
+        persona: "investment_firm",
+        query_type: "comparison",
+        cost_usd: 0.0512,
+        latency_ms: 187321,
+        langsmith_trace_id: "trace-tsla-rivn-1",
+        status: "valid",
+        ingested_entities: ["TSLA"],
+        ingestion_errors: ["RIVN: per-query ingestion limit reached, not fetched"],
+        ingestion_details: [
+          { ticker: "TSLA", company: "Tesla, Inc.", fiscal_year: 2025, filing_type: "10-K", chunks: 210 },
+        ],
+      },
+    });
+  });
+
+  await mockCorpus(page);
+  await page.goto("/");
+  await page.getByPlaceholder(/Ask about/).fill("Compare Tesla and Rivian margins");
+  await page.getByRole("button", { name: "Send" }).click();
+
+  await expect(page.getByText(/Added to the corpus during this query/)).toBeVisible();
+  await expect(page.getByText(/Could not add some companies to the corpus/)).toBeVisible();
+  await expect(page.getByText(/RIVN: per-query ingestion limit reached/)).toBeVisible();
+  await expect(page.getByText("tsla.html")).toBeVisible();
+});
