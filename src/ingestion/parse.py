@@ -25,7 +25,7 @@ RAW_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "
 # "\.?(\s|$)" pentru ca unii filer-i (ex: Google) pun titlul intr-un element
 # separat de numarul item-ului ("ITEM 1." fara text dupa), altii (Apple) pun
 # numarul si titlul in acelasi element ("Item 1.    Business").
-ITEM_TITLE_RE = re.compile(r"^item\s+(\d+[a-z]?)\.?(\s|$)", re.IGNORECASE)
+ITEM_TITLE_RE = re.compile(r"^item\s+(\d+[a-z]?)[.:]?(\s|$)", re.IGNORECASE)
 # 10-Q are titluri "PART I — FINANCIAL INFORMATION" / "PART II — OTHER INFORMATION"
 # (verificat pe filing real AAPL) — necesar doar pentru disambiguarea Item1-4
 # intre Part I si Part II, 10-K nu are nevoie de Part pentru mapare.

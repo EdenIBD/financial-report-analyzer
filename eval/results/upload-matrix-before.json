@@ -1,0 +1,244 @@
+[
+  {
+    "id": "aapl_2023_10k",
+    "path": "data/raw/upload-evaluation/aapl_2023_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
+    "form": "10-K",
+    "ticker": "AAPL",
+    "method": "direct requests download",
+    "sha256": "bda1f34435199672c16ecdf2034c650872d2cac8399ed0d179fc25450b080b90",
+    "bytes": 1558924,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "metadata": {
+      "filing_type": "10-K",
+      "company": "Apple Inc.",
+      "ticker": "AAPL",
+      "fiscal_year": 2023,
+      "cik": "0000320193"
+    },
+    "section_lengths": {
+      "risk_factors": 67446,
+      "legal_proceedings": 3037,
+      "mdna": 15015,
+      "market_risk": 2901,
+      "financial_statements": 59865,
+      "controls_procedures": 4428
+    },
+    "status": "passed"
+  },
+  {
+    "id": "msft_2024_10k",
+    "path": "data/raw/upload-evaluation/msft_2024_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017024087843/msft-20240630.htm",
+    "form": "10-K",
+    "ticker": "MSFT",
+    "method": "direct requests download",
+    "sha256": "43829a12cc9cd7198474b3d735c4fc1aba1f871fb637d237aa5979d57e6b8c95",
+    "bytes": 6860911,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "status": "failed",
+    "stage": "detect",
+    "error": "FilingMetadataError: Standard inline XBRL tags not found (dei:DocumentType / dei:TradingSymbol / dei:DocumentFiscalYearFocus) \u2014 this file does not look like a real 10-K/10-Q from SEC EDGAR."
+  },
+  {
+    "id": "googl_2023_10k",
+    "path": "data/raw/upload-evaluation/googl_2023_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000022/goog-20231231.htm",
+    "form": "10-K",
+    "ticker": "GOOGL",
+    "method": "direct requests download",
+    "sha256": "787dd59d770312b204d144b4c78b8de23db1e1d53aae4bf37a52d6d874e903b2",
+    "bytes": 2410403,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "metadata": {
+      "filing_type": "10-K",
+      "company": "Alphabet Inc.",
+      "ticker": "GOOGL",
+      "fiscal_year": 2023,
+      "cik": "0001652044"
+    },
+    "section_lengths": {
+      "risk_factors": 75521,
+      "legal_proceedings": 265,
+      "mdna": 58675,
+      "market_risk": 9582,
+      "financial_statements": 117495,
+      "controls_procedures": 2924
+    },
+    "status": "passed"
+  },
+  {
+    "id": "nvda_2023_10k",
+    "path": "data/raw/upload-evaluation/nvda_2023_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm",
+    "form": "10-K",
+    "ticker": "NVDA",
+    "method": "direct requests download",
+    "sha256": "a4c77324eba4a3d88d46428ee097531930b75e46e983816352c76eff927621b7",
+    "bytes": 2669239,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "metadata": {
+      "filing_type": "10-K",
+      "company": "NVIDIA CORP",
+      "ticker": "NVDA",
+      "fiscal_year": 2023,
+      "cik": "0001045810"
+    },
+    "section_lengths": {
+      "risk_factors": 87096,
+      "legal_proceedings": 171,
+      "mdna": 37962,
+      "market_risk": 4559,
+      "financial_statements": 155,
+      "controls_procedures": 3189
+    },
+    "status": "passed"
+  },
+  {
+    "id": "yum_2015_10k",
+    "path": "data/raw/upload-evaluation/yum_2015_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1041061/000104106116000056/yum10k12262015.htm",
+    "form": "10-K",
+    "ticker": "YUM",
+    "method": "direct requests download",
+    "sha256": "47c94a238c184995c5749ca599de9a2c7c8263cc00bd350b3f6c9e4518f288d6",
+    "bytes": 3687820,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "status": "failed",
+    "stage": "detect",
+    "error": "FilingMetadataError: Standard inline XBRL tags not found (dei:DocumentType / dei:TradingSymbol / dei:DocumentFiscalYearFocus) \u2014 this file does not look like a real 10-K/10-Q from SEC EDGAR."
+  },
+  {
+    "id": "lway_2023-12-31_10k",
+    "path": "data/raw/upload-evaluation/lway_2023-12-31_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/814586/000168316824001564/lifeway_i10k-123123.htm",
+    "form": "10-K",
+    "ticker": "LWAY",
+    "method": "direct requests download",
+    "sha256": "9cee5e6242ea98cb11a4c8e550397a23078356ec96181a9ef838f0a4d4b1474c",
+    "bytes": 1002656,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "metadata": {
+      "filing_type": "10-K",
+      "company": "LIFEWAY FOODS, INC.",
+      "ticker": "LWAY",
+      "fiscal_year": 2023,
+      "cik": "0000814586"
+    },
+    "section_lengths": {
+      "risk_factors": 40510,
+      "legal_proceedings": 341,
+      "mdna": 22072,
+      "market_risk": 15,
+      "financial_statements": 65921,
+      "controls_procedures": 4692
+    },
+    "status": "passed"
+  },
+  {
+    "id": "wina_2024-09-28_10q",
+    "path": "data/raw/upload-evaluation/wina_2024-09-28_10q.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/908315/000090831524000035/wina-20240928x10q.htm",
+    "form": "10-Q",
+    "ticker": "WINA",
+    "method": "direct requests download",
+    "sha256": "6ee0b703dfd750664f6070c29886b4d5acce37a6697a307fa5cd3962455e82f4",
+    "bytes": 1084597,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "status": "failed",
+    "stage": "detect",
+    "error": "FilingMetadataError: Standard inline XBRL tags not found (dei:DocumentType / dei:TradingSymbol / dei:DocumentFiscalYearFocus) \u2014 this file does not look like a real 10-K/10-Q from SEC EDGAR."
+  },
+  {
+    "id": "boom_2018-09-30_10q",
+    "path": "data/raw/upload-evaluation/boom_2018-09-30_10q.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/34067/000003406718000034/a0930201810q.htm",
+    "form": "10-Q",
+    "ticker": "BOOM",
+    "method": "direct requests download",
+    "sha256": "aadf2024281167f3e257bab143841f84b8cc3ed4cb41d95a6f27548852a72752",
+    "bytes": 1326291,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "status": "failed",
+    "stage": "detect",
+    "error": "FilingMetadataError: Standard inline XBRL tags not found (dei:DocumentType / dei:TradingSymbol / dei:DocumentFiscalYearFocus) \u2014 this file does not look like a real 10-K/10-Q from SEC EDGAR."
+  },
+  {
+    "id": "aapl_2026-06-27_10q",
+    "path": "data/raw/upload-evaluation/aapl_2026-06-27_10q.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000020/aapl-20260627.htm",
+    "form": "10-Q",
+    "ticker": "AAPL",
+    "method": "direct requests download",
+    "sha256": "4ad5bea67cedfa7542d623900355cc8d143ef95c1acc135a597f2eedabdb9177",
+    "bytes": 1018210,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "metadata": {
+      "filing_type": "10-Q",
+      "company": "Apple Inc.",
+      "ticker": "AAPL",
+      "fiscal_year": 2026,
+      "cik": "0000320193"
+    },
+    "section_lengths": {
+      "financial_statements": 24982,
+      "mdna": 20990,
+      "market_risk": 324,
+      "controls_procedures": 1315,
+      "legal_proceedings": 5472,
+      "risk_factors": 18936
+    },
+    "status": "passed"
+  },
+  {
+    "id": "tsla_2025-12-31_10k",
+    "path": "data/raw/upload-evaluation/tsla_2025-12-31_10k.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026003952/tsla-20251231.htm",
+    "form": "10-K",
+    "ticker": "TSLA",
+    "method": "direct requests download",
+    "sha256": "90d5d2bc4057df41c645f85dcebe575af9b0953a6a1902d189297bec17fd440a",
+    "bytes": 2391529,
+    "http_encoding": "ISO-8859-1",
+    "strict_utf8": true,
+    "metadata": {
+      "filing_type": "10-K",
+      "company": "Tesla, Inc.",
+      "ticker": "TSLA",
+      "fiscal_year": 2025,
+      "cik": "0001318605"
+    },
+    "section_lengths": {
+      "risk_factors": 83382,
+      "legal_proceedings": 201,
+      "mdna": 54986,
+      "market_risk": 1553,
+      "financial_statements": 169140,
+      "controls_procedures": 4194
+    },
+    "status": "passed"
+  },
+  {
+    "id": "yum_2015_user_browser_save",
+    "path": "data/raw/uploads/dde8072a-69db-40b7-80b0-d590d4166bf0.html",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1041061/000104106116000056/yum10k12262015.htm",
+    "form": "10-K",
+    "ticker": "YUM",
+    "method": "existing user browser save",
+    "sha256": "82d88f5b1391874460c3e51ffef25b516fae37c00aca81882aaa8a3f49018eeb",
+    "bytes": 3687074,
+    "strict_utf8": false,
+    "status": "failed",
+    "stage": "detect",
+    "error": "FilingMetadataError: Standard inline XBRL tags not found (dei:DocumentType / dei:TradingSymbol / dei:DocumentFiscalYearFocus) \u2014 this file does not look like a real 10-K/10-Q from SEC EDGAR."
+  }
+]

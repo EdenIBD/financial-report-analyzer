@@ -70,3 +70,9 @@ def test_retry_count_eventually_reaches_limit_and_stops():
             break
     assert state["retry_count"] == 2
     assert route == "generate_answer"
+
+
+def test_trace_does_not_promise_retry_when_router_will_generate():
+    state = verify_context(make_state([0.1], retry_count=1))
+    assert route_after_verify(state) == 'generate_answer'
+    assert 'retrying' not in state['trace'][-1]

@@ -17,3 +17,6 @@
 - [[pages/failure-patterns/company-year-scope|Company/year scope failure]] — NVIDIA FY2023, registranti nerezolvati si abstinere
 - [[pages/evaluation-2026-09-13|Evaluation — September 13]] — rezultate reale, incercari esuate si limite
 - [[pages/unit-test-inventory|Complete unit-test inventory]] — toate cazurile pytest incluse si in prezentare
+
+- [[pages/upload-evaluation-2026-09-13]]
+- [[pages/failure-patterns/upload-real-html]]

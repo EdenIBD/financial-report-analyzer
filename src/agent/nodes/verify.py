@@ -22,7 +22,10 @@ def verify_context(state: AgentState) -> AgentState:
     elif state["retry_count"] < 2:
         state["retry_count"] += 1
         state["use_fallback_sections"] = True
-        trace.append(f"Not enough high-confidence context — retrying with broader sections (attempt {state['retry_count']})")
+        if state["retry_count"] < 2:
+            trace.append("Not enough high-confidence context — retrying with broader sections (attempt 1)")
+        else:
+            trace.append("Still limited context after the additional retrieval pass — answering with available evidence")
     else:
         trace.append("Still limited context after retries — answering with what's available")
     return state

@@ -180,17 +180,24 @@ export default function Home() {
 
   useEffect(() => {
     if (!uploadStatus || uploadStatus.status !== "processing") return;
-    const timer = setTimeout(async () => {
+    const timer = setInterval(async () => {
       try {
         const res = await fetch(`${API_URL}/documents/${uploadStatus.document_id}/status`);
         if (!res.ok) throw new Error(`Backend responded with status ${res.status}`);
         const data: UploadStatus = await res.json();
         setUploadStatus(data);
+        setUploadError(null);
+        if (data.status === "ready") {
+          fetch(`${API_URL}/corpus`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then(setCorpus)
+            .catch(() => {});
+        }
       } catch {
         setUploadError("Could not reach the backend while checking upload status.");
       }
     }, UPLOAD_POLL_INTERVAL_MS);
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, [uploadStatus]);
 
   async function handleFileUpload(file: File) {

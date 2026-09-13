@@ -59,7 +59,7 @@ flowchart TD
 |---|---|
 | API and validation | Python 3.13, FastAPI, Uvicorn, Pydantic, python-multipart |
 | Agent and models | LangGraph, langchain-google-genai, google-genai, google-cloud-discoveryengine |
-| Parsing and chunking | sec-parser, langchain-text-splitters, tiktoken |
+| Parsing and chunking | BeautifulSoup, sec-parser, langchain-text-splitters, tiktoken |
 | Storage | PostgreSQL 16, psycopg2-binary, Qdrant, qdrant-client |
 | Interface | Next.js 16.3.4, React 19.2.8, TypeScript, Tailwind CSS 4 |
 | Observability and utilities | LangSmith, requests, python-dotenv |
@@ -135,6 +135,12 @@ docker compose exec api python -m eval.replay_retrieval
 ```
 
 Evaluation output is written inside the container under `/app/eval/results`; copy it out with `docker compose cp api:/app/eval/results/. eval/results/`. Golden-set and cost Markdown reports are written under `/app/wiki/pages`.
+
+### Upload compatibility validation
+
+Ten real SEC filings were tested, plus three saved/encoding variants: **10 accepted, 3 explicitly unsupported legacy files**. This includes large and small issuers, 10-K/10-Q, pre-inline-XBRL documents, a native Chrome save and a derived UTF-8 BOM copy. Microsoft nested metadata and Winmark colon-delimited headings are covered by real HTML regression fixtures. All six canonical categories remain mandatory. See the [per-file results](wiki/pages/upload-evaluation-2026-09-13.md).
+
+Uploads require inline XBRL metadata; older plain HTML filings remain unsupported. Download the original primary HTML, rather than an SEC viewer wrapper. Encoding is decoded without silently dropping bytes. Run `python -m eval.run_upload_matrix` with the manifest's local files; `RUN_LIVE_UPLOAD=1 npx playwright test` from `frontend` also exercises real uploads and incurs ingestion cost.
 
 ## Project status
 

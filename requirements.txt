@@ -15,3 +15,4 @@ google-cloud-discoveryengine
 psycopg2-binary
 langsmith
 pytest
+beautifulsoup4

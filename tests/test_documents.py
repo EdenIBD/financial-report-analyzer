@@ -99,3 +99,51 @@ def test_success_path_indexes_into_global_corpus_and_marks_ready(
     _, kwargs = mock_update.call_args
     assert kwargs["status"] == "ready"
     assert kwargs["chunks_indexed"] == 12
+    sql = [call.args[0] for call in mock_connect.return_value.cursor.return_value.__enter__.return_value.execute.call_args_list]
+    assert 'pg_advisory_lock' in sql[0]
+    assert "ingestion_status = 'processing'" in sql[1]
+    assert "ingestion_status = 'ready'" in sql[2]
+
+# These exercise real metadata markup and section parsing, without pipeline mocks.
+from pathlib import Path
+import pytest
+from src.ingestion.detect import detect_filing_metadata, decode_filing_html, FilingMetadataError
+from src.ingestion.parse import parse_filing
+from src.ingestion.sections import validate_sections, REQUIRED_CANONICAL_SECTIONS
+
+FIXTURES = Path(__file__).parent / 'fixtures' / 'filings'
+
+
+@pytest.mark.parametrize('filename,ticker,form', [
+    ('msft_2024_10k.html', 'MSFT', '10-K'),
+    ('wina_2024-09-28_10q.html', 'WINA', '10-Q'),
+])
+def test_real_markup_metadata_and_sections(filename, ticker, form):
+    html = decode_filing_html((FIXTURES / filename).read_bytes())
+    metadata = detect_filing_metadata(html)
+    assert metadata['ticker'] == ticker
+    assert metadata['filing_type'] == form
+    sections = parse_filing(html, form)
+    validate_sections(sections)
+    assert set(sections) == REQUIRED_CANONICAL_SECTIONS
+
+
+def test_real_nested_metadata_accepts_single_quotes_and_attribute_whitespace():
+    html = (FIXTURES / 'msft_2024_10k.html').read_text()
+    html = html.replace('name="dei:', "name = 'dei:")
+    import re
+    html = re.sub(r"name = '(dei:[^\"]+)\"", r"name = '\1'", html)
+    assert detect_filing_metadata(html)['ticker'] == 'MSFT'
+
+
+@pytest.mark.parametrize('encoding', ['utf-8-sig', 'utf-16', 'windows-1252'])
+def test_real_metadata_decoding_preserves_text(encoding):
+    html = (FIXTURES / 'msft_2024_10k.html').read_text()
+    html = html.replace('<html>', f'<html><head><meta charset="{encoding}"></head>')
+    raw = html.encode(encoding, errors='xmlcharrefreplace')
+    assert detect_filing_metadata(decode_filing_html(raw))['ticker'] == 'MSFT'
+
+
+def test_missing_inline_xbrl_explains_legacy_support_limit():
+    with pytest.raises(FilingMetadataError, match='Older filings without inline XBRL'):
+        detect_filing_metadata('<html><body>FORM 10-K</body></html>')

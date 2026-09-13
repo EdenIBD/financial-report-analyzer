@@ -12,13 +12,14 @@ acelasi pipeline de procesare (src/ingestion/pipeline.py).
 
 import os
 import uuid
+from pathlib import Path
 
 import psycopg2
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 
-from src.ingestion.detect import FilingMetadataError, detect_filing_metadata
+from src.ingestion.detect import FilingMetadataError, detect_filing_metadata, decode_filing_html
 from src.ingestion.parse import parse_filing
 from src.ingestion.pipeline import ingest_sections, make_doc_id, upsert_filing
 from src.ingestion.sections import FilingValidationError, validate_sections
@@ -84,10 +85,8 @@ def process_uploaded_document(document_id: str, file_path: str) -> None:
     in status='error' + error_message, nu propaga o exceptie necontrolata."""
     conn = _db_conn()
     try:
-        with open(file_path, encoding="utf-8", errors="ignore") as f:
-            html = f.read()
-
         try:
+            html = decode_filing_html(Path(file_path).read_bytes())
             meta = detect_filing_metadata(html)
         except FilingMetadataError as e:
             _update_upload_row(conn, document_id, status="error", error_message=str(e))
@@ -112,6 +111,9 @@ def process_uploaded_document(document_id: str, file_path: str) -> None:
 
         doc_id = make_doc_id(meta["ticker"], meta["fiscal_year"], meta["filing_type"])
 
+        # Serialize writes to this filing, just like dynamic ingestion.
+        with conn.cursor() as cur:
+            cur.execute("SELECT pg_advisory_lock(hashtext(%s))", (doc_id,))
         upsert_filing(
             conn,
             doc_id,
@@ -122,11 +124,17 @@ def process_uploaded_document(document_id: str, file_path: str) -> None:
             meta["fiscal_year"],
             meta=None,
         )
+        with conn.cursor() as cur:
+            cur.execute("UPDATE filings SET ingestion_status = 'processing' WHERE doc_id = %s", (doc_id,))
+        conn.commit()
         qdrant = QdrantClient(url=QDRANT_URL)
         chunk_count, _cost = ingest_sections(
             conn, qdrant, doc_id, meta["ticker"], meta["fiscal_year"], sections
         )
 
+        with conn.cursor() as cur:
+            cur.execute("UPDATE filings SET ingestion_status = 'ready' WHERE doc_id = %s", (doc_id,))
+        conn.commit()
         _update_upload_row(
             conn,
             document_id,
