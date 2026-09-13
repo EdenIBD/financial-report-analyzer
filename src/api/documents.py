@@ -20,7 +20,7 @@ from qdrant_client import QdrantClient
 
 from src.ingestion.detect import FilingMetadataError, detect_filing_metadata
 from src.ingestion.parse import parse_filing
-from src.ingestion.pipeline import ingest_sections, upsert_filing
+from src.ingestion.pipeline import ingest_sections, make_doc_id, upsert_filing
 from src.ingestion.sections import FilingValidationError, validate_sections
 
 router = APIRouter()
@@ -110,10 +110,7 @@ def process_uploaded_document(document_id: str, file_path: str) -> None:
             )
             return
 
-        # sufix cu tipul de filing: evita coliziunea cu doc_id-urile fixe
-        # (ex: "AAPL_2023" din corpusul EDGAR) si intre un 10-K si un 10-Q
-        # ale aceleiasi companii/an ("AAPL_2026_10K" vs "AAPL_2026_10Q").
-        doc_id = f"{meta['ticker']}_{meta['fiscal_year']}_{meta['filing_type'].replace('-', '')}"
+        doc_id = make_doc_id(meta["ticker"], meta["fiscal_year"], meta["filing_type"])
 
         upsert_filing(
             conn,
@@ -126,7 +123,9 @@ def process_uploaded_document(document_id: str, file_path: str) -> None:
             meta=None,
         )
         qdrant = QdrantClient(url=QDRANT_URL)
-        chunk_count = ingest_sections(conn, qdrant, doc_id, meta["ticker"], meta["fiscal_year"], sections)
+        chunk_count, _cost = ingest_sections(
+            conn, qdrant, doc_id, meta["ticker"], meta["fiscal_year"], sections
+        )
 
         _update_upload_row(
             conn,
@@ -141,7 +140,7 @@ def process_uploaded_document(document_id: str, file_path: str) -> None:
             chunks_indexed=chunk_count,
         )
     except Exception as e:
-        _update_upload_row(conn, document_id, status="error", error_message=f"Eroare interna: {e}")
+        _update_upload_row(conn, document_id, status="error", error_message=f"Internal error: {e}")
     finally:
         conn.close()
 
@@ -182,7 +181,7 @@ def get_upload_status(document_id: str):
         conn.close()
 
     if row is None:
-        raise HTTPException(status_code=404, detail="document_id necunoscut")
+        raise HTTPException(status_code=404, detail="unknown document_id")
 
     keys = [
         "document_id", "status", "original_filename", "company", "ticker",

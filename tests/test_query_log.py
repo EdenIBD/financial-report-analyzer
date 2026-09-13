@@ -31,7 +31,8 @@ def test_log_query_inserts_expected_values(mock_connect):
     assert args[0] == "test?"
     assert args[1] == "legal"
     assert args[2] == "factual"
-    assert args[-1] == 0.001
+    assert args[-2] == 0.001
+    assert args[-1] == []
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
 

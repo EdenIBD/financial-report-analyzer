@@ -28,4 +28,10 @@ def rerank(state):
         {**chunk_by_id[r.id], "score": r.score} for r in response.records
     ]
     state["cost_usd"] = state.get("cost_usd", 0.0) + RERANK_COST_PER_QUERY_USD
+
+    scores = [c["score"] for c in state["retrieved_chunks"]]
+    top_score = f"{max(scores):.2f}" if scores else "n/a"
+    state.setdefault("trace", []).append(
+        f"Reranked to top {len(scores)} chunks via Vertex AI (top score {top_score})"
+    )
     return state

@@ -16,9 +16,15 @@ def verify_context(state: AgentState) -> AgentState:
     # gasit: fara acest fix retry_count ramanea mereu la valoarea initiala, deci
     # verify_context -> retrieve -> rerank bucla infinit, oprita doar de
     # rate-limit-ul extern al Google (ResourceExhausted pe Rank Service).
-    if not _enough_good_chunks(state) and state["retry_count"] < 2:
+    trace = state.setdefault("trace", [])
+    if _enough_good_chunks(state):
+        trace.append("Context verified as sufficient")
+    elif state["retry_count"] < 2:
         state["retry_count"] += 1
         state["use_fallback_sections"] = True
+        trace.append(f"Not enough high-confidence context — retrying with broader sections (attempt {state['retry_count']})")
+    else:
+        trace.append("Still limited context after retries — answering with what's available")
     return state
 
 

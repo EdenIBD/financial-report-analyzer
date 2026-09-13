@@ -53,6 +53,6 @@ def validate_sections(sections: dict[str, str]) -> None:
     missing = REQUIRED_CANONICAL_SECTIONS - set(sections)
     if missing:
         raise FilingValidationError(
-            f"Sectiuni obligatorii lipsa dupa parsing: {sorted(missing)} — "
-            "documentul nu respecta structura asteptata a unui 10-K/10-Q."
+            f"Required sections missing after parsing: {sorted(missing)} — "
+            "the document does not match the expected structure of a 10-K/10-Q."
         )

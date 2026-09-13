@@ -47,6 +47,9 @@ def generate_answer(state: AgentState) -> AgentState:
     # .text e proprietatea LangChain care extrage robust indiferent de forma.
     state["answer"] = response.text
     state["sources"] = [c["chunk_id"] for c in state["retrieved_chunks"]]
+    state.setdefault("trace", []).append(
+        f"Generated answer citing {len(state['sources'])} source chunks"
+    )
 
     usage = response.usage_metadata or {}
     cost = calculate_cost_usd(

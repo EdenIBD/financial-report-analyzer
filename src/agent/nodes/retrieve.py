@@ -1,5 +1,7 @@
 import os
+import re
 
+import psycopg2
 from qdrant_client import QdrantClient
 
 from src.agent.state import AgentState, Persona, RetrievedChunk
@@ -22,15 +24,46 @@ PERSONA_SECTIONS = {
 }
 FALLBACK_SECTIONS = ["risk_factors", "mdna", "market_risk", "financial_statements"]
 
-KNOWN_ENTITIES = {
-    "AAPL": ["apple", "aapl"],
-    "MSFT": ["microsoft", "msft"],
-    "GOOGL": ["google", "alphabet", "googl"],
-}
+# Numele de brand difera de registrant name-ul din filings ("Alphabet Inc." nu
+# contine "Google"), deci un match strict pe corpus ar pierde intrebarile despre
+# Google. Doar pentru asemenea nepotriviri brand/nume legal, nu o lista de companii.
+BRAND_ALIASES = {"google": "GOOGL"}
+
+
+def known_companies() -> list[tuple[str, str]]:
+    """(ticker, company) din corpusul real, nu dintr-un dictionar hardcodat —
+    corpusul creste prin upload si prin ingestie dinamica."""
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT DISTINCT ticker, company FROM filings")
+            return cur.fetchall()
+    finally:
+        conn.close()
+
+
+def known_tickers() -> list[str]:
+    return sorted({ticker for ticker, _ in known_companies()})
+
+
+def _mentions(term: str, query_lower: str) -> bool:
+    # \b, nu substring: cu corpusul deschis pot aparea tickere de o litera
+    # (ex: "F" = Ford), iar un `in` simplu le-ar gasi in aproape orice intrebare.
+    return bool(re.search(rf"\b{re.escape(term.lower())}\b", query_lower))
+
 
 def extract_entities(query: str) -> list[str]:
+    """Treapta 1: companii deja in corpus. Treapta 2 (LLM + EDGAR, pentru
+    companii necunoscute) e separata in resolve_unknown_companies, ca sa ruleze
+    doar acolo unde e nevoie — nu la fiecare retrieval."""
     query_lower = query.lower()
-    return [ticker for ticker, aliases in KNOWN_ENTITIES.items() if any(a in query_lower for a in aliases)]
+    found = {
+        ticker
+        for ticker, company in known_companies()
+        if _mentions(ticker, query_lower) or _mentions(company.split()[0], query_lower)
+    }
+    found |= {ticker for alias, ticker in BRAND_ALIASES.items() if _mentions(alias, query_lower)}
+    return sorted(found)
 
 def format_chunk(result) -> RetrievedChunk:
     payload = result.payload
@@ -74,6 +107,10 @@ def retrieve_single(state: AgentState) -> AgentState:
     ).points
     merged = reciprocal_rank_fusion(dense_results, keyword_results, top_k=8)
     state["retrieved_chunks"] = [format_chunk(r) for r in merged]
+    state.setdefault("trace", []).append(
+        f"Searched {', '.join(allowed_sections)} sections ({persona.value}) — "
+        f"{len(merged)} candidate chunks found"
+    )
     return state
 
 
@@ -86,9 +123,8 @@ def retrieve_multi(state: AgentState) -> AgentState:
         # Query de comparatie fara nicio companie numita explicit (ex: "cum s-au
         # schimbat factorii de risc din 2024 vs 2025") — fara fallback, bucla
         # de mai jos nu ruleaza deloc, retrieved_chunks ramane gol si nu se
-        # genereaza niciun raspuns. Corpusul are doar 3 companii cunoscute,
-        # deci cautam in toate 3 in loc sa esuam silentios.
-        entities = list(KNOWN_ENTITIES.keys())
+        # genereaza niciun raspuns. Cautam in tot corpusul in loc sa esuam silentios.
+        entities = known_tickers()
     dense_vec = embed_query(query_text)
 
     all_chunks = []
@@ -114,4 +150,7 @@ def retrieve_multi(state: AgentState) -> AgentState:
         all_chunks.extend([format_chunk(r) for r in merged])
 
     state["retrieved_chunks"] = all_chunks
+    state.setdefault("trace", []).append(
+        f"Comparing across {', '.join(entities)} — {len(all_chunks)} candidate chunks found"
+    )
     return state

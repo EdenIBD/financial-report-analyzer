@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockCorpus } from "./mock-corpus";
 
 test("happy path — query factual despre Apple", async ({ page }) => {
   await page.route("**/query", async (route) => {
@@ -12,7 +13,7 @@ test("happy path — query factual despre Apple", async ({ page }) => {
             text: "Numerar si echivalente de numerar la 30 sept 2023: $29.9 miliarde.",
             company: "AAPL",
             fiscal_year: 2023,
-            section: "Item7A",
+            section: "market_risk",
             score: 0.91,
           },
         ],
@@ -22,13 +23,16 @@ test("happy path — query factual despre Apple", async ({ page }) => {
         latency_ms: 842,
         langsmith_trace_id: "trace-abc-123",
         status: "valid",
+        ingested_entities: [],
+        ingestion_errors: [],
       },
     });
   });
 
+  await mockCorpus(page);
   await page.goto("/");
-  await page.getByPlaceholder(/Intreaba despre/).fill("Care e nivelul de lichiditate al Apple?");
-  await page.getByRole("button", { name: "Trimite" }).click();
+  await page.getByPlaceholder(/Ask about/).fill("Care e nivelul de lichiditate al Apple?");
+  await page.getByRole("button", { name: "Send" }).click();
 
   await expect(page.getByText("treasury")).toBeVisible();
   await expect(page.getByText("factual")).toBeVisible();

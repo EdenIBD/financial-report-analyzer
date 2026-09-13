@@ -24,6 +24,10 @@ For each question, determine:
 
 The question may be asked in English or Romanian — classify it the same way regardless of language.
 
+Also give a one-sentence `reasoning` for your classification — it is shown to the
+user as part of the system's reasoning trace, so write it as a short, plain
+explanation of your choice, not internal notes.
+
 Examples:
 Q: "What does Apple say about supply chain risk?"
 → persona: investment_firm, query_type: risk_analysis
@@ -48,7 +52,13 @@ def classify(state: AgentState) -> AgentState:
     result = classify_llm.invoke(
         [("system", CLASSIFY_SYSTEM_PROMPT), ("human", state["raw_query"])]
     )
-    state["classification"] = result["parsed"]
+    classification = result["parsed"]
+    state["classification"] = classification
+
+    step = f"Classified as **{classification.persona.value}** / **{classification.query_type.value}**"
+    if classification.reasoning:
+        step += f" — {classification.reasoning}"
+    state.setdefault("trace", []).append(step)
 
     usage = result["raw"].usage_metadata or {}
     cost = calculate_cost_usd(

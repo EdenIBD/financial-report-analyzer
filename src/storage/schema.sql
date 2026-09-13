@@ -33,7 +33,10 @@ CREATE TABLE query_logs (
     tokens_out INT,
     cost_usd NUMERIC(10, 6),
     final_answer TEXT,
-    status VARCHAR
+    status VARCHAR,
+    -- nevid = query-ul a declansat ingestie live; costul unui astfel de query e
+    -- cu ordine de marime mai mare, deci cost-trends trebuie sa le separe.
+    ingested_entities TEXT[] DEFAULT '{}'
 );
 
 CREATE TABLE document_uploads (

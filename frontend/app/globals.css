@@ -3,6 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Palette: dark sidebar + warm amber accents on a light canvas — a fixed
+  brand look, not a light/dark adaptive theme (deliberate, matches the design). */
+  --color-sidebar: #0d1117;
+  --color-sidebar-elevated: #161b22;
+  --color-sidebar-border: #2d333b;
+  --color-sidebar-muted: #8b949e;
+  --color-accent: #e8a33d;
+  --color-suggestion-bg: #fdefc4;
+  --color-suggestion-bg-hover: #fbe6a3;
+  --color-suggestion-text: #6b4f14;
 }
 
 @theme inline {
@@ -10,17 +21,27 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-elevated: var(--color-sidebar-elevated);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-muted: var(--color-sidebar-muted);
+  --color-accent: var(--color-accent);
+  --color-suggestion-bg: var(--color-suggestion-bg);
+  --color-suggestion-bg-hover: var(--color-suggestion-bg-hover);
+  --color-suggestion-text: var(--color-suggestion-text);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.label-caps {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-sidebar-muted);
 }

@@ -1,32 +1,42 @@
 # Cost trends
 
-Generat automat de `scripts/cost_trends.py` din `query_logs` (27 query-uri cu cost logat).
+Generat automat de `scripts/cost_trends.py` din `query_logs` (51 query-uri cu cost logat).
 
 ## Cost mediu per query_type
 
 | query_type | n | cost mediu (USD) |
 |---|---|---|
-| comparison | 10 | 0.003444 |
-| factual | 8 | 0.001492 |
-| risk_analysis | 4 | 0.000504 |
+| comparison | 15 | 0.006633 |
+| factual | 20 | 0.007252 |
+| risk_analysis | 11 | 0.012418 |
 
-**Observatie:** Query-urile de comparatie costa de ~2.3x fata de cele factuale ($0.003444 vs $0.001492 in medie).
+**Observatie:** Query-urile de comparatie costa de ~0.9x fata de cele factuale ($0.006633 vs $0.007252 in medie).
 
 ## Cost mediu per persona
 
 | persona | n | cost mediu (USD) |
 |---|---|---|
-| investment_bank | 1 | 0.000179 |
-| investment_firm | 13 | 0.002795 |
-| legal | 2 | 0.000395 |
-| treasury | 6 | 0.001849 |
+| audit_firm | 3 | 0.010925 |
+| investment_bank | 4 | 0.010564 |
+| investment_firm | 18 | 0.008498 |
+| legal | 6 | 0.007460 |
+| treasury | 15 | 0.007226 |
 
 ## Cost mediu per status
 
 | status | n | cost mediu (USD) |
 |---|---|---|
 | error | 16 | 0.000128 |
-| valid | 11 | 0.004213 |
+| valid | 35 | 0.010831 |
+
+## Cost mediu cu vs. fara ingestie live
+
+| tip query | n | cost mediu (USD) |
+|---|---|---|
+| cu ingestie live | 1 | 0.067291 |
+| fara ingestie | 50 | 0.006277 |
+
+**Observatie:** Un query care declanseaza ingestie live costa de ~11x un query obisnuit ($0.067291 vs $0.006277 in medie) — ingestia face un apel LLM de contextual retrieval per chunk, sute per filing.
 
 ## Ce nu poate fi calculat din query_logs
 

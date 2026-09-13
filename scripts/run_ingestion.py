@@ -90,8 +90,8 @@ def main(files: list[str] | None = None):
             html = f.read()
         sections = parse_filing(html, filing_type="10-K")
 
-        chunk_count = ingest_sections(conn, qdrant, doc_id, ticker, fiscal_year, sections)
-        print(f"  {chunk_count} chunk-uri indexate din {len(sections)} sectiuni")
+        chunk_count, cost = ingest_sections(conn, qdrant, doc_id, ticker, fiscal_year, sections)
+        print(f"  {chunk_count} chunk-uri indexate din {len(sections)} sectiuni (${cost:.6f})")
 
     conn.close()
 

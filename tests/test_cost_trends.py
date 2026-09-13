@@ -11,21 +11,23 @@ def test_avg_computes_mean():
 
 def test_aggregate_groups_by_persona_and_query_type():
     rows = [
-        ("treasury", "factual", 0.0001, "error"),
-        ("treasury", "factual", 0.0003, "valid"),
-        ("legal", "risk_analysis", 0.0002, "error"),
+        ("treasury", "factual", 0.0001, "error", False),
+        ("treasury", "factual", 0.0003, "valid", False),
+        ("legal", "risk_analysis", 0.0002, "error", True),
     ]
-    by_query_type, by_persona, by_status = aggregate(rows)
+    by_query_type, by_persona, by_status, by_ingestion = aggregate(rows)
     assert by_query_type["factual"] == [0.0001, 0.0003]
     assert by_persona["treasury"] == [0.0001, 0.0003]
     assert by_persona["legal"] == [0.0002]
     assert by_status["error"] == [0.0001, 0.0002]
     assert by_status["valid"] == [0.0003]
+    assert by_ingestion["cu ingestie live"] == [0.0002]
+    assert by_ingestion["fara ingestie"] == [0.0001, 0.0003]
 
 
 def test_aggregate_skips_null_persona_or_query_type():
-    rows = [(None, None, 0.0001, "error")]
-    by_query_type, by_persona, by_status = aggregate(rows)
+    rows = [(None, None, 0.0001, "error", False)]
+    by_query_type, by_persona, by_status, _by_ingestion = aggregate(rows)
     assert by_query_type == {}
     assert by_persona == {}
     assert by_status["error"] == [0.0001]

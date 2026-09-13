@@ -21,6 +21,9 @@ type QueryResponse = {
   latency_ms: number | null;
   langsmith_trace_id: string | null;
   status: string;
+  ingested_entities: string[];
+  ingestion_errors: string[];
+  reasoning_trace: string[];
 };
 
 type UploadStatus = {
@@ -36,8 +39,39 @@ type UploadStatus = {
   error_message: string | null;
 };
 
+type CorpusSummary = {
+  companies: { ticker: string; company: string }[];
+  filings_indexed: number;
+  fiscal_year_min: number | null;
+  fiscal_year_max: number | null;
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const UPLOAD_POLL_INTERVAL_MS = 4000;
+// Peste atat, query-ul aproape sigur a declansat ingestie live (un query normal
+// dureaza ~10s): raspunsul e sincron, deci fara un semn explicit utilizatorul
+// vede doar un spinner care nu se misca timp de minute.
+const SLOW_QUERY_HINT_AFTER_SECONDS = 8;
+
+const SUGGESTIONS = [
+  "What are Apple's biggest risk factors this year?",
+  "Compare R&D spending between Microsoft and Google",
+  "What does Google's 10-K say about antitrust risk?",
+];
+
+// "Apple Inc." -> "Apple": generic corporate suffixes stripped for the sidebar
+// pills, which show a friendly name, not the SEC registrant name.
+const CORPORATE_SUFFIXES = new Set([
+  "inc", "inc.", "corp", "corp.", "corporation", "co", "co.",
+  "ltd", "ltd.", "holding", "holdings", "group", "plc", "llc",
+]);
+function shortCompanyName(company: string): string {
+  const words = company.split(" ");
+  while (words.length > 1 && CORPORATE_SUFFIXES.has(words[words.length - 1].toLowerCase())) {
+    words.pop();
+  }
+  return words.join(" ");
+}
 
 function renderAnswerWithCitations(
   answer: string,
@@ -53,7 +87,7 @@ function renderAnswerWithCitations(
         <button
           key={i}
           onClick={() => onCiteClick(chunkId)}
-          className="mx-0.5 rounded bg-blue-100 px-1 text-xs font-medium text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200"
+          className="mx-0.5 rounded bg-amber-100 px-1 text-xs font-medium text-amber-900 hover:bg-amber-200"
         >
           {part}
         </button>
@@ -63,16 +97,44 @@ function renderAnswerWithCitations(
   });
 }
 
+function ArrowUpIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 13V3M8 3L3.5 7.5M8 3L12.5 7.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<QueryResponse | null>(null);
   const [chunksOpen, setChunksOpen] = useState(false);
+  const [reasoningOpen, setReasoningOpen] = useState(false);
   const [highlightedChunk, setHighlightedChunk] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [corpus, setCorpus] = useState<CorpusSummary | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+
+  useEffect(() => {
+    fetch(`${API_URL}/corpus`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setCorpus)
+      .catch(() => setCorpus(null)); // sidebar cade pe langa, restul UI-ului tot functioneaza
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setElapsedSeconds(0);
+      return;
+    }
+    const id = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [loading]);
 
   useEffect(() => {
     if (highlightedChunk && chunksOpen) {
@@ -129,22 +191,32 @@ export default function Home() {
     }
   }
 
-  async function submitQuery() {
-    if (!query.trim() || loading) return;
+  async function submitQuery(overrideQuery?: string) {
+    const questionText = overrideQuery ?? query;
+    if (!questionText.trim() || loading) return;
+    setQuery(questionText);
     setLoading(true);
     setError(null);
     setResult(null);
+    setReasoningOpen(false);
     try {
       const res = await fetch(`${API_URL}/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ raw_query: query }),
+        body: JSON.stringify({ raw_query: questionText }),
       });
       if (!res.ok) throw new Error(`Backend responded with status ${res.status}`);
       const data: QueryResponse = await res.json();
       setResult(data);
       setChunksOpen(false);
       setHighlightedChunk(null);
+      // corpusul poate fi crescut de aceasta interogare (ingestie dinamica)
+      if (data.ingested_entities.length > 0) {
+        fetch(`${API_URL}/corpus`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then(setCorpus)
+          .catch(() => {});
+      }
     } catch (err) {
       const message =
         err instanceof TypeError
@@ -170,147 +242,282 @@ export default function Home() {
     setTimeout(() => setCopied(false), 1500);
   }
 
+  const showWelcome = !loading && !result && !error;
+
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-4 py-8 font-sans">
-      <h1 className="text-xl font-semibold">Financial Report Analyzer</h1>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          submitQuery();
-        }}
-        className="flex gap-2"
-      >
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask about Apple, Microsoft, or Google 10-K filings..."
-          className="flex-1 rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-        >
-          {loading ? "..." : "Send"}
-        </button>
-      </form>
-
-      {error && (
-        <div className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
-          {error}
+    <div className="flex h-screen overflow-hidden font-sans">
+      {/* Sidebar */}
+      <aside className="flex w-80 shrink-0 flex-col gap-6 overflow-y-auto bg-sidebar p-6 text-white">
+        <div>
+          <h1 className="text-lg font-bold">Financial Report Analyzer</h1>
+          <p className="mt-1 text-sm text-sidebar-muted">
+            Persona-aware Q&amp;A over SEC 10-K / 10-Q filings
+          </p>
         </div>
-      )}
 
-      <div className="flex flex-col gap-2 rounded border border-dashed border-zinc-300 p-3 text-sm dark:border-zinc-700">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">Upload a 10-K/10-Q (.html):</span>
-          <input
-            type="file"
-            accept=".html,.htm"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFileUpload(file);
-              e.target.value = "";
+        <div>
+          <div className="label-caps">Filings corpus</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(corpus?.companies ?? []).map((c) => (
+              <span
+                key={c.ticker}
+                className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-medium text-zinc-900"
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                {shortCompanyName(c.company)}
+              </span>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-sidebar-muted">
+            {corpus
+              ? `FY${corpus.fiscal_year_min}–FY${corpus.fiscal_year_max} · ${corpus.filings_indexed} filings indexed · live corpus`
+              : "Loading corpus…"}
+          </p>
+        </div>
+
+        <hr className="border-sidebar-border" />
+
+        <div>
+          <div className="label-caps">Upload a filing</div>
+          <label
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
             }}
-            className="text-xs"
-          />
-        </div>
+            onDragLeave={() => setDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragActive(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) handleFileUpload(file);
+            }}
+            className={`mt-2 flex cursor-pointer flex-col items-center gap-1 rounded-xl border border-dashed px-4 py-5 text-center transition-colors ${
+              dragActive ? "border-accent bg-sidebar-elevated" : "border-sidebar-border bg-sidebar-elevated"
+            }`}
+          >
+            <input
+              type="file"
+              accept=".html,.htm"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+                e.target.value = "";
+              }}
+              className="hidden"
+            />
+            <span className="text-sm font-semibold">Drop or choose a 10-K/10-Q</span>
+            <span className="text-xs text-sidebar-muted">.html or .htm files</span>
+          </label>
 
-        {uploadError && (
-          <div className="rounded border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
-            {uploadError}
-          </div>
-        )}
-
-        {uploadStatus && (
-          <div className="rounded border border-zinc-200 px-3 py-2 text-xs dark:border-zinc-800">
-            <div className="font-medium">{uploadStatus.original_filename}</div>
-            {uploadStatus.status === "processing" && (
-              <div className="mt-1 flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
-                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                Processing — parsing, contextualizing and embedding usually takes 1-3 minutes...
-              </div>
-            )}
-            {uploadStatus.status === "ready" && (
-              <div className="mt-1 text-green-700 dark:text-green-400">
-                Ready — detected {uploadStatus.company} ({uploadStatus.ticker}) {uploadStatus.filing_type}{" "}
-                FY{uploadStatus.fiscal_year}, {uploadStatus.sections_found} sections,{" "}
-                {uploadStatus.chunks_indexed} chunks indexed. You can now ask questions about it.
-              </div>
-            )}
-            {uploadStatus.status === "error" && (
-              <div className="mt-1 text-red-700 dark:text-red-400">
-                Failed: {uploadStatus.error_message ?? "unknown error"}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {result && (
-        <div className="flex flex-col gap-3 rounded border border-zinc-200 p-4 dark:border-zinc-800">
-          {(result.persona || result.query_type) && (
-            <div className="flex gap-2">
-              {result.persona && (
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium dark:bg-zinc-800">
-                  {result.persona}
-                </span>
-              )}
-              {result.query_type && (
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium dark:bg-zinc-800">
-                  {result.query_type}
-                </span>
-              )}
+          {uploadError && (
+            <div className="mt-2 rounded-lg border border-red-800 bg-red-950 px-3 py-2 text-xs text-red-200">
+              {uploadError}
             </div>
           )}
 
-          <p className="whitespace-pre-wrap text-sm leading-6">
-            {result.answer
-              ? renderAnswerWithCitations(result.answer, result.retrieved_chunks, handleCiteClick)
-              : "No answer could be generated."}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400">
-            {result.latency_ms != null && <span>Latency: {result.latency_ms} ms</span>}
-            {result.cost_usd != null && <span>Cost: ${result.cost_usd.toFixed(6)}</span>}
-            {result.langsmith_trace_id && (
-              <button onClick={copyTraceId} className="underline hover:no-underline">
-                {copied ? "Copied!" : `Trace ID: ${result.langsmith_trace_id}`}
-              </button>
-            )}
-          </div>
-
-          {result.retrieved_chunks.length > 0 && (
-            <div>
-              <button onClick={() => setChunksOpen((o) => !o)} className="text-xs font-medium underline">
-                {chunksOpen ? "Hide" : "Show"} retrieved chunks ({result.retrieved_chunks.length})
-              </button>
-              {chunksOpen && (
-                <div className="mt-2 flex flex-col gap-2">
-                  {result.retrieved_chunks.map((chunk) => (
-                    <div
-                      key={chunk.chunk_id}
-                      id={`chunk-${chunk.chunk_id}`}
-                      className={`rounded border p-2 text-xs ${
-                        highlightedChunk === chunk.chunk_id
-                          ? "border-blue-400 bg-blue-50 dark:bg-blue-950"
-                          : "border-zinc-200 dark:border-zinc-800"
-                      }`}
-                    >
-                      <div className="mb-1 font-medium text-zinc-500 dark:text-zinc-400">
-                        {chunk.chunk_id} · {chunk.company} {chunk.fiscal_year} · {chunk.section} · score{" "}
-                        {chunk.score.toFixed(2)}
-                      </div>
-                      <div className="whitespace-pre-wrap">{chunk.text}</div>
-                    </div>
-                  ))}
+          {uploadStatus && (
+            <div className="mt-2 rounded-lg border border-sidebar-border px-3 py-2 text-xs">
+              <div className="font-medium">{uploadStatus.original_filename}</div>
+              {uploadStatus.status === "processing" && (
+                <div className="mt-1 flex items-center gap-2 text-sidebar-muted">
+                  <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent" />
+                  Processing — usually takes 1-3 minutes...
                 </div>
               )}
+              {uploadStatus.status === "ready" && (
+                <div className="mt-1 text-green-400">
+                  Ready — {uploadStatus.company} ({uploadStatus.ticker}) {uploadStatus.filing_type} FY
+                  {uploadStatus.fiscal_year}, {uploadStatus.sections_found} sections,{" "}
+                  {uploadStatus.chunks_indexed} chunks indexed.
+                </div>
+              )}
+              {uploadStatus.status === "error" && (
+                <div className="mt-1 text-red-400">Failed: {uploadStatus.error_message ?? "unknown error"}</div>
+              )}
             </div>
           )}
         </div>
-      )}
+
+        {result && result.ingested_entities.length > 0 && (
+          <div className="rounded-xl border border-dashed border-sidebar-border px-3 py-2">
+            <div className="label-caps">Found via dynamic ingestion</div>
+            <div className="mt-1 font-mono text-sm">{result.ingested_entities.join(", ")}</div>
+          </div>
+        )}
+
+        <p className="mt-auto text-xs text-sidebar-muted">
+          Corpus grows via upload and dynamic ingestion from SEC EDGAR. Answers cite the exact filing
+          chunks retrieved — not guaranteed complete or error-free.
+        </p>
+      </aside>
+
+      {/* Main */}
+      <main className="flex flex-1 flex-col overflow-hidden bg-white">
+        <div className="flex-1 overflow-y-auto px-8 py-10">
+          {showWelcome && (
+            <div className="mx-auto mt-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold text-zinc-900">Ask about Apple, Microsoft, or Google filings</h2>
+              <p className="mt-3 text-zinc-500">
+                Answers cite the exact filing chunks they&apos;re drawn from. Try one of these, or ask your
+                own.
+              </p>
+              <div className="mt-6 flex flex-col items-center gap-3">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => submitQuery(s)}
+                    className="rounded-full bg-suggestion-bg px-5 py-2.5 text-sm font-medium text-suggestion-text transition-colors hover:bg-suggestion-bg-hover"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mx-auto max-w-2xl">
+            {loading && elapsedSeconds >= SLOW_QUERY_HINT_AFTER_SECONDS && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+                This question may mention a company that isn&apos;t in the corpus yet — fetching and
+                processing its filing from SEC EDGAR can take a few minutes. Elapsed: {elapsedSeconds}s
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
+            {result && (
+              <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 p-5">
+                {result.ingested_entities?.length > 0 && (
+                  <div className="rounded-xl border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800">
+                    Added to the corpus during this query:{" "}
+                    <span className="font-medium">{result.ingested_entities.join(", ")}</span> — fetched
+                    from SEC EDGAR because it wasn&apos;t indexed yet.
+                  </div>
+                )}
+
+                {result.ingestion_errors?.length > 0 && (
+                  <div className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                    <div className="font-medium">Could not add some companies to the corpus:</div>
+                    <ul className="mt-1 list-disc pl-5">
+                      {result.ingestion_errors.map((message, i) => (
+                        <li key={i}>{message}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {(result.persona || result.query_type) && (
+                  <div className="flex gap-2">
+                    {result.persona && (
+                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700">
+                        {result.persona}
+                      </span>
+                    )}
+                    {result.query_type && (
+                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700">
+                        {result.query_type}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {result.reasoning_trace?.length > 0 && (
+                  <div>
+                    <button
+                      onClick={() => setReasoningOpen((o) => !o)}
+                      className="label-caps flex items-center gap-1 text-zinc-500 hover:text-zinc-800"
+                    >
+                      {reasoningOpen ? "▾" : "▸"} How this answer was put together
+                    </button>
+                    {reasoningOpen && (
+                      <ol className="mt-2 flex flex-col gap-1.5 border-l-2 border-zinc-200 pl-3 font-mono text-xs text-zinc-600">
+                        {result.reasoning_trace.map((step, i) => (
+                          <li key={i}>{step}</li>
+                        ))}
+                      </ol>
+                    )}
+                  </div>
+                )}
+
+                <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-900">
+                  {result.answer
+                    ? renderAnswerWithCitations(result.answer, result.retrieved_chunks, handleCiteClick)
+                    : "No answer could be generated."}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500">
+                  {result.latency_ms != null && <span>Latency: {result.latency_ms} ms</span>}
+                  {result.cost_usd != null && <span>Cost: ${result.cost_usd.toFixed(6)}</span>}
+                  {result.langsmith_trace_id && (
+                    <button onClick={copyTraceId} className="underline hover:no-underline">
+                      {copied ? "Copied!" : `Trace ID: ${result.langsmith_trace_id}`}
+                    </button>
+                  )}
+                </div>
+
+                {result.retrieved_chunks.length > 0 && (
+                  <div>
+                    <button onClick={() => setChunksOpen((o) => !o)} className="text-xs font-medium underline">
+                      {chunksOpen ? "Hide" : "Show"} retrieved chunks ({result.retrieved_chunks.length})
+                    </button>
+                    {chunksOpen && (
+                      <div className="mt-2 flex flex-col gap-2">
+                        {result.retrieved_chunks.map((chunk) => (
+                          <div
+                            key={chunk.chunk_id}
+                            id={`chunk-${chunk.chunk_id}`}
+                            className={`rounded-lg border p-2 text-xs ${
+                              highlightedChunk === chunk.chunk_id
+                                ? "border-amber-400 bg-amber-50"
+                                : "border-zinc-200"
+                            }`}
+                          >
+                            <div className="mb-1 font-medium text-zinc-500">
+                              {chunk.chunk_id} · {chunk.company} {chunk.fiscal_year} · {chunk.section} ·
+                              score {chunk.score.toFixed(2)}
+                            </div>
+                            <div className="whitespace-pre-wrap">{chunk.text}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            submitQuery();
+          }}
+          className="px-8 pb-8"
+        >
+          <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-2xl bg-sidebar px-4 py-3">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ask about Apple, Microsoft, or Google 10-K/10-Q filings..."
+              className="flex-1 bg-transparent text-sm text-white placeholder:text-sidebar-muted focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              aria-label="Send"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sidebar transition-opacity disabled:opacity-40"
+            >
+              <ArrowUpIcon />
+            </button>
+          </div>
+        </form>
+      </main>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # Financial Report Analyzer
 
-A persona-aware RAG agent that answers questions about SEC 10-K filings from Apple, Microsoft, and Google (FY2020–FY2026, 14 filings, 8,250 indexed chunks). The system classifies each query by *who is asking* (legal, audit, investment firm, investment bank, treasury) and *what kind of answer they need* (factual, comparison, risk analysis), routes retrieval accordingly, and returns a cited answer alongside its cost and trace ID.
+A persona-aware RAG agent that answers questions about SEC 10-K filings. It ships with a fixed corpus of Apple, Microsoft and Google filings (FY2020–FY2026, 14 filings, 8,250 chunks) and extends itself beyond it at runtime — uploaded filings and companies fetched live from SEC EDGAR when a question names one that isn't indexed yet (currently 15 filings, 8,597 chunks). The system classifies each query by *who is asking* (legal, audit, investment firm, investment bank, treasury) and *what kind of answer they need* (factual, comparison, risk analysis), routes retrieval accordingly, and returns a cited answer alongside its cost and trace ID.
 
 Built as an end-to-end exercise in shipping a RAG pipeline that actually runs: containerized, tested, traced, and debugged against real API behavior rather than documentation.
 
@@ -24,7 +24,7 @@ flowchart LR
 
 - **parse** (`src/ingestion/parse.py`) — `sec-parser`'s `Edgar10QParser` has no 10-K-specific classifier, so section boundaries are extracted by regex on title text rather than the library's own (10-Q-shaped) semantic labels. Extracted sections are mapped to a **canonical taxonomy** (`src/ingestion/sections.py`) shared between 10-K and 10-Q — the same semantic content lives at different Item numbers in each (MD&A is Item 7 in a 10-K, Item 2 in a 10-Q), and a 10-Q additionally reuses Item 1–4 with a different meaning in Part I vs. Part II (Part I Item 1 = Financial Statements, Part II Item 1 = Legal Proceedings), which the parser disambiguates by tracking the current Part while walking the section tree. Retrieval (`PERSONA_SECTIONS` below) filters on these canonical categories, not raw Item numbers, so it works identically regardless of filing type.
 - **chunk** (`src/ingestion/chunk.py`) — `RecursiveCharacterTextSplitter`, 700 chars, 100 overlap, applied per section.
-- **contextualize** (`src/ingestion/contextual.py`) — an LLM call (`gemini-3.1-flash-lite`) prepends 1–2 sentences situating each chunk (company, fiscal year, section) before embedding — the "contextual retrieval" pattern.
+- **contextualize** (`src/ingestion/contextual.py`) — an LLM call (`gemini-3.1-flash-lite`) prepends a sentence situating each chunk (company, fiscal year, section) before embedding — the "contextual retrieval" pattern. **Known defect on ~28% of the existing corpus**, found by reading actual retrieved-chunk text in the UI rather than trusting the pipeline: the prompt never actually passed the filing's identity to the model, so it guessed — and guessed "Apple" often enough that 45% of GOOGL chunks and 33% of MSFT chunks carry a situating sentence naming the wrong company. Retrieval itself is unaffected (filtering uses the real `company` field, not this sentence), but the embedded text does — see [`wiki/pages/failure-patterns/contextual-retrieval-wrong-company.md`](wiki/pages/failure-patterns/contextual-retrieval-wrong-company.md) for the exact counts. The prompt is fixed for all ingestion going forward (verified live across 4 companies); the ~2,586 already-affected chunks are not yet re-processed.
 - **embed** (`src/retrieval/embed.py`) — `gemini-embedding-001` via Vertex AI, 3072-dim vectors, written to both stores.
 
 ### Agent (LangGraph)
@@ -32,8 +32,9 @@ flowchart LR
 ```mermaid
 flowchart TD
     START([START]) --> classify["classify<br/>persona + query_type<br/>(structured output)"]
-    classify -->|factual / risk_analysis| single[retrieve_single]
-    classify -->|comparison| multi[retrieve_multi]
+    classify --> check["check_entity_exists<br/>company in corpus?<br/>if not: ingest from EDGAR"]
+    check -->|factual / risk_analysis| single[retrieve_single]
+    check -->|comparison| multi[retrieve_multi]
     single --> rerank["rerank<br/>Vertex AI Discovery Engine<br/>semantic-ranker-default-004"]
     multi --> rerank
     rerank --> verify["verify_context<br/>score ≥ 0.55 & ≥ 3 chunks?"]
@@ -44,7 +45,8 @@ flowchart TD
 ```
 
 - **classify** — structured output (Pydantic) classifying into 5 personas × 3 query types, with a system prompt carrying few-shot examples per category.
-- **retrieve_single / retrieve_multi** — hybrid retrieval: a dense vector search (Qdrant) plus a keyword/full-text filter search, combined with Reciprocal Rank Fusion (`src/retrieval/fusion.py`). Retrieval is pre-filtered by persona to the 10-K sections that persona actually cares about (e.g. `legal` → Item 3 + 1A, `treasury` → Item 7A + 8). `retrieve_multi` handles comparison queries across the 3 known tickers, falling back to searching all of them if none is named explicitly in the query.
+- **check_entity_exists** — resolves the companies named in the question against the corpus; anything missing is fetched from SEC EDGAR and ingested before retrieval runs (see Dynamic ingestion below).
+- **retrieve_single / retrieve_multi** — hybrid retrieval: a dense vector search (Qdrant) plus a keyword/full-text filter search, combined with Reciprocal Rank Fusion (`src/retrieval/fusion.py`). Retrieval is pre-filtered by persona to the **canonical section categories** that persona actually cares about (e.g. `legal` → `legal_proceedings` + `risk_factors`, `treasury` → `market_risk` + `financial_statements`) — categories, not raw Item numbers, because 10-K and 10-Q number the same content differently. `retrieve_multi` handles comparison queries across the companies named, falling back to every ticker currently in the corpus if none is named explicitly.
 - **rerank** — Vertex AI Discovery Engine semantic reranker, re-scoring the fused candidates.
 - **verify_context** — checks reranked scores against a threshold; on insufficient context, widens the section filter to a fixed fallback set and retries retrieval up to twice before forcing generation.
 - **generate_answer** — a single base prompt with mandatory inline `[chunk_id]` citations, plus a persona-specific tone instruction appended (one prompt, not five).
@@ -72,6 +74,43 @@ flowchart LR
 - **Indexed into the same global corpus** the fixed filings live in — reusing the exact same `ingest_sections` pipeline function (`src/ingestion/pipeline.py`) that `scripts/run_ingestion.py` calls for the EDGAR-downloaded corpus, so there is one processing implementation, not two. `doc_id` is suffixed with the filing type (`AAPL_2026_10Q`) so an uploaded 10-Q can't collide with an existing 10-K for the same ticker/year.
 - **Verified live end-to-end**: a real Apple 10-Q (FY2026 Q3, not part of the fixed corpus) was uploaded through this endpoint, indexed into 159 chunks across all 6 canonical sections, and successfully retrieved and cited (`AAPL_2026_10Q_risk_factors_21`) by a live `/query` naming its Digital Markets Act disclosure — then removed again to keep the documented corpus numbers below accurate to the fixed 14-filing baseline.
 - **Known limitation, not specific to upload**: `retrieve_single` (used for factual/risk-analysis queries) filters by section but not by company or fiscal year, so a vague query can surface older chunks over a just-uploaded document; `retrieve_multi` (comparison queries) already filters by company. Tightening `retrieve_single` the same way is a natural next step, not yet built.
+
+### Dynamic ingestion
+
+The corpus is not fixed at query time either. If a question names a company that isn't indexed, `check_entity_exists` (`src/agent/nodes/check_entity.py`) fetches its most recent 10-K from SEC EDGAR and ingests it mid-request, before retrieval runs — so the agent can answer about companies it has never seen.
+
+Entity extraction runs in two tiers, the second only when the first finds nothing:
+
+1. **Corpus match** — `SELECT DISTINCT ticker, company FROM filings`, matched on word boundaries (not substrings: with an open corpus a one-letter ticker like `F` would otherwise match almost any question). A small alias map covers brand-vs-registrant mismatches, since "Alphabet Inc." doesn't contain the word "Google".
+2. **LLM + EDGAR resolution** — a structured-output call extracts company names as free text, then `resolve_company()` checks them against SEC's public [`company_tickers.json`](https://www.sec.gov/files/company_tickers.json) mapping (cached locally after first download). Exact ticker and exact title match first; prefix matching is a last resort, requires ≥3 characters, and prefers the shortest matching title — an LLM returning `"A"` or `"Apple"` must not resolve to a random company and trigger minutes of pointless ingestion.
+
+Design decisions worth naming:
+
+- **One ingestion per query** (`MAX_INGESTIONS_PER_QUERY = 1`). Ingesting a filing is minutes of work, so a comparison naming three unknown companies would hang the request for ~30 minutes. The rest come back as explicit entries in `ingestion_errors`, surfaced in the UI — not a silent wait.
+- **Nothing propagates as an exception.** A ticker that doesn't exist on EDGAR, a 429 from SEC, a filing whose parsing fails validation — all land in `ingestion_errors` and the query continues answering from the corpus it already has.
+- **Ingestion cost is counted.** Contextual retrieval is one LLM call per chunk, so a query that triggers ingestion costs orders of magnitude more than a normal one. `ingest_sections` returns real cost from `usage_metadata` (not an estimate), `check_entity_exists` adds it to `cost_usd`, and `query_logs.ingested_entities` records which queries did it so [`wiki/pages/cost-trends.md`](wiki/pages/cost-trends.md) can separate the two populations instead of averaging them together into a meaningless number.
+- **One processing implementation, three entry points.** `scripts/download_filings.py` (CLI), `src/api/documents.py` (upload), and this node all call the same functions in `src/ingestion/pipeline.py`; the scripts are thin wrappers, not copies.
+- **Not built, deliberately**: no job queue, no lock against two users ingesting the same company concurrently (worst case: duplicate chunks in Qdrant — acceptable at demo scale), no 10-Q through this path (that's what upload is for), and no detection of new filings for companies already in the corpus.
+
+**Verified live, end-to-end**, with one query about a company that was not in the corpus (*"What does Nvidia report about supply chain and manufacturing risk?"*):
+
+| | measured |
+|---|---|
+| Company resolved | `Nvidia` → `NVDA` (CIK 0001045810) via tier-2 LLM + EDGAR |
+| Filing ingested | NVDA 10-K FY2026, 347 chunks across all 6 canonical categories |
+| End-to-end latency | **8 min 14 s** (493,706 ms) vs ~15 s for a normal query |
+| Cost | **$0.0673** vs $0.0063 average for the 50 logged non-ingesting queries (~11×) |
+| Answer | generated and cited real just-indexed chunks (`NVDA_2026_10K_risk_factors_47`) |
+
+Two honest caveats on those numbers. The cost multiple is a **single observation** (n=1), not a validated average — it's the right order of magnitude, not a benchmark. And the 8-minute latency is well past the 1–3 minutes the feature was scoped against, because contextual retrieval and embedding run sequentially per chunk; `MAX_INGESTIONS_PER_QUERY = 1` is therefore doing more work than expected and is marked in code as needing recalibration against this measurement.
+
+A third finding came out of the same run and is documented in [`wiki/pages/failure-patterns/item8-incorporated-by-reference.md`](wiki/pages/failure-patterns/item8-incorporated-by-reference.md): NVIDIA incorporates Item 8 and Item 3 *by reference*, so those sections parse and pass validation but contain a single ~150-character pointer instead of content (1 chunk each, against 243 for risk factors). `validate_sections` checks presence, not size — for 4 of the 5 personas this is a quiet retrieval failure rather than an error. The threshold that would catch it can't be calibrated from one filing, so it's recorded rather than guessed at.
+
+### Frontend & reasoning trace
+
+The UI (`frontend/app/page.tsx`) is a two-pane layout: a dark sidebar showing the live corpus (fetched from `GET /corpus`, not hardcoded — it grows via upload and dynamic ingestion, so a static "3 companies" label would go stale within one query) plus a drag-and-drop upload zone, and a light query pane with example-question chips and a chat-style input.
+
+Every graph node appends a plain-English line to `state["trace"]` describing what it actually did — not a fabricated token-level chain-of-thought, but a real account of the pipeline's own decisions: how the question was classified (with the model's own one-sentence reasoning, requested explicitly in the `classify` prompt), whether an unindexed company triggered dynamic ingestion, which canonical sections were searched, the reranker's top score, whether `verify_context` had to retry with fallback sections, and how many sources the final answer cited. The API returns this as `reasoning_trace`; the frontend shows it collapsed under "How this answer was put together" so the mechanism is inspectable without cluttering the default view. Verified live — a real query about Apple's liquidity retried twice with broader sections before generating (top rerank score 0.42, then 0.66, still under the 3-good-chunks threshold) before answering, and every trace line matched what the logs showed actually happened.
 
 ---
 
@@ -208,7 +247,9 @@ cd frontend && npx playwright test
 
 ## Project status
 
-**Working end-to-end:** ingestion (14/14 filings, 8,250/8,250 chunks verified in both Postgres and Qdrant), classification (100% persona / 93.33% query-type accuracy on the golden set), hybrid retrieval with RRF, Vertex AI reranking, persona-toned cited generation, cost tracking, LangSmith tracing, all 4 services containerized, 50 passing unit tests, 3 passing E2E scenarios, and a document-upload feature (10-K/10-Q, async, auto-detected metadata, format-validated before indexing) verified live against a real filing.
+**Working end-to-end:** ingestion (14/14 base filings, 8,250/8,250 chunks verified in both Postgres and Qdrant), classification (100% persona / 93.33% query-type accuracy on the golden set), hybrid retrieval with RRF, Vertex AI reranking, persona-toned cited generation, cost tracking, LangSmith tracing, all 4 services containerized, 60 passing unit tests, 5 passing E2E scenarios, a document-upload feature (10-K/10-Q, async, auto-detected metadata, format-validated before indexing), and dynamic ingestion from SEC EDGAR mid-query — both verified live against real filings.
+
+**Corpus note:** the live dynamic-ingestion test added NVIDIA's FY2026 10-K (347 chunks), so the running corpus is 15 filings / 8,597 chunks. The golden-set accuracy figures above were measured on the 14-filing baseline, before that filing existed; they have not been re-measured since. Because `retrieve_single` filters by section but not by company, NVIDIA chunks can now surface in risk-analysis queries that name no company at all — a consequence of the known `retrieve_single` gap, not of dynamic ingestion itself.
 
 **Not done:**
 - Retrieval recall and faithfulness against the golden set — blocked on manual chunk-relevance annotation and an LLM-judge implementation, not on running the pipeline (classification accuracy already is).
@@ -216,5 +257,6 @@ cd frontend && npx playwright test
 - Retrieval eval is single-filing / 17-question scope, not corpus-wide.
 - `retrieve_single` has no company/fiscal-year filter (see Document upload) — a real gap uploads made visible, not one they introduced.
 - No auth (intentional — single-user demo scope); uploads land in one shared global corpus, not scoped per user or session.
+- ~2,586 chunks (28.4% of the corpus) carry a contextual-retrieval situating sentence naming the wrong company, from a prompt bug fixed today but not retroactively repaired (see Ingestion above) — a remediation decision (re-run contextual retrieval + re-embedding for the affected chunks) is pending.
 
 **Debugged against real behavior, not assumptions** — 9 issues found by running the system against live APIs and traced in [`wiki/pages/failure-patterns/`](wiki/pages/failure-patterns/), including two that only surfaced once the reranker started working: a router function whose state mutations LangGraph silently discarded (causing an actual infinite retry loop, stopped only by Google's own rate limiter, before the fix), and a comparison-query path that returned zero results whenever no company was named explicitly. Both are fixed and covered by regression tests.

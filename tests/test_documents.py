@@ -65,7 +65,7 @@ def test_rejects_when_required_sections_missing(
 
 
 @patch("src.api.documents.QdrantClient")
-@patch("src.api.documents.ingest_sections", return_value=12)
+@patch("src.api.documents.ingest_sections", return_value=(12, 0.03))
 @patch("src.api.documents.validate_sections")
 @patch("src.api.documents.parse_filing")
 @patch("src.api.documents.upsert_filing")

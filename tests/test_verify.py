@@ -46,6 +46,17 @@ def test_max_retries_forces_generate_answer():
     assert route_after_verify(state) == "generate_answer"
 
 
+def test_verify_context_appends_reasoning_trace_entry():
+    sufficient = verify_context(make_state([0.9, 0.8, 0.7]))
+    assert "sufficient" in sufficient["trace"][-1]
+
+    retrying = verify_context(make_state([0.1], retry_count=0))
+    assert "retrying" in retrying["trace"][-1].lower()
+
+    exhausted = verify_context(make_state([0.1], retry_count=2))
+    assert "retries" in exhausted["trace"][-1].lower()
+
+
 def test_retry_count_eventually_reaches_limit_and_stops():
     # regresie pentru bug-ul real gasit: fara ca verify_context sa fie NOD
     # (nu functie de conditional_edges), retry_count nu se incrementa

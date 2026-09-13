@@ -36,17 +36,17 @@ def detect_filing_metadata(html: str) -> dict:
 
     if not values["document_type"] or not values["ticker"] or not values["fiscal_year"]:
         raise FilingMetadataError(
-            "Nu s-au gasit tag-urile inline XBRL standard (dei:DocumentType / "
-            "dei:TradingSymbol / dei:DocumentFiscalYearFocus) — fisierul nu pare "
-            "sa fie un 10-K/10-Q real de pe SEC EDGAR."
+            "Standard inline XBRL tags not found (dei:DocumentType / "
+            "dei:TradingSymbol / dei:DocumentFiscalYearFocus) — this file does not "
+            "look like a real 10-K/10-Q from SEC EDGAR."
         )
     if values["document_type"] not in SUPPORTED_FILING_TYPES:
         raise FilingMetadataError(
-            f"Tip de document nesuportat: {values['document_type']!r} "
-            f"(suportate: {sorted(SUPPORTED_FILING_TYPES)})"
+            f"Unsupported document type: {values['document_type']!r} "
+            f"(supported: {sorted(SUPPORTED_FILING_TYPES)})"
         )
     if not values["fiscal_year"].isdigit():
-        raise FilingMetadataError(f"An fiscal nevalid detectat: {values['fiscal_year']!r}")
+        raise FilingMetadataError(f"Invalid fiscal year detected: {values['fiscal_year']!r}")
 
     return {
         "filing_type": values["document_type"],

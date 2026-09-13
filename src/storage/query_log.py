@@ -15,6 +15,7 @@ def log_query_to_postgres(
     status: str,
     langsmith_trace_id: str | None,
     cost_usd: float | None = None,
+    ingested_entities: list[str] | None = None,
 ) -> None:
     persona = classification.persona.value if classification else None
     query_type = classification.query_type.value if classification else None
@@ -27,8 +28,8 @@ def log_query_to_postgres(
                 INSERT INTO query_logs (
                     raw_query, classified_persona, classified_query_type,
                     retrieved_chunk_ids, langsmith_trace_id, latency_ms,
-                    final_answer, status, cost_usd
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    final_answer, status, cost_usd, ingested_entities
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     raw_query,
@@ -40,6 +41,7 @@ def log_query_to_postgres(
                     final_answer,
                     status,
                     cost_usd,
+                    ingested_entities or [],
                 ),
             )
         conn.commit()

@@ -22,7 +22,8 @@ def fetch_rows(conn):
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT classified_persona, classified_query_type, cost_usd, status
+            SELECT classified_persona, classified_query_type, cost_usd, status,
+                   coalesce(array_length(ingested_entities, 1), 0) > 0
             FROM query_logs
             WHERE cost_usd IS NOT NULL
             """
@@ -38,14 +39,16 @@ def aggregate(rows):
     by_query_type = defaultdict(list)
     by_persona = defaultdict(list)
     by_status = defaultdict(list)
-    for persona, query_type, cost, status in rows:
+    by_ingestion = defaultdict(list)
+    for persona, query_type, cost, status, had_ingestion in rows:
         if query_type:
             by_query_type[query_type].append(cost)
         if persona:
             by_persona[persona].append(cost)
         if status:
             by_status[status].append(cost)
-    return by_query_type, by_persona, by_status
+        by_ingestion["cu ingestie live" if had_ingestion else "fara ingestie"].append(cost)
+    return by_query_type, by_persona, by_status, by_ingestion
 
 
 def render_table(header: list[str], rows: list[list]) -> list[str]:
@@ -68,7 +71,26 @@ def render_query_type_insight(by_query_type: dict) -> str:
     return "Insuficiente date pentru comparatie factual vs. comparison (necesita ambele tipuri logate)."
 
 
-def render_markdown(by_query_type, by_persona, by_status, total_rows: int) -> str:
+def render_ingestion_insight(by_ingestion: dict) -> str:
+    with_cost = by_ingestion.get("cu ingestie live", [])
+    without_cost = by_ingestion.get("fara ingestie", [])
+    if not with_cost:
+        return (
+            "Niciun query logat nu a declansat inca ingestie live, deci nu exista "
+            "inca o comparatie reala cu/fara. Coloana `ingested_entities` exista si "
+            "se populeaza, dar ramane goala pana ruleaza primul astfel de query."
+        )
+    if not without_cost or avg(without_cost) == 0:
+        return f"Query-uri cu ingestie live: {len(with_cost)}, cost mediu ${avg(with_cost):.6f}."
+    ratio = avg(with_cost) / avg(without_cost)
+    return (
+        f"Un query care declanseaza ingestie live costa de ~{ratio:.0f}x un query obisnuit "
+        f"(${avg(with_cost):.6f} vs ${avg(without_cost):.6f} in medie) — ingestia face un "
+        "apel LLM de contextual retrieval per chunk, sute per filing."
+    )
+
+
+def render_markdown(by_query_type, by_persona, by_status, by_ingestion, total_rows: int) -> str:
     lines = ["# Cost trends", "", f"Generat automat de `scripts/cost_trends.py` din `query_logs` ({total_rows} query-uri cu cost logat).", ""]
 
     lines.append("## Cost mediu per query_type")
@@ -97,6 +119,16 @@ def render_markdown(by_query_type, by_persona, by_status, total_rows: int) -> st
     )
     lines.append("")
 
+    lines.append("## Cost mediu cu vs. fara ingestie live")
+    lines.append("")
+    lines += render_table(
+        ["tip query", "n", "cost mediu (USD)"],
+        [[k, len(costs), f"{avg(costs):.6f}"] for k, costs in sorted(by_ingestion.items())],
+    )
+    lines.append("")
+    lines.append(f"**Observatie:** {render_ingestion_insight(by_ingestion)}")
+    lines.append("")
+
     lines.append("## Ce nu poate fi calculat din query_logs")
     lines.append("")
     lines.append(
@@ -114,8 +146,8 @@ def render_markdown(by_query_type, by_persona, by_status, total_rows: int) -> st
 def main():
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     rows = fetch_rows(conn)
-    by_query_type, by_persona, by_status = aggregate(rows)
-    markdown = render_markdown(by_query_type, by_persona, by_status, len(rows))
+    by_query_type, by_persona, by_status, by_ingestion = aggregate(rows)
+    markdown = render_markdown(by_query_type, by_persona, by_status, by_ingestion, len(rows))
 
     with open(WIKI_PAGE_PATH, "w") as f:
         f.write(markdown)

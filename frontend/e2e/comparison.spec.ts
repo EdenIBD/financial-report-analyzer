@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockCorpus } from "./mock-corpus";
 
 test("comparatie — query care mentioneaza doua companii", async ({ page }) => {
   await page.route("**/query", async (route) => {
@@ -13,7 +14,7 @@ test("comparatie — query care mentioneaza doua companii", async ({ page }) => 
             text: "Marja operationala Google: 32% in ultimul an fiscal.",
             company: "GOOGL",
             fiscal_year: 2023,
-            section: "Item7",
+            section: "mdna",
             score: 0.88,
           },
           {
@@ -21,7 +22,7 @@ test("comparatie — query care mentioneaza doua companii", async ({ page }) => 
             text: "Marja operationala Microsoft: 44% in ultimul an fiscal.",
             company: "MSFT",
             fiscal_year: 2023,
-            section: "Item7",
+            section: "mdna",
             score: 0.85,
           },
         ],
@@ -31,20 +32,23 @@ test("comparatie — query care mentioneaza doua companii", async ({ page }) => 
         latency_ms: 1200,
         langsmith_trace_id: "trace-cmp-1",
         status: "valid",
+        ingested_entities: [],
+        ingestion_errors: [],
       },
     });
   });
 
+  await mockCorpus(page);
   await page.goto("/");
   await page
-    .getByPlaceholder(/Intreaba despre/)
+    .getByPlaceholder(/Ask about/)
     .fill("Cum se compara marja operationala a Google si Microsoft?");
-  await page.getByRole("button", { name: "Trimite" }).click();
+  await page.getByRole("button", { name: "Send" }).click();
 
   await expect(page.getByText(/Google/).first()).toBeVisible();
   await expect(page.getByText(/Microsoft/).first()).toBeVisible();
 
-  await page.getByRole("button", { name: /fragmentele recuperate/ }).click();
+  await page.getByRole("button", { name: /retrieved chunks/ }).click();
 
   await expect(page.getByText(/GOOGL 2023/)).toBeVisible();
   await expect(page.getByText(/MSFT 2023/)).toBeVisible();

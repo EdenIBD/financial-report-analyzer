@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()  # trebuie inainte de orice import care citeste os.environ la nivel de modul (embed.py, rerank.py)
 
+import os
+
+import psycopg2
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from langsmith import traceable
@@ -38,6 +41,19 @@ class QueryResponse(BaseModel):
     cost_usd: float
     langsmith_trace_id: str | None
     status: str
+    ingested_entities: list[str]
+    ingestion_errors: list[str]
+    reasoning_trace: list[str]
+
+class CorpusCompany(BaseModel):
+    ticker: str
+    company: str
+
+class CorpusResponse(BaseModel):
+    companies: list[CorpusCompany]
+    filings_indexed: int
+    fiscal_year_min: int | None
+    fiscal_year_max: int | None
 
 @app.post("/query", response_model=QueryResponse)
 def query_endpoint(request: QueryRequest):
@@ -46,6 +62,27 @@ def query_endpoint(request: QueryRequest):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/corpus", response_model=CorpusResponse)
+def corpus_summary():
+    """Sidebar-ul frontend-ului citeste corpusul real, nu o lista hardcodata —
+    corpusul creste prin upload si ingestie dinamica, deci "14 filings" ar
+    deveni fals in minute de la un query care aduce o companie noua."""
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT DISTINCT ticker, company FROM filings ORDER BY ticker")
+            companies = cur.fetchall()
+            cur.execute("SELECT count(*), min(fiscal_year), max(fiscal_year) FROM filings")
+            count, min_year, max_year = cur.fetchone()
+    finally:
+        conn.close()
+    return {
+        "companies": [{"ticker": t, "company": c} for t, c in companies],
+        "filings_indexed": count,
+        "fiscal_year_min": min_year,
+        "fiscal_year_max": max_year,
+    }
 
 @traceable(name="handle_query")
 def handle_query(raw_query: str) -> dict:
@@ -59,6 +96,10 @@ def handle_query(raw_query: str) -> dict:
         "sources": [],
         "use_fallback_sections": False,
         "cost_usd": 0.0,
+        "ingested_entities": [],
+        "ingestion_errors": [],
+        "ingestion_count": 0,
+        "trace": [],
     }
     start = time.time()
     final_state = initial_state
@@ -86,6 +127,7 @@ def handle_query(raw_query: str) -> dict:
             status=status,
             langsmith_trace_id=trace_id,
             cost_usd=final_state.get("cost_usd", 0.0),
+            ingested_entities=final_state.get("ingested_entities", []),
         )
     except Exception as log_error:
         # logging esuat nu trebuie sa piarda un raspuns deja generat cu succes
@@ -101,4 +143,7 @@ def handle_query(raw_query: str) -> dict:
         "cost_usd": final_state.get("cost_usd", 0.0),
         "langsmith_trace_id": trace_id,
         "status": status,
+        "ingested_entities": final_state.get("ingested_entities", []),
+        "ingestion_errors": final_state.get("ingestion_errors", []),
+        "reasoning_trace": final_state.get("trace", []),
     }
