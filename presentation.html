@@ -1,4 +1,5 @@
 <!doctype html>
+<meta charset="utf-8">
 <title>Financial Report Analyzer</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -292,7 +293,7 @@
         </div>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>02 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>02 / 14</span></div>
   </section>
 
   <!-- 3 : TECH STACK -->
@@ -329,7 +330,7 @@
         <p style="color:var(--text-dim); font-size:12.5px;">filings · chunks · query_logs · eval_set</p>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>03 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>03 / 14</span></div>
   </section>
 
   <!-- 4 : ARCHITECTURE -->
@@ -337,7 +338,7 @@
     <div class="rail"></div>
     <div class="head-block">
       <span class="kicker"><span class="num">04</span> — System Architecture</span>
-      <h2 class="h-slide">Four containers, two external APIs</h2>
+      <h2 class="h-slide">Four containers, three external APIs</h2>
     </div>
     <div class="body-area">
       <figure class="diagram">
@@ -400,9 +401,14 @@
           <text x="995" y="282" text-anchor="middle" font-size="10.5" opacity="0.55" fill="var(--accent)">generativelanguage / aiplatform</text>
 
           <!-- external: discovery engine -->
-          <rect x="880" y="330" width="230" height="60" fill="none" stroke="var(--accent)"/>
-          <text x="995" y="356" text-anchor="middle" font-size="13" class="svg-label" font-weight="600" fill="var(--accent)">Discovery Engine</text>
-          <text x="995" y="374" text-anchor="middle" font-size="11" opacity="0.75" fill="var(--accent)">semantic reranker</text>
+          <rect x="880" y="330" width="230" height="55" fill="none" stroke="var(--accent)"/>
+          <text x="995" y="352" text-anchor="middle" font-size="13" class="svg-label" font-weight="600" fill="var(--accent)">Discovery Engine</text>
+          <text x="995" y="369" text-anchor="middle" font-size="11" opacity="0.75" fill="var(--accent)">semantic reranker</text>
+
+          <!-- external: SEC EDGAR -->
+          <rect x="880" y="400" width="230" height="55" fill="none" stroke="var(--accent)"/>
+          <text x="995" y="422" text-anchor="middle" font-size="13" class="svg-label" font-weight="600" fill="var(--accent)">SEC EDGAR</text>
+          <text x="995" y="439" text-anchor="middle" font-size="11" opacity="0.75" fill="var(--accent)">dynamic ingestion + upload</text>
 
           <!-- arrows -->
           <line x1="850" y1="95" x2="260" y2="95" stroke="currentColor" marker-end="url(#arrow4)"/>
@@ -422,11 +428,14 @@
 
           <line x1="530" y1="110" x2="878" y2="355" stroke="var(--accent)" marker-end="url(#arrow4)"/>
           <text x="740" y="270" text-anchor="middle" font-size="10.5" fill="var(--accent)" opacity="0.85">gRPC</text>
+
+          <line x1="530" y1="122" x2="878" y2="422" stroke="var(--accent)" marker-end="url(#arrow4)"/>
+          <text x="745" y="330" text-anchor="middle" font-size="10.5" fill="var(--accent)" opacity="0.85">HTTPS (new filings)</text>
         </svg>
-        <figcaption>fig. 1 — request path from browser through the four docker-compose services out to the two Google Cloud APIs</figcaption>
+        <figcaption>fig. 1 — request path from browser through the four docker-compose services out to the three external APIs; SEC EDGAR is called mid-request when a query names a company the corpus doesn't have yet</figcaption>
       </figure>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>04 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>04 / 14</span></div>
   </section>
 
   <!-- 5 : INGESTION PIPELINE -->
@@ -503,13 +512,16 @@
         <figcaption>fig. 2 — ingestion runs once per filing; 8,250 chunks land in Postgres and Qdrant in lock-step</figcaption>
       </figure>
       <div style="display:flex; gap:28px; margin-top:6px;">
-        <div class="stat"><span class="n">14</span><span class="l">filings</span></div>
-        <div class="stat"><span class="n">8,250</span><span class="l">chunks</span></div>
+        <div class="stat"><span class="n">14</span><span class="l">base filings</span></div>
+        <div class="stat"><span class="n">8,250</span><span class="l">base chunks</span></div>
         <div class="stat"><span class="n">~16.5k</span><span class="l">API calls</span></div>
-        <div class="stat"><span class="n">3</span><span class="l">companies</span></div>
+        <div class="stat"><span class="n">3</span><span class="l">base companies</span></div>
+      </div>
+      <div class="panel" style="margin-top:14px;">
+        <p style="font-size:13px;"><span class="tag gold" style="margin-right:8px;">since</span>sections are mapped to a <strong>canonical taxonomy</strong> shared between 10-K and 10-Q (<code class="inline" style="font-size:10.5px;">risk_factors</code>, <code class="inline" style="font-size:10.5px;">mdna</code>, <code class="inline" style="font-size:10.5px;">financial_statements</code>…) instead of raw Item numbers — the same content lives at different Items in each filing type, and retrieval filters on the category, not the number. This corpus is also no longer fixed: uploads and dynamic ingestion (next slides) grow it live.</p>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>05 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>05 / 14</span></div>
   </section>
 
   <!-- 6 : AGENT GRAPH -->
@@ -517,11 +529,11 @@
     <div class="rail"></div>
     <div class="head-block">
       <span class="kicker"><span class="num">06</span> — Agent Graph</span>
-      <h2 class="h-slide">LangGraph: classify, retrieve, rerank, verify, generate</h2>
+      <h2 class="h-slide">classify, check entity, retrieve, rerank, verify, generate</h2>
     </div>
     <div class="body-area">
       <figure class="diagram">
-        <svg viewBox="0 0 1180 420" role="img" aria-label="The graph starts, classifies the query into a persona and query type, branches to single or multi-company retrieval, merges into reranking, then a verify step either loops back to retrieval up to two times when context is insufficient, or proceeds to generate the final answer and end.">
+        <svg viewBox="0 0 1330 420" role="img" aria-label="The graph starts, classifies the query into a persona and query type, checks whether any company it names is already in the corpus and fetches it from SEC EDGAR if not, branches to single or multi-company retrieval, merges into reranking, then a verify step either loops back to retrieval up to two times when context is insufficient, or proceeds to generate the final answer and end.">
           <defs>
             <marker id="arrow6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -529,70 +541,79 @@
           </defs>
           <g class="svg-label" font-size="12.5">
             <!-- START -->
-            <circle cx="90" cy="60" r="24" fill="none" stroke="currentColor"/>
-            <text x="90" y="64" text-anchor="middle" font-size="11">START</text>
+            <circle cx="70" cy="60" r="24" fill="none" stroke="currentColor"/>
+            <text x="70" y="64" text-anchor="middle" font-size="11">START</text>
 
             <!-- classify -->
-            <rect x="220" y="30" width="170" height="60" fill="none" stroke="currentColor" stroke-width="1.6"/>
-            <text x="305" y="55" text-anchor="middle" font-weight="600">classify</text>
-            <text x="305" y="73" text-anchor="middle" font-size="10.5" opacity="0.6">persona + query_type</text>
+            <rect x="180" y="30" width="150" height="60" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <text x="255" y="55" text-anchor="middle" font-weight="600" font-size="12">classify</text>
+            <text x="255" y="73" text-anchor="middle" font-size="10" opacity="0.6">persona + query_type</text>
+
+            <!-- check_entity_exists -->
+            <rect x="410" y="20" width="200" height="80" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+            <text x="510" y="45" text-anchor="middle" font-weight="600" font-size="12" fill="var(--accent)">check_entity_exists</text>
+            <text x="510" y="63" text-anchor="middle" font-size="10" opacity="0.75" fill="var(--accent)">company already in corpus?</text>
+            <text x="510" y="78" text-anchor="middle" font-size="10" opacity="0.75" fill="var(--accent)">if not: fetch from EDGAR</text>
+            <text x="510" y="93" text-anchor="middle" font-size="9.5" opacity="0.55" fill="var(--accent)">max 1 ingestion / query</text>
 
             <!-- retrieve_single -->
-            <rect x="500" y="10" width="190" height="55" fill="none" stroke="currentColor"/>
-            <text x="595" y="33" text-anchor="middle" font-weight="600" font-size="12">retrieve_single</text>
-            <text x="595" y="50" text-anchor="middle" font-size="10" opacity="0.6">factual / risk_analysis</text>
+            <rect x="700" y="10" width="190" height="55" fill="none" stroke="currentColor"/>
+            <text x="795" y="33" text-anchor="middle" font-weight="600" font-size="12">retrieve_single</text>
+            <text x="795" y="50" text-anchor="middle" font-size="10" opacity="0.6">factual / risk_analysis</text>
 
             <!-- retrieve_multi -->
-            <rect x="500" y="95" width="190" height="55" fill="none" stroke="currentColor"/>
-            <text x="595" y="118" text-anchor="middle" font-weight="600" font-size="12">retrieve_multi</text>
-            <text x="595" y="135" text-anchor="middle" font-size="10" opacity="0.6">comparison</text>
+            <rect x="700" y="95" width="190" height="55" fill="none" stroke="currentColor"/>
+            <text x="795" y="118" text-anchor="middle" font-weight="600" font-size="12">retrieve_multi</text>
+            <text x="795" y="135" text-anchor="middle" font-size="10" opacity="0.6">comparison</text>
 
             <!-- rerank -->
-            <rect x="770" y="50" width="170" height="60" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
-            <text x="855" y="75" text-anchor="middle" font-weight="600" fill="var(--accent)">rerank</text>
-            <text x="855" y="93" text-anchor="middle" font-size="10.5" opacity="0.75" fill="var(--accent)">Discovery Engine</text>
+            <rect x="970" y="50" width="170" height="60" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+            <text x="1055" y="75" text-anchor="middle" font-weight="600" fill="var(--accent)">rerank</text>
+            <text x="1055" y="93" text-anchor="middle" font-size="10.5" opacity="0.75" fill="var(--accent)">Discovery Engine</text>
 
             <!-- verify_context -->
-            <rect x="770" y="200" width="170" height="65" fill="none" stroke="currentColor" stroke-width="1.6"/>
-            <text x="855" y="224" text-anchor="middle" font-weight="600" font-size="12">verify_context</text>
-            <text x="855" y="241" text-anchor="middle" font-size="10" opacity="0.6">score &#8805; 0.55,</text>
-            <text x="855" y="254" text-anchor="middle" font-size="10" opacity="0.6">&#8805; 3 chunks?</text>
+            <rect x="970" y="200" width="170" height="65" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <text x="1055" y="224" text-anchor="middle" font-weight="600" font-size="12">verify_context</text>
+            <text x="1055" y="241" text-anchor="middle" font-size="10" opacity="0.6">score &#8805; 0.55,</text>
+            <text x="1055" y="254" text-anchor="middle" font-size="10" opacity="0.6">&#8805; 3 chunks?</text>
 
             <!-- generate_answer -->
-            <rect x="500" y="200" width="190" height="60" fill="none" stroke="currentColor" stroke-width="1.6"/>
-            <text x="595" y="225" text-anchor="middle" font-weight="600">generate_answer</text>
-            <text x="595" y="243" text-anchor="middle" font-size="10.5" opacity="0.6">cited, persona-toned</text>
+            <rect x="700" y="200" width="190" height="60" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <text x="795" y="225" text-anchor="middle" font-weight="600">generate_answer</text>
+            <text x="795" y="243" text-anchor="middle" font-size="10.5" opacity="0.6">cited, persona-toned</text>
 
             <!-- END -->
-            <circle cx="330" cy="230" r="24" fill="none" stroke="currentColor"/>
-            <text x="330" y="234" text-anchor="middle" font-size="12">END</text>
+            <circle cx="500" cy="230" r="24" fill="none" stroke="currentColor"/>
+            <text x="500" y="234" text-anchor="middle" font-size="12">END</text>
           </g>
 
           <!-- edges -->
-          <line x1="114" y1="60" x2="218" y2="55" stroke="currentColor" marker-end="url(#arrow6)"/>
-          <line x1="390" y1="50" x2="498" y2="37" stroke="currentColor" marker-end="url(#arrow6)"/>
-          <text x="440" y="32" text-anchor="middle" font-size="10">factual/risk</text>
-          <line x1="390" y1="70" x2="498" y2="118" stroke="currentColor" marker-end="url(#arrow6)"/>
-          <text x="440" y="108" text-anchor="middle" font-size="10">comparison</text>
+          <line x1="94" y1="60" x2="178" y2="56" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="330" y1="60" x2="408" y2="60" stroke="currentColor" marker-end="url(#arrow6)"/>
 
-          <line x1="690" y1="35" x2="768" y2="66" stroke="currentColor" marker-end="url(#arrow6)"/>
-          <line x1="690" y1="122" x2="768" y2="85" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="610" y1="45" x2="698" y2="35" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <text x="655" y="25" text-anchor="middle" font-size="10">factual/risk</text>
+          <line x1="610" y1="75" x2="698" y2="118" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <text x="655" y="108" text-anchor="middle" font-size="10">comparison</text>
 
-          <line x1="855" y1="110" x2="855" y2="198" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="890" y1="35" x2="968" y2="66" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="890" y1="122" x2="968" y2="85" stroke="currentColor" marker-end="url(#arrow6)"/>
 
-          <line x1="768" y1="230" x2="692" y2="230" stroke="currentColor" marker-end="url(#arrow6)"/>
-          <text x="730" y="220" text-anchor="middle" font-size="10">sufficient</text>
+          <line x1="1055" y1="110" x2="1055" y2="198" stroke="currentColor" marker-end="url(#arrow6)"/>
 
-          <line x1="500" y1="230" x2="356" y2="230" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <line x1="968" y1="230" x2="892" y2="230" stroke="currentColor" marker-end="url(#arrow6)"/>
+          <text x="930" y="220" text-anchor="middle" font-size="10">sufficient</text>
+
+          <line x1="700" y1="230" x2="526" y2="230" stroke="currentColor" marker-end="url(#arrow6)"/>
 
           <!-- retry loop (curved, danger-tinted, the bug site) -->
-          <path d="M 855 265 C 855 340, 595 340, 595 265" fill="none" stroke="var(--danger)" stroke-width="1.6" marker-end="url(#arrow6)"/>
-          <text x="725" y="358" text-anchor="middle" font-size="11" fill="var(--danger)">retry (&lt; 2×) · widen sections — infinite-loop bug lived here</text>
+          <path d="M 1055 265 C 1055 340, 795 340, 795 265" fill="none" stroke="var(--danger)" stroke-width="1.6" marker-end="url(#arrow6)"/>
+          <text x="925" y="358" text-anchor="middle" font-size="11" fill="var(--danger)">retry (&lt; 2×) · widen sections — infinite-loop bug lived here</text>
         </svg>
-        <figcaption>fig. 3 — the verify → retrieve retry loop only terminates because <code>verify_context</code> was moved into a real graph node; as a router-only function it never persisted <code>retry_count</code></figcaption>
+        <figcaption>fig. 3 — <code>check_entity_exists</code> sits between classify and retrieval on both branches: an unlisted company is fetched from SEC EDGAR before search runs, not after it comes back empty. The verify → retrieve retry loop only terminates because <code>verify_context</code> was moved into a real graph node; as a router-only function it never persisted <code>retry_count</code>.</figcaption>
       </figure>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>06 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>06 / 14</span></div>
   </section>
 
   <!-- 7 : PERSONA SECTIONS -->
@@ -600,26 +621,29 @@
     <div class="rail"></div>
     <div class="head-block">
       <span class="kicker"><span class="num">07</span> — Persona-Aware Retrieval</span>
-      <h2 class="h-slide">Same filing, different sections per reader</h2>
-      <p class="sub">Retrieval is filtered to the 10-K Items each persona actually cares about, before any similarity search runs.</p>
+      <h2 class="h-slide">Same category, different Item number per filing type</h2>
+      <p class="sub">Retrieval is filtered to the canonical categories each persona actually cares about, before any similarity search runs — not to raw 10-K Item numbers.</p>
     </div>
     <div class="body-area">
       <table>
-        <thead><tr><th>Persona</th><th>Cares about</th><th class="mono">10-K Sections</th></tr></thead>
+        <thead><tr><th>Persona</th><th>Cares about</th><th class="mono">Canonical categories</th></tr></thead>
         <tbody>
-          <tr><td>Legal</td><td>Litigation, compliance risk</td><td class="mono">Item3 · Item1A</td></tr>
-          <tr><td>Audit Firm</td><td>Financial statements, internal controls</td><td class="mono">Item8 · Item9A</td></tr>
-          <tr><td>Investment Firm</td><td>Performance drivers, outlook</td><td class="mono">Item7 · Item8</td></tr>
-          <tr><td>Investment Bank</td><td>Capital structure, debt, M&amp;A</td><td class="mono">Item7 · Item7A · Item8</td></tr>
-          <tr><td>Treasury</td><td>Liquidity, cash flow, FX exposure</td><td class="mono">Item7A · Item8</td></tr>
+          <tr><td>Legal</td><td>Litigation, compliance risk</td><td class="mono">legal_proceedings · risk_factors</td></tr>
+          <tr><td>Audit Firm</td><td>Financial statements, internal controls</td><td class="mono">financial_statements · controls_procedures</td></tr>
+          <tr><td>Investment Firm</td><td>Performance drivers, outlook</td><td class="mono">mdna · financial_statements</td></tr>
+          <tr><td>Investment Bank</td><td>Capital structure, debt, M&amp;A</td><td class="mono">mdna · market_risk · financial_statements</td></tr>
+          <tr><td>Treasury</td><td>Liquidity, cash flow, FX exposure</td><td class="mono">market_risk · financial_statements</td></tr>
         </tbody>
       </table>
-      <div class="panel" style="margin-top:16px;">
+      <div class="panel" style="margin-top:14px;">
+        <p style="font-size:13px;"><span class="tag gold" style="margin-right:8px;">why it matters</span>MD&amp;A is <code class="inline" style="font-size:10.5px;">Item 7</code> in a 10-K but <code class="inline" style="font-size:10.5px;">Item 2</code> in a 10-Q — and a 10-Q reuses <code class="inline" style="font-size:10.5px;">Item 1</code> twice with different meanings in Part&nbsp;I vs. Part&nbsp;II. Filtering on the category instead of the number is what lets the same persona table work for both filing types without a second set of rules.</p>
+      </div>
+      <div class="panel" style="margin-top:10px;">
         <p style="font-size:13px;"><span class="tag" style="margin-right:8px;">on retry</span>widens to a fixed fallback —
-          <code class="inline">Item1A · Item7 · Item7A · Item8</code> — instead of reformulating the query. Simpler, and it attacks the most likely cause: a persona filter that was too narrow.</p>
+          <code class="inline">risk_factors · mdna · market_risk · financial_statements</code> — instead of reformulating the query. Simpler, and it attacks the most likely cause: a persona filter that was too narrow.</p>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>07 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>07 / 14</span></div>
   </section>
 
   <!-- 8 : DEMO -->
@@ -632,107 +656,233 @@
     <div class="body-area" style="align-items:center; justify-content:center;">
       <div class="panel" style="width:min(720px,100%); padding:0; overflow:hidden;">
         <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; gap:10px;">
-          <div style="flex:1; border:1px solid var(--border); padding:9px 12px; font-family:var(--mono); font-size:12.5px; color:var(--text-dim);">Care este structura de capital a Microsoft?</div>
-          <div style="border:1px solid var(--text); padding:9px 16px; font-family:var(--mono); font-size:12.5px;">Trimite</div>
+          <div style="flex:1; border:1px solid var(--border); padding:9px 12px; font-family:var(--mono); font-size:12.5px; color:var(--text-dim);">What is Microsoft's capital structure?</div>
+          <div style="border:1px solid var(--text); padding:9px 16px; font-family:var(--mono); font-size:12.5px;">Send</div>
         </div>
         <div style="padding:20px;">
           <div style="display:flex; gap:8px; margin-bottom:12px;">
             <span class="tag on">investment_bank</span>
             <span class="tag on">factual</span>
           </div>
-          <p style="font-size:13.5px; margin-bottom:14px;">Microsoft raportează o datorie pe termen lung de
-            <strong>$41.99B</strong> <span class="mono accent2">[MSFT_2025_Item7_9]</span>, susținută de un capital
-            propriu de <strong>$343.5B</strong> la finalul anului fiscal 2025.</p>
+          <p style="font-size:13.5px; margin-bottom:14px;">Microsoft reports long-term debt of
+            <strong>$41.99B</strong> <span class="mono accent2">[MSFT_2025_mdna_9]</span>, backed by
+            <strong>$343.5B</strong> of stockholders' equity at the end of fiscal year 2025.</p>
+          <div style="display:flex; gap:8px; margin-bottom:12px; font-size:11px; font-family:var(--mono); color:var(--text-dim);">
+            <span>▸ How this answer was put together</span>
+          </div>
           <div style="display:flex; gap:16px; font-family:var(--mono); font-size:11px; color:var(--text-dim); border-top:1px solid var(--border); padding-top:12px;">
-            <span>Latența: <span class="accent2">6.2s</span></span>
+            <span>Latency: <span class="accent2">6.2s</span></span>
             <span>Cost: <span class="accent2">$0.00081</span></span>
             <span style="text-decoration:underline;">Trace ID: 01a090…</span>
-            <span style="text-decoration:underline; margin-left:auto;">Arată fragmentele (8)</span>
+            <span style="text-decoration:underline; margin-left:auto;">Show retrieved chunks (8)</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>08 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>08 / 14</span></div>
+  </section>
+
+  <!-- 8b : DYNAMIC INGESTION + UPLOAD -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">09</span> — Beyond the Fixed Corpus</span>
+      <h2 class="h-slide">Two ways in: ask about it, or drop the file</h2>
+      <p class="sub">Sister features, same processing pipeline underneath — they differ only in where the filing comes from.</p>
+    </div>
+    <div class="body-area cols cols-2" style="gap:20px;">
+      <div class="panel stack">
+        <span class="tag gold">Dynamic ingestion</span>
+        <p style="font-size:13px;">A question naming a company that isn't indexed triggers <code class="inline" style="font-size:10.5px;">check_entity_exists</code> to fetch its latest 10-K from SEC EDGAR <strong>mid-request</strong>, before retrieval runs.</p>
+        <p style="font-size:12.5px; color:var(--text-dim);">Entity resolution runs in two tiers — corpus match first, then an LLM + EDGAR's public ticker mapping only when that finds nothing, so a normal question about Apple never pays for an extra LLM call.</p>
+        <div style="display:flex; gap:20px; margin-top:6px;">
+          <div class="stat"><span class="n" style="font-size:22px;">8m14s</span><span class="l">NVDA, live</span></div>
+          <div class="stat"><span class="n" style="font-size:22px;">~11×</span><span class="l">cost vs normal</span></div>
+          <div class="stat"><span class="n" style="font-size:22px;">1</span><span class="l">max / query</span></div>
+        </div>
+      </div>
+      <div class="panel stack">
+        <span class="tag gold">Document upload</span>
+        <p style="font-size:13px;">Drop a 10-K/10-Q <code class="inline" style="font-size:10.5px;">.html</code> in the sidebar — <code class="inline" style="font-size:10.5px;">POST /documents/upload</code> validates it in two steps before indexing anything.</p>
+        <p style="font-size:12.5px; color:var(--text-dim);"><strong>1.</strong> Is it even a real EDGAR filing? Checked against the standard inline-XBRL <code class="inline" style="font-size:10.5px;">dei:*</code> tags every modern filing carries. <strong>2.</strong> Does it have all 6 canonical sections after parsing? Either failure returns <code class="inline" style="font-size:10.5px;">status: error</code> — nothing partial is ever written.</p>
+        <div style="display:flex; gap:20px; margin-top:6px;">
+          <div class="stat"><span class="n" style="font-size:22px;">async</span><span class="l">background job</span></div>
+          <div class="stat"><span class="n" style="font-size:22px;">2</span><span class="l">validation gates</span></div>
+          <div class="stat"><span class="n" style="font-size:22px;">159</span><span class="l">chunks, real AAPL 10-Q</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:2px;">
+      <p style="font-size:13px;"><span class="tag" style="margin-right:8px;">shared</span>both call the exact same <code class="inline" style="font-size:10.5px;">ingest_sections()</code> in <code class="inline" style="font-size:10.5px;">src/ingestion/pipeline.py</code> — one processing implementation, not two — and both land in the same global corpus that <code class="inline" style="font-size:10.5px;">GET /corpus</code> reports live to the sidebar, so "14 filings" never goes stale.</p>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>09 / 14</span></div>
   </section>
 
   <!-- 9 : ENGINEERING CHALLENGES -->
   <section class="slide">
     <div class="rail"></div>
     <div class="head-block">
-      <span class="kicker"><span class="num">09</span> — What Broke, and Why</span>
-      <h2 class="h-slide">Nine real bugs, found by running it</h2>
-      <p class="sub">Every one below was caught by executing the pipeline against live data, not by reading the code.</p>
+      <span class="kicker"><span class="num">10</span> — What Broke, and Why (1/2)</span>
+      <h2 class="h-slide">Thirteen real bugs, found by running it</h2>
+      <p class="sub">Every one below was caught by executing the pipeline against live data or reading actual retrieved text — never by reading the code and assuming it was right.</p>
     </div>
-    <div class="body-area cols cols-3" style="gap:14px;">
+    <div class="body-area cols cols-3" style="gap:12px;">
       <div class="panel stack">
         <span class="tag gold">Parsing</span>
-        <p style="font-weight:600; font-size:13.5px;">sec-parser has no 10-K parser</p>
-        <p style="font-size:12px; color:var(--text-dim);">Only ships an Edgar10Q classifier — fixed by extracting sections on the title regex instead, relaxed for filers (Google) that omit the trailing space.</p>
+        <p style="font-weight:600; font-size:13px;">sec-parser has no 10-K parser</p>
+        <p style="font-size:11.5px; color:var(--text-dim);">Only ships an Edgar10Q classifier — fixed by extracting sections on the title regex instead, relaxed for filers (Google) that omit the trailing space.</p>
       </div>
       <div class="panel stack">
         <span class="tag gold">Models</span>
-        <p style="font-weight:600; font-size:13.5px;">Two models retired mid-project</p>
-        <p style="font-size:12px; color:var(--text-dim);"><code class="inline" style="font-size:10.5px;">gemini-embedding-2</code> and <code class="inline" style="font-size:10.5px;">gemini-2.5-*</code> both 404'd — caught by calling the API directly, not trusting <code class="inline" style="font-size:10.5px;">models.list()</code>.</p>
+        <p style="font-weight:600; font-size:13px;">Two models retired mid-project</p>
+        <p style="font-size:11.5px; color:var(--text-dim);"><code class="inline" style="font-size:10px;">gemini-embedding-2</code> and <code class="inline" style="font-size:10px;">gemini-2.5-*</code> both 404'd — caught by calling the API directly, not trusting <code class="inline" style="font-size:10px;">models.list()</code>.</p>
       </div>
       <div class="panel stack" style="border-color:var(--danger);">
         <span class="tag" style="border-color:var(--danger); color:var(--danger);">Critical</span>
-        <p style="font-weight:600; font-size:13.5px;">Retry loop never terminated</p>
-        <p style="font-size:12px; color:var(--text-dim);">A router function mutating state doesn't persist in LangGraph — <code class="inline" style="font-size:10.5px;">retry_count</code> stayed at 0. 300+ loop iterations, stopped only by Google's own rate limit.</p>
+        <p style="font-weight:600; font-size:13px;">Retry loop never terminated</p>
+        <p style="font-size:11.5px; color:var(--text-dim);">A router function mutating state doesn't persist in LangGraph — <code class="inline" style="font-size:10px;">retry_count</code> stayed at 0. 300+ loop iterations, stopped only by Google's own rate limit.</p>
       </div>
       <div class="panel stack">
         <span class="tag">Response shape</span>
-        <p style="font-weight:600; font-size:13.5px;">qdrant's query_points wraps its result</p>
-        <p style="font-size:12px; color:var(--text-dim);">Returns a <code class="inline" style="font-size:10.5px;">QueryResponse</code>, not a bare list — RRF fusion needs <code class="inline" style="font-size:10.5px;">.points</code> extracted first.</p>
+        <p style="font-weight:600; font-size:13px;">qdrant's query_points wraps its result</p>
+        <p style="font-size:11.5px; color:var(--text-dim);">Returns a <code class="inline" style="font-size:10px;">QueryResponse</code>, not a bare list — RRF fusion needs <code class="inline" style="font-size:10px;">.points</code> extracted first.</p>
       </div>
       <div class="panel stack">
         <span class="tag">Observability</span>
-        <p style="font-weight:600; font-size:13.5px;">Trace ID was always null</p>
-        <p style="font-size:12px; color:var(--text-dim);">LangSmith's run context only exists inside a traced call — <code class="inline" style="font-size:10.5px;">@traceable</code> on <code class="inline" style="font-size:10.5px;">handle_query</code> fixed it.</p>
+        <p style="font-weight:600; font-size:13px;">Trace ID was always null</p>
+        <p style="font-size:11.5px; color:var(--text-dim);">LangSmith's run context only exists inside a traced call — <code class="inline" style="font-size:10px;">@traceable</code> on <code class="inline" style="font-size:10px;">handle_query</code> fixed it.</p>
       </div>
       <div class="panel stack">
         <span class="tag">Comparison queries</span>
         <p style="font-weight:600; font-size:13.5px;">No named company, no chunks</p>
-        <p style="font-size:12px; color:var(--text-dim);">"risk factors 2024 vs 2025" names no company — <code class="inline" style="font-size:10.5px;">retrieve_multi</code> now falls back to all three known tickers.</p>
+        <p style="font-size:12px; color:var(--text-dim);">"risk factors 2024 vs 2025" names no company — <code class="inline" style="font-size:10.5px;">retrieve_multi</code> now falls back to every ticker in the corpus.</p>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>09 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>10 / 14</span></div>
   </section>
 
-  <!-- 10 : STATUS -->
+  <!-- 10b : MORE BUGS -->
   <section class="slide">
     <div class="rail"></div>
     <div class="head-block">
-      <span class="kicker"><span class="num">10</span> — Status</span>
+      <span class="kicker"><span class="num">11</span> — What Broke, and Why (2/2)</span>
+      <h2 class="h-slide">...and seven more, found building dynamic ingestion</h2>
+    </div>
+    <div class="body-area cols cols-3" style="gap:12px;">
+      <div class="panel stack" style="border-color:var(--danger);">
+        <span class="tag" style="border-color:var(--danger); color:var(--danger);">28% of corpus</span>
+        <p style="font-weight:600; font-size:13px;">Contextual retrieval named the wrong company</p>
+        <p style="font-size:11px; color:var(--text-dim);"><code class="inline" style="font-size:9.5px;">doc_id</code> never reached the prompt — the model guessed, and guessed "Apple" often enough to mislabel 45% of GOOGL chunks and 33% of MSFT. Found reading real retrieved text in the UI.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Prompt compliance</span>
+        <p style="font-weight:600; font-size:13px;">Model replied "here are two options"</p>
+        <p style="font-size:11px; color:var(--text-dim);">Even given the right identifier, a conversational prompt got meta-commentary back, not one sentence — 146 chunks had it embedded. Fixed with a strict single-output instruction.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Silent resolution failure</span>
+        <p style="font-weight:600; font-size:13px;">"Tesla Inc" ≠ "Tesla, Inc." to a string compare</p>
+        <p style="font-size:11px; color:var(--text-dim);">Punctuation/suffix mismatch between an LLM's extraction and EDGAR's title silently dropped the company — no error, no banner. Fixed with a shared normalizer.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Resilience</span>
+        <p style="font-weight:600; font-size:13px;">One LLM hiccup could kill an unrelated query</p>
+        <p style="font-size:11px; color:var(--text-dim);">Tier-2 resolution runs on <em>any</em> question without a known company — an unguarded exception there took the whole query down. Now it degrades to a trace note.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Data migration</span>
+        <p style="font-weight:600; font-size:13px;">A "safe" migration order wasn't</p>
+        <p style="font-size:11px; color:var(--text-dim);">Delete-then-reinsert, interrupted mid-insert by the machine sleeping, left a real gap — 35 chunks gone. Rewritten insert-first, delete-after: interruption now leaves redundant data, never a hole.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Parser drift</span>
+        <p style="font-weight:600; font-size:13px;">MSFT parsing changed since it was first ingested</p>
+        <p style="font-size:11px; color:var(--text-dim);">Re-parsing the same static HTML today yields ~5,000 fewer characters than originally — found only because a remediation script's compare step exposed it.</p>
+      </div>
+      <div class="panel stack">
+        <span class="tag">Test rot</span>
+        <p style="font-weight:600; font-size:13px;">The E2E suite was silently broken</p>
+        <p style="font-size:11px; color:var(--text-dim);">A translation pass changed the DOM text every selector searched for — 3 "passing" tests were actually hitting a stopped Docker container's stale build, not the new code.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>11 / 14</span></div>
+  </section>
+
+  <!-- 12 : ALL UNIT TESTS -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">12</span> — Test Coverage</span>
+      <h2 class="h-slide">66 unit tests, every file that can break silently</h2>
+      <p class="sub">Not a coverage percentage — the actual list. Every one of these is a regression test for a bug that was real, live, and found by running the system.</p>
+    </div>
+    <div class="body-area">
+      <table style="font-size:12px;">
+        <thead><tr><th>File</th><th>Tests</th><th>Covers</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">test_dynamic_ingestion.py</td><td>13</td><td>company resolution (ticker, prefix, punctuation/suffix mismatches), corpus-vs-EDGAR tiering, ingestion limits, error isolation</td></tr>
+          <tr><td class="mono">test_parse.py</td><td>9</td><td>title regex across filer formats, section extraction, 10-K/10-Q boundary cases</td></tr>
+          <tr><td class="mono">test_cost_trends.py</td><td>7</td><td>cost aggregation by persona/query_type/status, ingestion-vs-normal cost split</td></tr>
+          <tr><td class="mono">test_verify.py</td><td>6</td><td>retry threshold logic, fallback-section routing, the retry-loop regression, reasoning-trace entries</td></tr>
+          <tr><td class="mono">test_retrieve_sections.py</td><td>6</td><td>persona → section coverage, entity extraction, comparison fallback regression</td></tr>
+          <tr><td class="mono">test_detect.py</td><td>4</td><td>inline-XBRL metadata detection, rejection of non-EDGAR / unsupported files</td></tr>
+          <tr><td class="mono">test_cost.py</td><td>4</td><td>pricing lookup, unknown-model zero-cost, pricing keys match real model constants</td></tr>
+          <tr><td class="mono">test_chunk.py</td><td>4</td><td>splitter behavior — short/long text, overlap, empty input</td></tr>
+          <tr><td class="mono">test_tokenizer.py</td><td>3</td><td>token counting sanity checks</td></tr>
+          <tr><td class="mono">test_sections.py</td><td>3</td><td>canonical taxonomy mapping, required-section validation</td></tr>
+          <tr><td class="mono">test_documents.py</td><td>3</td><td>upload validation gates, successful indexing into the global corpus</td></tr>
+          <tr><td class="mono">test_query_log.py</td><td>2</td><td>Postgres logging, including ingested_entities</td></tr>
+          <tr><td class="mono">test_fusion.py</td><td>2</td><td>Reciprocal Rank Fusion merge and top_k behavior</td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex; gap:28px; margin-top:14px;">
+        <div class="stat"><span class="n">66</span><span class="l">unit tests, 64 passing</span></div>
+        <div class="stat"><span class="n">7</span><span class="l">Playwright E2E scenarios</span></div>
+        <div class="stat"><span class="n">12</span><span class="l">test files</span></div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>12 / 14</span></div>
+  </section>
+
+  <!-- 13 : STATUS -->
+  <section class="slide">
+    <div class="rail"></div>
+    <div class="head-block">
+      <span class="kicker"><span class="num">13</span> — Status</span>
       <h2 class="h-slide">Where it stands today</h2>
     </div>
     <div class="body-area" style="justify-content:center;">
       <div class="cols cols-5" style="flex:none;">
-        <div class="stat"><span class="n">8,250</span><span class="l">chunks indexed</span></div>
-        <div class="stat"><span class="n">14</span><span class="l">10-K filings</span></div>
-        <div class="stat"><span class="n">37</span><span class="l">tests passing</span></div>
+        <div class="stat"><span class="n">8,250+</span><span class="l">chunks, growing live</span></div>
+        <div class="stat"><span class="n">14+</span><span class="l">filings, growing live</span></div>
+        <div class="stat"><span class="n">66</span><span class="l">unit tests</span></div>
         <div class="stat"><span class="n">4</span><span class="l">containers</span></div>
-        <div class="stat"><span class="n">9</span><span class="l">bugs documented</span></div>
+        <div class="stat"><span class="n">13</span><span class="l">bugs documented</span></div>
       </div>
       <div style="margin-top:36px; display:flex; gap:10px; flex-wrap:wrap;">
         <span class="tag on">retrieval — live</span>
         <span class="tag on">generation — live</span>
         <span class="tag on">rerank — live</span>
         <span class="tag on">tracing — live</span>
+        <span class="tag on">dynamic ingestion — live</span>
+        <span class="tag on">document upload — live</span>
+        <span class="tag on">reasoning trace — live</span>
         <span class="tag">eval thresholds — pending calibration</span>
+        <span class="tag">MSFT contextual-sentence remediation — in progress</span>
       </div>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>10 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>13 / 14</span></div>
   </section>
 
-  <!-- 11 : END -->
+  <!-- 14 : END -->
   <section class="slide">
     <div class="rail"></div>
     <div class="body-area" style="justify-content:center; align-items:flex-start; gap:18px;">
-      <span class="kicker"><span class="num">11</span> — Questions</span>
+      <span class="kicker"><span class="num">14</span> — Questions</span>
       <h1 class="h-display" style="font-size:clamp(34px,4.4vw,54px);">Ask it something<br>it hasn't seen.</h1>
-      <p class="sub mono" style="font-size:14px;">localhost:3000 — AAPL · MSFT · GOOGL · FY2020–2026</p>
+      <p class="sub mono" style="font-size:14px;">localhost:3000 — a growing corpus: upload a filing, or just ask about a company that isn't there yet</p>
     </div>
-    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>11 / 11</span></div>
+    <div class="foot"><span class="brand">Financial Report Analyzer</span><span>14 / 14</span></div>
   </section>
 
 </div>
