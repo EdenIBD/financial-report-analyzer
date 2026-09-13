@@ -23,6 +23,7 @@ type QueryResponse = {
   status: string;
   ingested_entities: string[];
   ingestion_errors: string[];
+  ingestion_details: { ticker: string; company: string; fiscal_year: number; filing_type: string; chunks: number }[];
   reasoning_trace: string[];
 };
 
@@ -95,6 +96,37 @@ function renderAnswerWithCitations(
     }
     return <span key={i}>{part}</span>;
   });
+}
+
+function DocumentPreviewCard({
+  ticker,
+  company,
+  fiscalYear,
+  filingType,
+}: {
+  ticker: string;
+  company: string;
+  fiscalYear: number;
+  filingType: string;
+}) {
+  // Placeholder vizual de "pagina de document" (linii redactate) — nu exista
+  // o miniatura reala a filing-ului de aratat, doar metadata reala de dedesubt.
+  const lineWidths = ["85%", "60%", "92%", "70%", "45%"];
+  return (
+    <div className="rounded-lg border border-dashed border-sidebar-border p-2">
+      <div className="label-caps mb-2">Found via dynamic ingestion</div>
+      <div className="rounded bg-preview-card p-3">
+        <div className="mb-2 h-2 w-2/3 rounded-sm bg-sidebar-muted/70" />
+        {lineWidths.map((w, i) => (
+          <div key={i} className="mb-1.5 h-1.5 rounded-sm bg-preview-line" style={{ width: w }} />
+        ))}
+      </div>
+      <div className="mt-2 font-mono text-sm font-semibold">{ticker.toLowerCase()}.html</div>
+      <div className="text-xs text-sidebar-muted">
+        {company} · {filingType} · FY{fiscalYear}
+      </div>
+    </div>
+  );
 }
 
 function ArrowUpIcon() {
@@ -338,10 +370,17 @@ export default function Home() {
           )}
         </div>
 
-        {result && result.ingested_entities.length > 0 && (
-          <div className="rounded-xl border border-dashed border-sidebar-border px-3 py-2">
-            <div className="label-caps">Found via dynamic ingestion</div>
-            <div className="mt-1 font-mono text-sm">{result.ingested_entities.join(", ")}</div>
+        {result && (result.ingestion_details?.length ?? 0) > 0 && (
+          <div className="flex flex-col gap-2">
+            {result.ingestion_details.map((d) => (
+              <DocumentPreviewCard
+                key={d.ticker}
+                ticker={d.ticker}
+                company={d.company}
+                fiscalYear={d.fiscal_year}
+                filingType={d.filing_type}
+              />
+            ))}
           </div>
         )}
 

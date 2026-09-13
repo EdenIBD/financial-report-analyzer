@@ -4,16 +4,19 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* Palette: dark sidebar + warm amber accents on a light canvas — a fixed
-  brand look, not a light/dark adaptive theme (deliberate, matches the design). */
-  --color-sidebar: #0d1117;
-  --color-sidebar-elevated: #161b22;
-  --color-sidebar-border: #2d333b;
-  --color-sidebar-muted: #8b949e;
-  --color-accent: #e8a33d;
+  /* Palette: navy sidebar (SEC-filing-official feel) + gold accents on a
+  light canvas — a fixed brand look, not a light/dark adaptive theme
+  (deliberate, matches the design mockup). */
+  --color-sidebar: #08213f;
+  --color-sidebar-elevated: #0f2c52;
+  --color-sidebar-border: #24416b;
+  --color-sidebar-muted: #93a6c3;
+  --color-accent: #f0b429;
   --color-suggestion-bg: #fdefc4;
   --color-suggestion-bg-hover: #fbe6a3;
   --color-suggestion-text: #6b4f14;
+  --color-preview-card: #1a232d;
+  --color-preview-line: #4a5568;
 }
 
 @theme inline {
@@ -30,6 +33,8 @@
   --color-suggestion-bg: var(--color-suggestion-bg);
   --color-suggestion-bg-hover: var(--color-suggestion-bg-hover);
   --color-suggestion-text: var(--color-suggestion-text);
+  --color-preview-card: var(--color-preview-card);
+  --color-preview-line: var(--color-preview-line);
 }
 
 body {

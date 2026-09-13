@@ -25,6 +25,7 @@ test("ingestie dinamica — banner pentru compania adaugata in corpus", async ({
         status: "valid",
         ingested_entities: ["NVDA"],
         ingestion_errors: [],
+        ingestion_details: [{ ticker: "NVDA", company: "NVIDIA CORP", fiscal_year: 2026, filing_type: "10-K", chunks: 347 }],
       },
     });
   });
@@ -38,6 +39,10 @@ test("ingestie dinamica — banner pentru compania adaugata in corpus", async ({
   // "NVDA" apare de doua ori (bannerul din main si cutia din sidebar) — .first() e suficient aici.
   await expect(page.getByText("NVDA", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/depinde de foundry-uri/)).toBeVisible();
+
+  // Cardul de previzualizare document din sidebar, cu metadata reala
+  await expect(page.getByText("nvda.html")).toBeVisible();
+  await expect(page.getByText(/NVIDIA CORP · 10-K · FY2026/)).toBeVisible();
 });
 
 test("ingestie esuata — eroare explicita per companie, raspunsul tot apare", async ({ page }) => {
@@ -55,6 +60,7 @@ test("ingestie esuata — eroare explicita per companie, raspunsul tot apare", a
         status: "valid",
         ingested_entities: [],
         ingestion_errors: ["BABA: no 10-K filings found on SEC EDGAR for CIK 0001577552"],
+        ingestion_details: [],
       },
     });
   });

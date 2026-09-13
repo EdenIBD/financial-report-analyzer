@@ -25,6 +25,7 @@ test("happy path — query factual despre Apple", async ({ page }) => {
         status: "valid",
         ingested_entities: [],
         ingestion_errors: [],
+        ingestion_details: [],
       },
     });
   });

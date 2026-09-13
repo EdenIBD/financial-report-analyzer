@@ -9,6 +9,7 @@ feature-document-upload.md: "nu duplici pipeline-ul").
 
 import json
 import os
+import re
 import time
 import uuid
 
@@ -164,9 +165,33 @@ def _company_index() -> list[dict]:
     return companies
 
 
+_CORP_SUFFIXES = {
+    "inc", "corp", "corporation", "co", "company",
+    "ltd", "holding", "holdings", "group", "plc", "llc",
+}
+
+
+def _normalize_company(name: str) -> str:
+    """Companie liber-scrisa -> forma comparabila: fara punctuatie, fara
+    sufixul corporativ. BUG REAL gasit testand ingestia dinamica (2026-09-13):
+    un LLM extrage adesea "Tesla Inc" dintr-o intrebare, dar EDGAR listeaza
+    "Tesla, Inc." — nici match exact, nici prefix (virgula rupe startswith),
+    deci resolve_company intorcea None si intreaga companie era ignorata
+    silentios, fara eroare vizibila. Normalizarea ambelor parti la "tesla"
+    elimina asta, nu doar pentru Tesla."""
+    # Spatiu, nu sterge: "Amazon.com Inc" fara asta ar deveni "amazoncom",
+    # care nu mai matcheaza "AMAZON COM INC" de pe EDGAR ("amazon com").
+    name = re.sub(r"[.,]", " ", name.lower())
+    words = name.split()
+    while words and words[-1] in _CORP_SUFFIXES:
+        words.pop()
+    return " ".join(words)
+
+
 def resolve_company(name_or_ticker: str) -> dict | None:
     """{ticker, cik, title} de pe EDGAR, sau None daca nu exista acolo."""
-    needle = name_or_ticker.strip().lower()
+    raw_needle = name_or_ticker.strip().lower()
+    needle = _normalize_company(name_or_ticker)
     if not needle:
         return None
 
@@ -174,25 +199,25 @@ def resolve_company(name_or_ticker: str) -> dict | None:
     for entry in _company_index():
         ticker = entry["ticker"]
         title = entry["title"]
-        if ticker.lower() == needle:
+        if ticker.lower() == raw_needle:
             return {"ticker": ticker, "cik": f"{entry['cik_str']:010d}", "title": title}
-        if exact_title is None and title.lower() == needle:
+        if exact_title is None and _normalize_company(title) == needle:
             exact_title = {"ticker": ticker, "cik": f"{entry['cik_str']:010d}", "title": title}
     if exact_title:
         return exact_title
 
-    # "Nvidia" pentru "NVIDIA CORP": prefix pe titlu, dupa ce match-urile exacte
-    # au esuat, ca sa nu returnam o companie gresita cand exista una exacta.
-    # Sub 3 caractere nu facem prefix match: numele vine dintr-un LLM, iar un
-    # "A" ar rezolva la prima companie care incepe cu A si ar declansa o
-    # ingestie de minute pe compania gresita.
+    # "Nvidia" pentru "NVIDIA CORP": prefix pe titlu (normalizat), dupa ce
+    # match-urile exacte au esuat, ca sa nu returnam o companie gresita cand
+    # exista una exacta. Sub 3 caractere nu facem prefix match: numele vine
+    # dintr-un LLM, iar un "A" ar rezolva la prima companie care incepe cu A
+    # si ar declansa o ingestie de minute pe compania gresita.
     if len(needle) < 3:
         return None
     prefixed = [
         entry
         for entry in _company_index()
-        if entry["title"].lower().startswith(needle)
-        and not entry["title"][len(needle) : len(needle) + 1].isalpha()
+        if _normalize_company(entry["title"]).startswith(needle)
+        and not _normalize_company(entry["title"])[len(needle) : len(needle) + 1].isalpha()
     ]
     if not prefixed:
         return None
@@ -285,6 +310,7 @@ def ingest_company(ticker: str, filing_type: str = "10-K", count: int = 1) -> di
         "chunks_indexed": 0,
         "cost_usd": 0.0,
         "errors": [],
+        "filings": [],  # {company, fiscal_year, filing_type, chunks} - pentru cardul de "found via dynamic ingestion"
     }
 
     company = resolve_company(ticker)
@@ -303,6 +329,14 @@ def ingest_company(ticker: str, filing_type: str = "10-K", count: int = 1) -> di
             summary["filings_ingested"] += 1
             summary["chunks_indexed"] += chunks
             summary["cost_usd"] += cost
+            summary["filings"].append(
+                {
+                    "company": meta["company"],
+                    "fiscal_year": int(meta["fiscal_year"]),
+                    "filing_type": meta["filing_type"],
+                    "chunks": chunks,
+                }
+            )
         except Exception as e:
             summary["errors"].append(f"{os.path.basename(path)}: {e}")
     return summary

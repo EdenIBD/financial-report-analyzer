@@ -94,3 +94,57 @@ s-a reparat pentru GOOGL/AAPL/NVDA e verificat corect si sigur.
    si-au pierdut deja continutul vechi (nu exista backup), deci comparatia
    se poate face doar pe chunk-urile inca netouched (legal_proceedings,
    market_risk, si coada nefixata din celelalte sectiuni).
+
+**Decizie luata (2026-09-13): optiunea 1** — re-ingestie completa, curata,
+doar pentru perechile (doc_id, sectiune) din tabelul de mai sus.
+
+## Incident operational: doua intreruperi, una a produs un gol real de continut
+
+`scripts/reingest_msft_drifted_sections.py`, versiunea initiala, facea
+**sterge intai, insereaza dupa** per sectiune (simetric cu cum arata orice
+migratie "curata" pe hartie). Pe masina asta insa, Docker Desktop s-a oprit
+de doua ori in timpul rularii (motiv probabil: repaus/sleep al laptopului,
+nu o eroare de cod) — de fiecare data, `docker compose exec` a raportat
+"completed, exit code 0" prin sistemul de notificari, un fals pozitiv (
+procesul a fost omorat odata cu daemon-ul Docker, nu s-a terminat normal).
+
+Consecinta reala a ordinii sterge-apoi-insereaza: la a doua intrerupere,
+job-ul murise la mijlocul insertului pentru `MSFT_2021/risk_factors` —
+sectiunea veche (149 chunk-uri) fusese deja stearsa complet, iar insertul
+nou ajunsese doar la 108 din 143 tinta. Timp de cateva ore (pana la
+verificarea urmatoare), acea sectiune a avut **un gol real de continut**:
+35 de chunk-uri de text financiar real, indisponibile pentru retrieval, nu
+doar etichetate gresit — o regresie mai grava decat bug-ul pe care remedierea
+incerca sa-l repare.
+
+**Lectie si fix aplicat**: ordinea a fost inversata — **insereaza intai
+(complet), sterge dupa** (`delete_stale_old_style_chunks`, apelat abia dupa
+ce noul set de chunk-uri e complet inserat). Chunk-urile vechi si cele noi
+au formate de `chunk_id` diferite (`{doc_id}_Item8_{n}` vechi vs
+`{doc_id}_financial_statements_{n}` nou), deci nu se suprascriu — pot
+coexista temporar fara sa produca goluri. Retrieval-ul filtreaza pe coloana
+`section`, nu pe `chunk_id`, deci coexistenta temporara a doua segmentari nu
+afecteaza corectitudinea query-urilor, doar adauga cateva chunk-uri
+redundante pana la pasul de curatare. O intrerupere la mijloc, cu aceasta
+ordine, lasa cel mult continut vechi redundant — niciodata un gol.
+
+**A treia intrerupere, auto-provocata**: in timp ce job-ul de re-ingestie rula
+(cu ordinea deja corectata insert-first), am rulat `docker compose up -d
+--build frontend` pentru un update de design — si `api` a fost repornit
+odata cu el (compose reconciliaza intreg proiectul, nu doar serviciul cerut),
+omorand din nou exec-ul cu SIGKILL (exit 137). Verificare directa dupa aceea
+a confirmat ca design-ul insert-first si-a facut treaba: nici un gol de
+continut, doar sectiuni ramase partial completate (ex: MSFT_2025/mdna avea
+151 chunk-uri — 113 vechi + 38 noi, coexistand, nu suprascrise). Lectie
+suplimentara: **niciun `docker compose up`/`--build`, pe orice serviciu, cat
+timp un exec de migratie de date ruleaza in fundal** — nu doar "nu rebuild pe
+serviciul care ruleaza exec-ul", ci pe intregul proiect compose.
+
+**Lectie generala pentru munca de migratie de date pe aceasta masina**:
+notificarile de "job completed" de la procese `docker compose exec` de lunga
+durata nu sunt de incredere daca Docker Desktop se poate opri singur (sleep)
+— verificarea trebuie facuta mereu direct in baza de date/Qdrant dupa
+finalizare, nu doar pe baza codului de iesire raportat. A doua lectie:
+orice script de migratie care modifica date in productie ar trebui sa fie
+implicit rezistent la intrerupere (insert-first, delete-after, sau
+tranzactii atomice), nu doar "de obicei ruleaza pana la capat".

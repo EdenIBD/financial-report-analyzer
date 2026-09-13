@@ -34,6 +34,7 @@ test("comparatie — query care mentioneaza doua companii", async ({ page }) => 
         status: "valid",
         ingested_entities: [],
         ingestion_errors: [],
+        ingestion_details: [],
       },
     });
   });

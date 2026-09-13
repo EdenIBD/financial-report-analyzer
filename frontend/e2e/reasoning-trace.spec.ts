@@ -25,6 +25,7 @@ test("reasoning trace — ascuns implicit, vizibil dupa click", async ({ page })
         status: "valid",
         ingested_entities: [],
         ingestion_errors: [],
+        ingestion_details: [],
         reasoning_trace: [
           "Classified as **treasury** / **factual** — the question asks about liquidity.",
           "Companies mentioned already in corpus: AAPL",
@@ -66,6 +67,7 @@ test("fara reasoning_trace — sectiunea nu apare deloc", async ({ page }) => {
         status: "valid",
         ingested_entities: [],
         ingestion_errors: [],
+        ingestion_details: [],
         reasoning_trace: [],
       },
     });

@@ -37,6 +37,7 @@ class AgentState(TypedDict):
     sources: List[str]
     cost_usd: float  # acumulat de fiecare nod care face un apel LLM/embedding/rerank
     ingested_entities: List[str]  # ce s-a ingerat live in acest query
+    ingestion_details: List[dict]  # {ticker, company, fiscal_year, filing_type, chunks} per filing ingerat
     ingestion_errors: List[str]  # ce nu s-a putut ingera, cu motiv
     ingestion_count: int  # contra MAX_INGESTIONS_PER_QUERY
     trace: List[str]  # pasii reali facuti de pipeline, afisati in UI ca "chain of thought"

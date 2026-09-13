@@ -43,6 +43,7 @@ class QueryResponse(BaseModel):
     status: str
     ingested_entities: list[str]
     ingestion_errors: list[str]
+    ingestion_details: list[dict]
     reasoning_trace: list[str]
 
 class CorpusCompany(BaseModel):
@@ -100,6 +101,7 @@ def handle_query(raw_query: str) -> dict:
         "ingestion_errors": [],
         "ingestion_count": 0,
         "trace": [],
+        "ingestion_details": [],
     }
     start = time.time()
     final_state = initial_state
@@ -145,5 +147,6 @@ def handle_query(raw_query: str) -> dict:
         "status": status,
         "ingested_entities": final_state.get("ingested_entities", []),
         "ingestion_errors": final_state.get("ingestion_errors", []),
+        "ingestion_details": final_state.get("ingestion_details", []),
         "reasoning_trace": final_state.get("trace", []),
     }

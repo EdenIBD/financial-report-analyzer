@@ -61,8 +61,17 @@ def check_entity_exists(state: AgentState) -> AgentState:
 
     requested = extract_entities(state["raw_query"])
     if not requested:
-        requested, cost = resolve_unknown_companies(state["raw_query"])
-        state["cost_usd"] = state.get("cost_usd", 0.0) + cost
+        # BUG REAL gasit testand ingestia dinamica (2026-09-13): acest apel
+        # LLM ruleaza la ORICE intrebare care nu numeste explicit o companie
+        # deja in corpus (nu doar cand chiar exista o companie noua) — o
+        # eroare tranzitorie aici (rate limit, retea) omora tot query-ul,
+        # transformand un query altfel raspundut normal intr-un esec total.
+        try:
+            requested, cost = resolve_unknown_companies(state["raw_query"])
+            state["cost_usd"] = state.get("cost_usd", 0.0) + cost
+        except Exception as e:
+            trace.append(f"Could not check for an unlisted company: {e}")
+            requested = []
         if requested:
             trace.append(f"No corpus match — resolved via LLM + SEC EDGAR: {', '.join(requested)}")
 
@@ -86,6 +95,9 @@ def check_entity_exists(state: AgentState) -> AgentState:
             if result["filings_ingested"]:
                 state["ingested_entities"].append(ticker)
                 state["ingestion_count"] += 1
+                state.setdefault("ingestion_details", []).extend(
+                    {"ticker": ticker, **f} for f in result["filings"]
+                )
                 trace.append(f"Indexed {ticker}: {result['chunks_indexed']} chunks")
             elif result["errors"]:
                 trace.append(f"Could not index {ticker}: {result['errors'][-1]}")
