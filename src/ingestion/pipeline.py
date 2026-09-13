@@ -233,38 +233,70 @@ def resolve_ticker(company_name_or_ticker: str) -> str | None:
     return company["cik"] if company else None
 
 
-def download_filing(cik: str, filing_type: str = "10-K", count: int = 1, ticker: str | None = None) -> list[str]:
-    """Descarca filing-uri, returneaza lista de path-uri HTML din data/raw/."""
-    url = f"https://data.sec.gov/submissions/CIK{cik}.json"
-    response = requests.get(url, headers=EDGAR_HEADERS, timeout=30)
-    time.sleep(RATE_LIMIT_SECONDS)
-    response.raise_for_status()
+def download_filing(cik: str, filing_type: str = "10-K", count: int = 1,
+                    ticker: str | None = None, fiscal_year: int | None = None) -> list[str]:
+    """Select the requested FY using XBRL, including older submissions shards.
 
-    recent = response.json()["filings"]["recent"]
-    report_dates = recent.get("reportDate", [])
-    indices = [i for i, form in enumerate(recent["form"]) if form == filing_type][:count]
-    if not indices:
-        # mesajele de eroare de aici ajung in interfata, deci sunt in engleza
-        raise ValueError(f"no {filing_type} filings found on SEC EDGAR for CIK {cik}")
+    reportDate is a candidate filter only: NVIDIA's fiscal year need not equal
+    the calendar year in reportDate. Never silently substitute the latest filing.
+    """
+    from src.ingestion.detect import detect_filing_metadata
 
-    os.makedirs(RAW_DIR, exist_ok=True)
-    paths = []
-    for i in indices:
-        accession = recent["accessionNumber"][i].replace("-", "")
-        report_date = report_dates[i] if i < len(report_dates) else ""
-        fiscal_year = (report_date or recent["filingDate"][i])[:4]
-        doc_url = (
-            f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/"
-            f"{accession}/{recent['primaryDocument'][i]}"
-        )
-        doc_response = requests.get(doc_url, headers=EDGAR_HEADERS, timeout=60)
+    def fetch(url):
+        response = requests.get(url, headers=EDGAR_HEADERS, timeout=60)
         time.sleep(RATE_LIMIT_SECONDS)
-        doc_response.raise_for_status()
+        response.raise_for_status()
+        return response
 
-        path = os.path.join(RAW_DIR, f"{ticker or cik}_{fiscal_year}.html")
-        with open(path, "wb") as f:
-            f.write(doc_response.content)
-        paths.append(path)
+    submissions = fetch(f"https://data.sec.gov/submissions/CIK{cik}.json").json()
+    batches = [submissions["filings"]["recent"]]
+    archives = iter(submissions["filings"].get("files", []))
+    paths, seen = [], set()
+    os.makedirs(RAW_DIR, exist_ok=True)
+    while batches:
+        batch = batches.pop()
+        for i, form in enumerate(batch["form"]):
+            if form != filing_type:
+                continue
+            accession = batch["accessionNumber"][i]
+            if accession in seen:
+                continue
+            seen.add(accession)
+            report_date = batch.get("reportDate", [""] * len(batch["form"]))[i]
+            if fiscal_year is not None and report_date and abs(int(report_date[:4]) - fiscal_year) > 1:
+                continue
+            document = batch["primaryDocument"][i]
+            url = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession.replace('-', '')}/{document}"
+            print(f"Downloading {ticker or cik}: {batch['filingDate'][i]} {url}")
+            response = fetch(url)
+            meta = detect_filing_metadata(response.text)
+            if meta["filing_type"] != filing_type or int(meta["cik"] or 0) != int(cik):
+                raise ValueError("SEC document metadata does not match the requested registrant/form")
+            if fiscal_year is not None and meta["fiscal_year"] != fiscal_year:
+                continue
+            path = os.path.join(RAW_DIR, f"{ticker or cik}_{meta['fiscal_year']}_{accession}.html")
+            with open(path, "wb") as f:
+                f.write(response.content)
+            metadata_dir = os.path.join(DATA_DIR, "cache", "filing_metadata")
+            os.makedirs(metadata_dir, exist_ok=True)
+            with open(os.path.join(metadata_dir, os.path.basename(path) + ".json"), "w") as f:
+                json.dump({"filing_date": batch["filingDate"][i], "accession_number": accession,
+                           "source_url": url}, f)
+            paths.append(path)
+            if len(paths) >= count:
+                return paths
+        if fiscal_year is None and paths:
+            break
+        archive = next(archives, None)
+        if archive is not None:
+            # SEC supplies these shard filenames; do not accept arbitrary URLs.
+            name = archive["name"]
+            if not re.fullmatch(r"CIK[0-9]+-submissions-[0-9]+\.json", name):
+                raise ValueError("Unexpected SEC submissions shard name")
+            batches.append(fetch(f"https://data.sec.gov/submissions/{name}").json())
+    if not paths:
+        year_label = f" for fiscal year {fiscal_year}" if fiscal_year is not None else ""
+        raise ValueError(f"no verified {filing_type}{year_label} found on SEC EDGAR for CIK {cik}")
     return paths
 
 
@@ -284,23 +316,40 @@ def ingest_filing(html_path: str, ticker: str, fiscal_year: int, filing_type: st
     with open(html_path, encoding="utf-8", errors="ignore") as f:
         html = f.read()
 
-    meta = detect_filing_metadata(html)  # doar pentru company/cik; restul vine de la apelant
+    meta = detect_filing_metadata(html)
+    if int(meta["fiscal_year"]) != int(fiscal_year) or meta["filing_type"] != filing_type:
+        raise ValueError("Filing fiscal year/form does not match the requested scope")
     sections = parse_filing(html, filing_type=filing_type)
     validate_sections(sections)  # acelasi prag ca la upload — o singura definitie de "filing valid"
 
     doc_id = make_doc_id(ticker, fiscal_year, filing_type)
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    metadata_path = os.path.join(DATA_DIR, "cache", "filing_metadata", os.path.basename(html_path) + ".json")
+    source_meta = None
+    if os.path.exists(metadata_path):
+        with open(metadata_path) as f:
+            source_meta = json.load(f)
     try:
+        # Serialize ingestion of the same filing across API requests.
+        with conn.cursor() as cur:
+            cur.execute("SELECT pg_advisory_lock(hashtext(%s))", (doc_id,))
         upsert_filing(
-            conn, doc_id, meta["company"], ticker, meta["cik"], filing_type, fiscal_year, meta=None
+            conn, doc_id, meta["company"], ticker, meta["cik"], filing_type, fiscal_year, meta=source_meta
         )
         qdrant = QdrantClient(url=os.environ.get("QDRANT_URL", "http://localhost:6333"))
-        return ingest_sections(conn, qdrant, doc_id, ticker, fiscal_year, sections)
+        with conn.cursor() as cur:
+            cur.execute("UPDATE filings SET ingestion_status = 'processing' WHERE doc_id = %s", (doc_id,))
+        conn.commit()
+        result = ingest_sections(conn, qdrant, doc_id, ticker, fiscal_year, sections)
+        with conn.cursor() as cur:
+            cur.execute("UPDATE filings SET ingestion_status = 'ready' WHERE doc_id = %s", (doc_id,))
+        conn.commit()
+        return result
     finally:
         conn.close()
 
 
-def ingest_company(ticker: str, filing_type: str = "10-K", count: int = 1) -> dict:
+def ingest_company(ticker: str, filing_type: str = "10-K", count: int = 1, fiscal_year: int | None = None) -> dict:
     """resolve -> download -> ingest. Rezumat cu ce a reusit si ce nu."""
     from src.ingestion.detect import detect_filing_metadata
 
@@ -318,7 +367,7 @@ def ingest_company(ticker: str, filing_type: str = "10-K", count: int = 1) -> di
         summary["errors"].append(f"{ticker}: not found on SEC EDGAR")
         return summary
 
-    paths = download_filing(company["cik"], filing_type, count, ticker=company["ticker"])
+    paths = download_filing(company["cik"], filing_type, count, ticker=company["ticker"], fiscal_year=fiscal_year)
     for path in paths:
         try:
             with open(path, encoding="utf-8", errors="ignore") as f:

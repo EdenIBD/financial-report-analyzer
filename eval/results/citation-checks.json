@@ -1,0 +1,207 @@
+{
+  "scope": "Identifier integrity only; not claim faithfulness",
+  "passed": 14,
+  "n": 15,
+  "cases": [
+    {
+      "question": "Ce riscuri legale semnaleaza Microsoft in legatura cu reglementarile antitrust din UE?",
+      "cited_ids": [
+        "MSFT_2021_risk_factors_80",
+        "MSFT_2023_risk_factors_83",
+        "MSFT_2023_risk_factors_86",
+        "MSFT_2024_risk_factors_86",
+        "MSFT_2025_risk_factors_84",
+        "MSFT_2026_risk_factors_105"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Ce litigii majore are Microsoft in curs, conform ultimului 10-K?",
+      "cited_ids": [
+        "MSFT_2021_financial_statements_225",
+        "MSFT_2021_risk_factors_79",
+        "MSFT_2023_financial_statements_192",
+        "MSFT_2023_financial_statements_196",
+        "MSFT_2024_financial_statements_193",
+        "MSFT_2026_financial_statements_180"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Cum difera expunerea la riscuri de reglementare intre Google si Apple?",
+      "cited_ids": [
+        "AAPL_2020_Item1A_79",
+        "AAPL_2022_Item1A_113",
+        "AAPL_2024_Item1A_117",
+        "GOOGL_2023_Item1A_111",
+        "GOOGL_2023_Item1A_112",
+        "GOOGL_2023_Item1A_99",
+        "GOOGL_2024_Item1A_101",
+        "GOOGL_2025_Item1A_122"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Ce spune Apple despre eficacitatea controalelor interne asupra raportarii financiare?",
+      "cited_ids": [
+        "AAPL_2020_Item9A_11",
+        "AAPL_2020_Item9A_6",
+        "AAPL_2021_Item9A_11",
+        "AAPL_2022_Item8_149",
+        "AAPL_2022_Item9A_11",
+        "AAPL_2023_Item9A_11",
+        "AAPL_2023_Item9A_6"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Ce discrepante sau puncte slabe in controalele interne raporteaza Google?",
+      "cited_ids": [
+        "GOOGL_2023_Item8_16",
+        "GOOGL_2023_Item8_25",
+        "GOOGL_2023_Item8_26",
+        "GOOGL_2024_Item8_25",
+        "GOOGL_2024_Item8_26",
+        "GOOGL_2025_Item8_24"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Cum se compara opinia auditorului independent intre Microsoft si Apple?",
+      "cited_ids": [
+        "AAPL_2022_Item8_132",
+        "AAPL_2022_Item8_143",
+        "AAPL_2023_Item8_110",
+        "MSFT_2021_financial_statements_287",
+        "MSFT_2024_mdna_123",
+        "MSFT_2025_mdna_101",
+        "MSFT_2026_financial_statements_228",
+        "MSFT_2026_mdna_114"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Cum s-a schimbat marja operationala a Google fata de anul precedent?",
+      "cited_ids": [
+        "GOOGL_2023_Item7_81",
+        "GOOGL_2023_Item7_84",
+        "GOOGL_2024_Item7_74",
+        "GOOGL_2024_Item7_76",
+        "GOOGL_2025_Item1A_27"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Ce factori explica evolutia veniturilor Apple in ultimul an fiscal?",
+      "cited_ids": [
+        "AAPL_2024_Item7_6",
+        "AAPL_2024_Item8_34"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Care a fost venitul net al Microsoft in ultimul an fiscal raportat?",
+      "cited_ids": [
+        "MSFT_2021_Item7_32",
+        "MSFT_2023_Item7_32",
+        "MSFT_2026_mdna_26"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Care este nivelul total al datoriei pe termen lung raportat de Microsoft?",
+      "cited_ids": [
+        "MSFT_2021_financial_statements_175",
+        "MSFT_2023_financial_statements_148",
+        "MSFT_2024_financial_statements_158",
+        "MSFT_2024_financial_statements_7",
+        "MSFT_2025_financial_statements_137",
+        "MSFT_2025_financial_statements_138",
+        "MSFT_2025_financial_statements_7"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Cum se compara structura de capital (datorie vs. capital propriu) intre Apple si Google?",
+      "cited_ids": [
+        "AAPL_2021_Item7_25",
+        "AAPL_2021_Item8_10",
+        "AAPL_2025_Item7_18",
+        "GOOGL_2023_Item8_29",
+        "GOOGL_2025_Item8_36"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Ce impact ar putea avea nivelul actual de indatorare al Google asupra unei eventuale achizitii majore?",
+      "cited_ids": [],
+      "unknown_ids": [],
+      "has_citations": false,
+      "all_ids_exist": false
+    },
+    {
+      "question": "Ce expunere la riscul de curs valutar raporteaza Apple si cum il gestioneaza?",
+      "cited_ids": [
+        "AAPL_2020_Item7A_1",
+        "AAPL_2021_Item7A_12",
+        "AAPL_2022_Item7A_11",
+        "AAPL_2022_Item8_63",
+        "AAPL_2023_Item7A_4"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Care este pozitia de numerar si echivalente de numerar a Microsoft la finalul anului fiscal?",
+      "cited_ids": [
+        "MSFT_2023_Item7_85",
+        "MSFT_2023_financial_statements_13",
+        "MSFT_2024_mdna_70",
+        "MSFT_2025_financial_statements_13",
+        "MSFT_2025_mdna_61",
+        "MSFT_2026_mdna_71"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    },
+    {
+      "question": "Cum se compara nivelul de lichiditate intre Google si Microsoft?",
+      "cited_ids": [
+        "GOOGL_2024_Item7_50",
+        "GOOGL_2024_Item8_29",
+        "GOOGL_2025_Item7_72",
+        "MSFT_2021_Item7_78",
+        "MSFT_2023_Item7_85",
+        "MSFT_2025_mdna_61",
+        "MSFT_2026_mdna_70"
+      ],
+      "unknown_ids": [],
+      "has_citations": true,
+      "all_ids_exist": true
+    }
+  ]
+}

@@ -1,5 +1,8 @@
+import re
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from src.agent.citations import inspect_citations
 from src.agent.state import AgentState, Persona
 from src.storage.cost import calculate_cost_usd
 
@@ -14,11 +17,12 @@ PERSONA_TONE = {
 }
 
 BASE_PROMPT = """You are an assistant that answers questions about 10-K financial reports
-(Apple, Microsoft, Google), using ONLY the provided context fragments.
+using ONLY the provided context fragments. Never substitute another company or fiscal year.
+A filing fiscal year is distinct from a calendar year and the year it was filed.
 
 Rules:
 - Answer only from the context; if the information isn't there, say so explicitly.
-- Cite the source for every claim in the format [chunk_id] (the identifier in brackets at the start of each context fragment).
+- Cite every factual claim with the COMPLETE source identifier in brackets, copied exactly from the context. Never shorten it to a numeric suffix such as [61].
 - Do not invent figures or facts that don't appear in the context.
 - Answer in the same language the question was asked in (English or Romanian). Default to English if that's unclear.
 
@@ -32,9 +36,21 @@ Question: {query}"""
 generate_llm = ChatGoogleGenerativeAI(model=GENERATE_MODEL)
 
 def generate_answer(state: AgentState) -> AgentState:
+    if state.get("scope_blocked") or not state.get("retrieved_chunks"):
+        state["retrieved_chunks"] = []
+        state["sources"] = []
+        state["abstained"] = True
+        romanian = re.search(r"\b(care|raportul|din|pentru|rezumă|rezuma|compară|compara)\b", state["raw_query"], re.I)
+        state["answer"] = (
+            "Nu am putut obține documentele pentru compania și anul cerute. Nu pot oferi un rezumat verificabil din corpusul disponibil. Consultați detaliile ingestiei."
+            if romanian else
+            "I could not obtain evidence for the requested company and fiscal year. I cannot provide a supported summary from the available corpus. See the ingestion details."
+        )
+        state.setdefault("trace", []).append("Abstained because the requested evidence is unavailable")
+        return state
     persona = state["classification"].persona
     context = "\n\n".join(
-        f"[{c['chunk_id']} | {c['company']} {c['fiscal_year']} | {c['section']}]\n{c['text']}"
+        f"[{c['chunk_id']}]\nCompany: {c['company']}; fiscal year: {c['fiscal_year']}; section: {c['section']}\n{c['text']}"
         for c in state["retrieved_chunks"]
     )
     prompt = BASE_PROMPT.format(
@@ -46,10 +62,19 @@ def generate_answer(state: AgentState) -> AgentState:
     # in functie de model — gemini-pro-latest intoarce blocuri, nu string.
     # .text e proprietatea LangChain care extrage robust indiferent de forma.
     state["answer"] = response.text
-    state["sources"] = [c["chunk_id"] for c in state["retrieved_chunks"]]
-    state.setdefault("trace", []).append(
-        f"Generated answer citing {len(state['sources'])} source chunks"
-    )
+    citations = inspect_citations(state["answer"], {c["chunk_id"] for c in state["retrieved_chunks"]})
+    if citations["all_ids_exist"]:
+        state["sources"] = citations["cited_ids"]
+        state.setdefault("trace", []).append(f"Generated answer with {len(state['sources'])} resolvable source citations")
+    else:
+        state["abstained"] = True
+        state["sources"] = []
+        state["answer"] = (
+            "Nu am putut genera un răspuns cu identificatori valizi ai surselor. Încercați din nou."
+            if re.search(r"\b(care|raportul|din|pentru|rezumă|rezuma|compara|ce|cum)\b", state["raw_query"], re.I)
+            else "I could not generate an answer with valid source identifiers. Please try again."
+        )
+        state.setdefault("trace", []).append("Citation validation failed; unsupported identifiers were not returned as an answer")
 
     usage = response.usage_metadata or {}
     cost = calculate_cost_usd(

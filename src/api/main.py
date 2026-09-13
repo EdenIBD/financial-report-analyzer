@@ -72,9 +72,9 @@ def corpus_summary():
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT DISTINCT ticker, company FROM filings ORDER BY ticker")
+            cur.execute("SELECT DISTINCT ticker, company FROM filings WHERE ingestion_status = 'ready' ORDER BY ticker")
             companies = cur.fetchall()
-            cur.execute("SELECT count(*), min(fiscal_year), max(fiscal_year) FROM filings")
+            cur.execute("SELECT count(*), min(fiscal_year), max(fiscal_year) FROM filings WHERE ingestion_status = 'ready'")
             count, min_year, max_year = cur.fetchone()
     finally:
         conn.close()
@@ -111,9 +111,12 @@ def handle_query(raw_query: str) -> dict:
         # starea partiala (clasificare, cost acumulat) ramane, nu se pierde.
         for state_update in graph.stream(initial_state, stream_mode="values"):
             final_state = state_update
-        status = "valid" if final_state.get("answer") else "invalid"
-    except Exception:
+        status = "abstained" if final_state.get("abstained") else ("valid" if final_state.get("answer") else "invalid")
+    except Exception as exc:
         status = "error"
+        final_state.setdefault("trace", []).append(
+            f"Pipeline failed ({type(exc).__name__}); completed steps and partial cost were preserved."
+        )
 
     latency_ms = int((time.time() - start) * 1000)
     trace_id = get_current_run_id()

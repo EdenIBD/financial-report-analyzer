@@ -79,7 +79,20 @@ def format_chunk(result) -> RetrievedChunk:
         "score": result.score,
     }
 
+def scope_filter(state: AgentState) -> list[dict]:
+    filters = []
+    if state.get("requested_tickers"):
+        filters.append({"key": "company", "match": {"any": state["requested_tickers"]}})
+        filters.append({"key": "doc_id", "match": {"any": state.get("scope_doc_ids", [])}})
+    if state.get("requested_years"):
+        filters.append({"key": "fiscal_year", "match": {"any": state["requested_years"]}})
+    return filters
+
+
 def retrieve_single(state: AgentState) -> AgentState:
+    if state.get("scope_blocked"):
+        state["retrieved_chunks"] = []
+        return state
     persona = state["classification"].persona
     allowed_sections = FALLBACK_SECTIONS if state["use_fallback_sections"] else PERSONA_SECTIONS[persona]
     query_text = state["raw_query"]
@@ -92,13 +105,13 @@ def retrieve_single(state: AgentState) -> AgentState:
     dense_results = qdrant_client.query_points(
         collection_name="financial_reports",
         query=dense_vec,
-        query_filter={"must": [{"key": "section", "match": {"any": allowed_sections}}]},
+        query_filter={"must": [{"key": "section", "match": {"any": allowed_sections}}] + scope_filter(state)},
         limit=15,
     ).points
     keyword_results = qdrant_client.query_points(
         collection_name="financial_reports",
         query_filter={
-            "must": [
+            "must": scope_filter(state) + [
                 {"key": "section", "match": {"any": allowed_sections}},
                 {"key": "text", "match": {"text": query_text}},
             ]
@@ -115,10 +128,13 @@ def retrieve_single(state: AgentState) -> AgentState:
 
 
 def retrieve_multi(state: AgentState) -> AgentState:
+    if state.get("scope_blocked"):
+        state["retrieved_chunks"] = []
+        return state
     persona = state["classification"].persona
     allowed_sections = FALLBACK_SECTIONS if state["use_fallback_sections"] else PERSONA_SECTIONS[persona]
     query_text = state["raw_query"]
-    entities = extract_entities(query_text)
+    entities = state["requested_tickers"] if "requested_tickers" in state else extract_entities(query_text)
     if not entities:
         # Query de comparatie fara nicio companie numita explicit (ex: "cum s-au
         # schimbat factorii de risc din 2024 vs 2025") — fara fallback, bucla
@@ -132,7 +148,7 @@ def retrieve_multi(state: AgentState) -> AgentState:
         base_filter = [
             {"key": "section", "match": {"any": allowed_sections}},
             {"key": "company", "match": {"value": entity}},
-        ]
+        ] + scope_filter(state)
         dense_results = qdrant_client.query_points(
             collection_name="financial_reports",
             query=dense_vec,

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import eagle from "../public/eagle.png";
 import { useEffect, useState } from "react";
 
 type RetrievedChunk = {
@@ -279,7 +281,8 @@ export default function Home() {
   return (
     <div className="flex h-screen overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="flex w-80 shrink-0 flex-col gap-6 overflow-y-auto bg-sidebar p-6 text-white">
+      <aside className="sidebar relative isolate flex w-80 shrink-0 flex-col gap-6 overflow-y-auto bg-sidebar p-6 text-white">
+        <Image src={eagle} alt="" aria-hidden="true" className="eagle-watermark" unoptimized />
         <div>
           <h1 className="text-lg font-bold">Financial Report Analyzer</h1>
           <p className="mt-1 text-sm text-sidebar-muted">
@@ -395,7 +398,7 @@ export default function Home() {
         <div className="flex-1 overflow-y-auto px-8 py-10">
           {showWelcome && (
             <div className="mx-auto mt-16 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-zinc-900">Ask about Apple, Microsoft, or Google filings</h2>
+              <h2 className="text-3xl font-bold text-zinc-900">Ask about financial filings</h2>
               <p className="mt-3 text-zinc-500">
                 Answers cite the exact filing chunks they&apos;re drawn from. Try one of these, or ask your
                 own.
@@ -543,7 +546,7 @@ export default function Home() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask about Apple, Microsoft, or Google 10-K/10-Q filings..."
+              placeholder="Ask about a company and fiscal year..."
               className="flex-1 bg-transparent text-sm text-white placeholder:text-sidebar-muted focus:outline-none"
             />
             <button

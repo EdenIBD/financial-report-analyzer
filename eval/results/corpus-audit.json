@@ -1,0 +1,121 @@
+{
+  "postgres_chunks": 9189,
+  "qdrant_chunks": 9189,
+  "missing_in_qdrant": [],
+  "orphan_qdrant": [],
+  "text_mismatches": [],
+  "msft_sections": [
+    {
+      "doc_id": "MSFT_2021",
+      "section": "financial_statements",
+      "expected": 304,
+      "actual": 304,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2021",
+      "section": "risk_factors",
+      "expected": 143,
+      "actual": 143,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2023",
+      "section": "financial_statements",
+      "expected": 265,
+      "actual": 265,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2023",
+      "section": "risk_factors",
+      "expected": 138,
+      "actual": 138,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2024",
+      "section": "controls_procedures",
+      "expected": 21,
+      "actual": 21,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2024",
+      "section": "financial_statements",
+      "expected": 273,
+      "actual": 273,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2024",
+      "section": "mdna",
+      "expected": 127,
+      "actual": 127,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2024",
+      "section": "risk_factors",
+      "expected": 146,
+      "actual": 146,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2025",
+      "section": "controls_procedures",
+      "expected": 16,
+      "actual": 16,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2025",
+      "section": "financial_statements",
+      "expected": 238,
+      "actual": 238,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2025",
+      "section": "mdna",
+      "expected": 104,
+      "actual": 104,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2025",
+      "section": "risk_factors",
+      "expected": 128,
+      "actual": 128,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2026",
+      "section": "controls_procedures",
+      "expected": 16,
+      "actual": 16,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2026",
+      "section": "financial_statements",
+      "expected": 244,
+      "actual": 244,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2026",
+      "section": "mdna",
+      "expected": 117,
+      "actual": 117,
+      "body_mismatches": []
+    },
+    {
+      "doc_id": "MSFT_2026",
+      "section": "risk_factors",
+      "expected": 152,
+      "actual": 152,
+      "body_mismatches": []
+    }
+  ]
+}

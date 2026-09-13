@@ -1,0 +1,89 @@
+# Unit-test inventory
+
+Generated from `eval/results/unit-tests.xml`. 83 passed; 2 skipped.
+
+- `tests/test_chunk.py::test_short_text_stays_one_chunk` — passed
+- `tests/test_chunk.py::test_long_text_splits_into_multiple_chunks` — passed
+- `tests/test_chunk.py::test_consecutive_chunks_overlap` — passed
+- `tests/test_chunk.py::test_empty_text_returns_no_chunks` — passed
+- `tests/test_citations.py::test_full_identifiers_required[Revenue [NVDA_2023_10K_mdna_16]-True]` — passed
+- `tests/test_citations.py::test_full_identifiers_required[Revenue [NVDA_2023_10K_mdna_16, NVDA_2023_10K_mdna_60]-True]` — passed
+- `tests/test_citations.py::test_full_identifiers_required[Revenue [61]-False]` — passed
+- `tests/test_citations.py::test_full_identifiers_required[Revenue [GOOGL_2025_Item8_33]-False]` — passed
+- `tests/test_citations.py::test_full_identifiers_required[Revenue without citations-False]` — passed
+- `tests/test_citations.py::test_full_identifiers_required[Revenue [NVDA_2023_10K_mdna_16] and expenses [99]-False]` — passed
+- `tests/test_citations.py::test_invalid_citation_abstains_and_preserves_generation_cost` — passed
+- `tests/test_cost.py::test_known_model_pricing` — passed
+- `tests/test_cost.py::test_unknown_model_costs_zero` — passed
+- `tests/test_cost.py::test_input_and_output_both_counted` — passed
+- `tests/test_cost.py::test_pricing_keys_match_real_model_constants` — passed
+- `tests/test_cost_trends.py::test_avg_of_empty_list_is_zero` — passed
+- `tests/test_cost_trends.py::test_avg_computes_mean` — passed
+- `tests/test_cost_trends.py::test_aggregate_groups_by_persona_and_query_type` — passed
+- `tests/test_cost_trends.py::test_aggregate_skips_null_persona_or_query_type` — passed
+- `tests/test_cost_trends.py::test_query_type_insight_computes_ratio_when_both_present` — passed
+- `tests/test_cost_trends.py::test_query_type_insight_reports_insufficient_data` — passed
+- `tests/test_cost_trends.py::test_render_table_produces_markdown_pipe_rows` — passed
+- `tests/test_detect.py::test_detect_rejects_html_without_dei_tags` — passed
+- `tests/test_detect.py::test_detect_rejects_unsupported_document_type` — passed
+- `tests/test_detect.py::test_detect_on_real_filings[AAPL_2023.html-10-K]` — passed
+- `tests/test_detect.py::test_detect_on_real_filings[AAPL_2025_Q_sample.html-10-Q]` — skipped
+- `tests/test_documents.py::test_rejects_file_without_valid_metadata` — passed
+- `tests/test_documents.py::test_rejects_when_required_sections_missing` — passed
+- `tests/test_documents.py::test_success_path_indexes_into_global_corpus_and_marks_ready` — passed
+- `tests/test_dynamic_ingestion.py::test_resolve_ticker_valid` — passed
+- `tests/test_dynamic_ingestion.py::test_resolve_ticker_nonexistent` — passed
+- `tests/test_dynamic_ingestion.py::test_resolve_company_prefers_exact_company_over_longer_prefix_match` — passed
+- `tests/test_dynamic_ingestion.py::test_resolve_company_rejects_too_short_name_for_prefix_match` — passed
+- `tests/test_dynamic_ingestion.py::test_resolve_company_matches_despite_suffix_and_punctuation_mismatch` — passed
+- `tests/test_dynamic_ingestion.py::test_resolve_company_matches_period_inside_name` — passed
+- `tests/test_dynamic_ingestion.py::test_resolution_failure_blocks_unrelated_corpus` — passed
+- `tests/test_dynamic_ingestion.py::test_existing_company_missing_year_triggers_exact_year_ingestion` — passed
+- `tests/test_dynamic_ingestion.py::test_known_and_unknown_companies_are_both_checked` — passed
+- `tests/test_dynamic_ingestion.py::test_complete_filing_does_not_trigger_ingestion` — passed
+- `tests/test_dynamic_ingestion.py::test_unresolved_registrant_abstains_without_other_sources` — passed
+- `tests/test_dynamic_ingestion.py::test_failed_attempt_counts_toward_ingestion_limit` — passed
+- `tests/test_dynamic_ingestion.py::test_general_question_keeps_general_scope` — passed
+- `tests/test_dynamic_ingestion.py::test_year_range_and_comparison_are_distinct` — passed
+- `tests/test_edgar_year_selection.py::test_requested_year_found_in_older_submissions_shard` — passed
+- `tests/test_edgar_year_selection.py::test_report_date_is_not_fiscal_year` — passed
+- `tests/test_edgar_year_selection.py::test_unavailable_year_does_not_download_latest` — passed
+- `tests/test_edgar_year_selection.py::test_sec_failure_propagates_without_substitution` — passed
+- `tests/test_fusion.py::test_reciprocal_rank_fusion_merges_and_ranks` — passed
+- `tests/test_fusion.py::test_reciprocal_rank_fusion_respects_top_k` — passed
+- `tests/test_parse.py::test_regex_matches_apple_style_number_and_title_together` — passed
+- `tests/test_parse.py::test_regex_matches_google_style_number_only_no_trailing_space` — passed
+- `tests/test_parse.py::test_regex_extracts_letter_suffix` — passed
+- `tests/test_parse.py::test_regex_does_not_match_unrelated_text_containing_item_word` — passed
+- `tests/test_parse.py::test_part_regex_matches_10q_style_part_titles` — passed
+- `tests/test_parse.py::test_parse_filing_10k_finds_all_canonical_sections[AAPL_2023.html]` — passed
+- `tests/test_parse.py::test_parse_filing_10k_finds_all_canonical_sections[GOOGL_2023.html]` — passed
+- `tests/test_parse.py::test_parse_filing_10k_finds_all_canonical_sections[MSFT_2024.html]` — passed
+- `tests/test_parse.py::test_parse_filing_10q_disambiguates_part1_vs_part2_item1` — skipped
+- `tests/test_query_log.py::test_log_query_inserts_expected_values` — passed
+- `tests/test_query_log.py::test_log_query_handles_missing_classification` — passed
+- `tests/test_query_scope.py::test_company_year_and_document_filters_survive_both_routes_and_retry[False-retrieve_single]` — passed
+- `tests/test_query_scope.py::test_company_year_and_document_filters_survive_both_routes_and_retry[False-retrieve_multi]` — passed
+- `tests/test_query_scope.py::test_company_year_and_document_filters_survive_both_routes_and_retry[True-retrieve_single]` — passed
+- `tests/test_query_scope.py::test_company_year_and_document_filters_survive_both_routes_and_retry[True-retrieve_multi]` — passed
+- `tests/test_query_scope.py::test_blocked_scope_short_circuits_graph_and_generation` — passed
+- `tests/test_query_scope.py::test_empty_context_abstains_without_llm` — passed
+- `tests/test_query_scope.py::test_graph_stream_preserves_scope_through_verification_retry` — passed
+- `tests/test_retrieve_sections.py::test_every_persona_has_sections` — passed
+- `tests/test_retrieve_sections.py::test_fallback_sections_nonempty` — passed
+- `tests/test_retrieve_sections.py::test_extract_entities_matches_corpus` — passed
+- `tests/test_retrieve_sections.py::test_extract_entities_matches_brand_name_not_in_registrant_name` — passed
+- `tests/test_retrieve_sections.py::test_extract_entities_does_not_match_single_letter_ticker_inside_words` — passed
+- `tests/test_retrieve_sections.py::test_retrieve_multi_falls_back_to_all_companies_when_no_entity_named` — passed
+- `tests/test_sections.py::test_canonical_sections_10k_and_10q_map_to_same_required_categories` — passed
+- `tests/test_sections.py::test_validate_sections_passes_when_all_required_present` — passed
+- `tests/test_sections.py::test_validate_sections_raises_when_missing` — passed
+- `tests/test_tokenizer.py::test_empty_string_has_zero_tokens` — passed
+- `tests/test_tokenizer.py::test_longer_text_has_more_tokens` — passed
+- `tests/test_tokenizer.py::test_known_short_phrase_token_count` — passed
+- `tests/test_verify.py::test_enough_good_chunks_generates_answer` — passed
+- `tests/test_verify.py::test_insufficient_chunks_retries_and_sets_fallback` — passed
+- `tests/test_verify.py::test_insufficient_chunks_routes_to_retrieve_multi_for_comparison` — passed
+- `tests/test_verify.py::test_max_retries_forces_generate_answer` — passed
+- `tests/test_verify.py::test_verify_context_appends_reasoning_trace_entry` — passed
+- `tests/test_verify.py::test_retry_count_eventually_reaches_limit_and_stops` — passed

@@ -14,3 +14,6 @@
 - [failure-patterns/msft-parse-drift-during-remediation.md](pages/failure-patterns/msft-parse-drift-during-remediation.md)
 - [cost-trends.md](pages/cost-trends.md) — generat automat de `scripts/cost_trends.py`, ruleaza-l din nou dupa ce se acumuleaza mai multe query-uri
 - [golden-set-results.md](pages/golden-set-results.md) — generat automat de `eval/run_golden_set.py`
+- [[pages/failure-patterns/company-year-scope|Company/year scope failure]] — NVIDIA FY2023, registranti nerezolvati si abstinere
+- [[pages/evaluation-2026-09-13|Evaluation — September 13]] — rezultate reale, incercari esuate si limite
+- [[pages/unit-test-inventory|Complete unit-test inventory]] — toate cazurile pytest incluse si in prezentare

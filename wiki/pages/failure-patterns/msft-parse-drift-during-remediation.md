@@ -128,6 +128,34 @@ afecteaza corectitudinea query-urilor, doar adauga cateva chunk-uri
 redundante pana la pasul de curatare. O intrerupere la mijloc, cu aceasta
 ordine, lasa cel mult continut vechi redundant — niciodata un gol.
 
+## Rezolvare finala (2026-09-13)
+
+Re-ingestia curata pentru toate cele 16 perechi (doc_id, sectiune) din
+tabelul de mai sus s-a terminat cu succes: 819 chunk-uri vechi sterse, 761
+noi indexate, cost total $0.05. Verificat direct: toate cele 16 sectiuni au
+acum exact numarul de chunk-uri asteptat de la re-parsarea curenta, toate cu
+`chunk_id` in formatul nou consistent — nici o dezaliniere ramasa.
+
+**A patra optimizare**: scriptul repeta necondiționat toate sectiunile la
+fiecare repornire, chiar si pe cele deja terminate cu succes — la a patra
+repornire, asta insemna sa refaca ore de munca deja corecta inainte sa
+ajunga la treaba noua. Adaugat `already_done()`: verifica local (fara apel
+LLM) daca sectiunea are deja exact numarul tinta de chunk-uri in formatul
+nou, si sare peste daca da. Rezultat: repornirea finala a durat 13 minute
+(doar cele 6 sectiuni ramase, nu toate cele 16), nu ore.
+
+**Recontrol pe tot corpusul** dupa remediere: cele 2440+146 chunk-uri
+initial afectate au scazut la 159 ramase — dar aproape toate (158/159) sunt
+in sectiuni orfane (`Item1`, `Item2`, `Item5`), ramasite dinainte de
+migrarea la taxonomia canonica, pe care `retrieve.py` nu le mai filtreaza
+niciodata (`PERSONA_SECTIONS`/`FALLBACK_SECTIONS` folosesc doar cele 6
+categorii canonice). Aceste chunk-uri sunt **inaccesibile la retrieval,
+indiferent de continutul lor** — repararea propozitiei lor de context nu ar
+schimba niciun comportament real al sistemului, deci nu a fost facuta.
+Bug-ul e rezolvat complet pentru tot ce conteaza functional; cele 158
+chunk-uri orfane raman ca o curatenie separata, de facut (sters, nu reparat)
+daca se decide vreodata.
+
 **A treia intrerupere, auto-provocata**: in timp ce job-ul de re-ingestie rula
 (cu ordinea deja corectata insert-first), am rulat `docker compose up -d
 --build frontend` pentru un update de design — si `api` a fost repornit
@@ -148,3 +176,11 @@ finalizare, nu doar pe baza codului de iesire raportat. A doua lectie:
 orice script de migratie care modifica date in productie ar trebui sa fie
 implicit rezistent la intrerupere (insert-first, delete-after, sau
 tranzactii atomice), nu doar "de obicei ruleaza pana la capat".
+
+## Independent verification — 2026-09-13
+
+The completed repair was checked against actual stored data, not the background-task notification. All 16 targeted document/section pairs have exactly the fresh parser's chunk counts and identical raw bodies (after removing the contextual prefix). The initial full-corpus audit found 9,189 identical IDs/texts in PostgreSQL and Qdrant; the final audit after NVIDIA FY2023 found 9,496 in each, without missing, orphaned or mismatched entries.
+
+Evidence: `eval/results/corpus-audit.json` and `eval/results/corpus-audit-final.json`. No additional Microsoft reingestion is required for these pairs. The last batch's 761 chunks / $0.0503 / 760 seconds are **not** totals for all remediation batches.
+
+The old contextual-prefix heuristic still flags 159 chunks: 158 in legacy Item categories excluded from canonical retrieval, and one NVIDIA risk-factor chunk. Inspection of that NVIDIA source shows an actual agreement with Microsoft; this is a detector false positive. Counts of name matches must not be described as counts of proven wrong-company attributions.

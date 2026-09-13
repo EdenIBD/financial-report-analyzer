@@ -14,6 +14,8 @@ inca). Aceste coloane raman NULL in eval_set — nu se inventeaza valori.
 
 import json
 import os
+from pathlib import Path
+from datetime import datetime, timezone
 
 import psycopg2
 from dotenv import load_dotenv
@@ -61,7 +63,11 @@ def main():
             "num_chunks": len(result.get("retrieved_chunks", [])),
             "answer": result.get("answer"),
         }
+        row["pipeline_result"] = result
         results.append(row)
+        output = Path("eval/results/golden-set-latest.json")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps({"run_at": datetime.now(timezone.utc).isoformat(), "results": results}, indent=2, ensure_ascii=False))
         insert_eval_row(conn, question, result.get("answer"))
 
         print(
@@ -130,6 +136,7 @@ def write_report(results, n, persona_correct, persona_accuracy, query_type_corre
         )
     lines.append("")
 
+    Path(REPORT_PATH).parent.mkdir(parents=True, exist_ok=True)
     with open(REPORT_PATH, "w") as f:
         f.write("\n".join(lines))
     print(f"\nScris {REPORT_PATH}")

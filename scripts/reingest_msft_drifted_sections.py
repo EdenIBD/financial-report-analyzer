@@ -25,6 +25,7 @@ import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointIdsList
 
+from src.ingestion.chunk import chunk_section
 from src.ingestion.parse import parse_filing
 from src.ingestion.pipeline import RAW_DIR, ingest_sections
 
@@ -71,6 +72,22 @@ def delete_stale_old_style_chunks(conn, qdrant: QdrantClient, doc_id: str, secti
     return len(stale_ids)
 
 
+def already_done(conn, doc_id: str, section: str, target_count: int) -> bool:
+    """True daca sectiunea are deja exact target_count chunk-uri in noul
+    format — evita re-rularea (costisitoare, un apel LLM+embed per chunk) a
+    unei sectiuni deja terminate cu succes intr-o rulare anterioara, oprita
+    de o intrerupere ulterioara pe alta sectiune. Fara asta, fiecare repornire
+    reface de la zero tot ce era deja corect, in ordine, inainte sa ajunga la
+    treaba noua — exact ce s-a intamplat la a patra repornire a acestui job."""
+    pattern = f"^{doc_id}_{section}_[0-9]+$"
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FROM chunks WHERE doc_id = %s AND section = %s AND chunk_id ~ %s",
+            (doc_id, section, pattern),
+        )
+        return cur.fetchone()[0] == target_count
+
+
 def main():
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     qdrant = QdrantClient(url=QDRANT_URL)
@@ -92,6 +109,11 @@ def main():
         fresh_sections = parse_filing(html, filing_type=filing_type)
 
         for section in sections_to_fix:
+            target_count = len(chunk_section(fresh_sections[section]))
+            if already_done(conn, doc_id, section, target_count):
+                print(f"--- {doc_id}/{section}: deja complet ({target_count} chunk-uri) — sar peste ---")
+                continue
+
             print(f"--- {doc_id}/{section}: re-ingerez (insert-first, safe la intrerupere) ---")
             count, cost = ingest_sections(
                 conn, qdrant, doc_id, ticker, fiscal_year, {section: fresh_sections[section]}

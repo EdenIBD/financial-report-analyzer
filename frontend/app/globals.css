@@ -50,3 +50,18 @@ body {
   text-transform: uppercase;
   color: var(--color-sidebar-muted);
 }
+
+/* Match the supplied standalone HTML: centered at 44%, 460px, 8% opacity. */
+.sidebar > :not(.eagle-watermark) { position: relative; z-index: 1; }
+.eagle-watermark {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  width: 460px;
+  max-width: none;
+  height: auto;
+  transform: translate(-50%, -50%);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}

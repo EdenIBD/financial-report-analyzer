@@ -7,7 +7,8 @@ CREATE TABLE filings (
     fiscal_year INT NOT NULL,
     filing_date DATE,
     accession_number VARCHAR,
-    source_url TEXT
+    source_url TEXT,
+    ingestion_status VARCHAR NOT NULL DEFAULT 'ready'
 );
 
 CREATE TABLE chunks (

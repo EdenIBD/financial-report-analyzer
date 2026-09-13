@@ -82,3 +82,7 @@ fix-ul; cele 2440 + 146 chunk-uri deja ingerate raman neschimbate pana la o
 decizie explicita de remediere (cost estimat: ~$0.37 in apeluri LLM, dar
 ~3 ore de rulare secventiala la ritmul observat de ~14 chunk-uri/minut — timpul,
 nu costul, e constrangerea reala).
+
+## Update — 2026-09-13
+
+Canonical-section remediation has been checked, including fresh parsing of all 16 drifted Microsoft sections and full PostgreSQL/Qdrant text equality. The detector's remaining 159 flags are not 159 verified errors: 158 are legacy Item-category chunks, while the canonical NVIDIA flag correctly mentions a Microsoft agreement found in its source body. See [[msft-parse-drift-during-remediation]] and [[evaluation-2026-09-13]]. Historical percentages on this page describe the pre-repair heuristic sample, not current retrieval accuracy.

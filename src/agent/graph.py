@@ -1,7 +1,3 @@
-"""Skeleton graph — structura e decisa; implementarea nodurilor individuale e
-separata (vezi src/agent/nodes/). classify si generate_answer raman
-NotImplementedError pana la clarificare (build-spec.md sectiunea 2)."""
-
 from langgraph.graph import StateGraph, START, END
 
 from src.agent.state import AgentState, QueryType
@@ -13,6 +9,8 @@ from src.agent.nodes.verify import verify_context, route_after_verify
 from src.retrieval.rerank import rerank
 
 def route_after_classify(state: AgentState) -> str:
+    if state.get("scope_blocked"):
+        return "generate_answer"
     if state["classification"].query_type == QueryType.COMPARISON:
         return "retrieve_multi"
     return "retrieve_single"
@@ -34,7 +32,7 @@ graph_builder.add_edge("classify", "check_entity_exists")
 graph_builder.add_conditional_edges(
     "check_entity_exists",
     route_after_classify,
-    {"retrieve_single": "retrieve_single", "retrieve_multi": "retrieve_multi"},
+    {"retrieve_single": "retrieve_single", "retrieve_multi": "retrieve_multi", "generate_answer": "generate_answer"},
 )
 graph_builder.add_edge("retrieve_single", "rerank")
 graph_builder.add_edge("retrieve_multi", "rerank")

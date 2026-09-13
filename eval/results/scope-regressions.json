@@ -1,0 +1,406 @@
+{
+  "run_at": "2026-09-13T10:42:29.109107+00:00",
+  "cases": [
+    {
+      "case": "nvidia_2023",
+      "question": "Check NVDA financial report from 2023 and summarize it",
+      "expected_companies": [
+        "NVDA"
+      ],
+      "expected_years": [
+        2023
+      ],
+      "expected_abstention": false,
+      "passed": true,
+      "result": {
+        "answer": "Based on the fiscal year 2023 financial report (for the year ended January 29, 2023), NVIDIA experienced a period of significant transition characterized by flat top-line growth and a substantial decline in profitability.\n\n### **Financial Performance Overview**\nNVIDIA reported total revenue of **$26,974 million**, remaining nearly unchanged from the previous year [NVDA_2023_10K_mdna_16]. However, the company’s bottom-line results faced significant downward pressure:\n*   **Net Income:** Fell 55% to $4,368 million, down from $9,752 million in fiscal year 2022 [NVDA_2023_10K_mdna_16].\n*   **Gross Margin:** Contracted by 8.0 percentage points to 56.9% [NVDA_2023_10K_mdna_16].\n*   **Earnings Per Share:** Diluted net income per share dropped 55% to $1.74 [NVDA_2023_10K_mdna_16].\n\n### **Drivers of Performance**\nThe overall performance was driven by a sharp divergence between the company's two primary reportable segments:\n*   **Compute & Networking:** This segment was a major growth engine, with revenue increasing **36%** to $15,068 million [NVDA_2023_10K_mdna_60].\n*   **Graphics:** This segment saw a significant downturn, with revenue declining **25%** to $11,906 million, which offset the gains in the networking business [NVDA_2023_10K_mdna_60].\n\n### **Operating Expenses and Costs**\nProfitability was further impacted by a **50% increase in operating expenses**, which rose to $11,132 million [NVDA_2023_10K_mdna_16]. Key factors driving this increase included:\n*   **R&D Investment:** Research and development spending increased to represent 27.2% of total revenue, up from 19.6% the prior year [NVDA_2023_10K_mdna_59].\n*   **Acquisition Termination Cost:** The company recorded a one-time cost related to an acquisition termination, which accounted for 5.0% of total revenue for the year [NVDA_2023_10K_mdna_59].\n\n### **Liquidity and Cash Flow**\nThe company's liquid assets saw a notable decrease. Total cash, cash equivalents, and marketable securities ended the year at **$13,296 million**, compared to $21,208 million at the end of the previous fiscal year [NVDA_2023_10K_mdna_77]. Net cash provided by operating activities also declined from $9,108 million to $5,641 million [NVDA_2023_10K_mdna_77].",
+        "persona": "investment_firm",
+        "query_type": "factual",
+        "sources": [
+          "NVDA_2023_10K_mdna_16",
+          "NVDA_2023_10K_mdna_59",
+          "NVDA_2023_10K_mdna_60",
+          "NVDA_2023_10K_mdna_41",
+          "NVDA_2023_10K_mdna_77",
+          "NVDA_2023_10K_mdna_56",
+          "NVDA_2023_10K_mdna_0",
+          "NVDA_2023_10K_mdna_57"
+        ],
+        "retrieved_chunks": [
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_16",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nFiscal Year 2023 Summary\nYear Ended January 29,2023January 30,2022Change($ in millions, except per share data)Revenue$26,974 $26,914 — %Gross margin56.9 %64.9 %Down 8.0 ptsOperating expenses$11,132 $7,434 Up 50%Income from operations$4,224 $10,041 Down 58%Net income$4,368 $9,752 Down 55%Net income per diluted share$1.74 $3.85 Down 55%",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.6668000221252441
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_59",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nYear Ended January 29,2023January 30,2022Revenue100.0 %100.0 %Cost of revenue43.1 35.1 Gross profit56.9 64.9 Operating expenses Research and development27.2 19.6 Sales, general and administrative9.1 8.0 Acquisition termination cost5.0 — Total operating expenses41.3 27.6 Income from operations15.6 37.3 Interest income1.0 0.1 Interest expense(1.0)(0.9)Other, net(0.1)0.4 Other income (expense), net(0.1)(0.4)Income before income tax15.5 36.9 Income tax expense (benefit)(0.7)0.7 Net income16.2 %36.2 %\nRevenue\nRevenue by Reportable Segments",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.5547000169754028
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_60",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nRevenue\nRevenue by Reportable Segments\nYear EndedJanuary 29,2023January 30,2022$Change%Change($ in millions)Compute & Networking$15,068 $11,046 $4,022 36 %Graphics11,906 15,868 (3,962)(25)%Total$26,974 $26,914 $60 — %",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.5419999957084656
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_41",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nProduct Sales Revenue",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4580000042915344
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_77",
+            "text": "This fragment is from filing NVDA_2023_10K, section \"mdna\".\n\nRefer to Note 14 of the Notes to the Consolidated Financial Statements in Part IV, Item 15 of this Annual Report on Form 10-K for additional information.\nLiquidity and Capital Resources\nJanuary 29,2023January 30,2022 (In millions)Cash and cash equivalents$3,389 $1,990 Marketable securities9,907 19,218 Cash, cash equivalents, and marketable securities$13,296 $21,208\nYear EndedJanuary 29,2023January 30,2022 (In millions)Net cash provided by operating activities$5,641 $9,108 Net cash provided by (used in) investing activities$7,375 $(9,830)Net cash provided by (used in) financing activities$(11,617)$1,865",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.450300008058548
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_56",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nResults of Operations",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4422999918460846
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_0",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nThe following discussion and analysis of our financial condition and results of operations should be read in conjunction with “Item 1A. Risk Factors”, our Consolidated Financial Statements and related Notes thereto, as well as other cautionary statements and risks described elsewhere in this Annual Report on Form 10-K, before deciding to purchase, hold or sell shares of our common stock.\nOverview\nOur Company and Our Businesses",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4336000084877014
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_57",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nA discussion regarding our financial condition and results of operations for fiscal year 2023 compared to fiscal year 2022 is presented below",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4092999994754791
+          }
+        ],
+        "latency_ms": 17246,
+        "cost_usd": 0.012323250000000001,
+        "langsmith_trace_id": "01a09a5b-6f7c-7412-9224-c2c732fb0558",
+        "status": "valid",
+        "ingested_entities": [],
+        "ingestion_errors": [],
+        "ingestion_details": [],
+        "reasoning_trace": [
+          "Classified as **investment_firm** / **factual** — The request seeks a high-level summary of a specific year's financial report to assess performance and strategy, which is typical for an investment firm's research.",
+          "Resolved scope: NVDA; fiscal years: [2023]",
+          "Searched mdna, financial_statements sections (investment_firm) — 8 candidate chunks found",
+          "Reranked to top 8 chunks via Vertex AI (top score 0.67)",
+          "Not enough high-confidence context — retrying with broader sections (attempt 1)",
+          "Searched risk_factors, mdna, market_risk, financial_statements sections (investment_firm) — 8 candidate chunks found",
+          "Reranked to top 8 chunks via Vertex AI (top score 0.67)",
+          "Not enough high-confidence context — retrying with broader sections (attempt 2)",
+          "Generated answer citing 8 source chunks"
+        ]
+      }
+    },
+    {
+      "case": "nvidia_2023_ro",
+      "question": "Rezumă raportul financiar Nvidia din 2023",
+      "expected_companies": [
+        "NVDA"
+      ],
+      "expected_years": [
+        2023
+      ],
+      "expected_abstention": false,
+      "passed": true,
+      "result": {
+        "answer": "În anul fiscal 2023 (încheiat la 29 ianuarie 2023), NVIDIA a înregistrat o performanță financiară mixtă, caracterizată printr-o stagnare a veniturilor totale și o scădere semnificativă a profitabilității, pe fondul unor condiții economice în schimbare rapidă [NVDA_2023_10K_mdna_16].\n\n**Indicatori Financiari Cheie:**\n*   **Venituri:** 26,97 miliarde USD, o valoare relativ constantă (flat) comparativ cu anul precedent [NVDA_2023_10K_mdna_16, NVDA_2023_10K_mdna_18].\n*   **Venit Net:** A scăzut cu 55%, ajungând la 4,37 miliarde USD [NVDA_2023_10K_mdna_16].\n*   **Marja Brută:** S-a redus de la 64,9% la 56,9% [NVDA_2023_10K_mdna_16].\n*   **Cheltuieli Operaționale:** Au crescut cu 50%, totalizând 11,13 miliarde USD, creștere influențată parțial de un cost de 5% reprezentând terminarea unei achiziții [NVDA_2023_10K_mdna_16, NVDA_2023_10K_mdna_59].\n\n**Performanța pe Segmente și Factori de Influență:**\n1.  **Data Center (Centru de Date):** A fost motorul principal de creștere, cu venituri în urcare cu 41% față de anul anterior [NVDA_2023_10K_mdna_18]. Această evoluție a fost susținută de cererea puternică din partea clienților de tip \"hyperscale\" și de parteneriatele cu furnizorii de servicii cloud (CSP) pentru noile oferte NVIDIA AI cloud [NVDA_2023_10K_mdna_18]. Segmentul de *Compute & Networking* a crescut per total cu 36% [NVDA_2023_10K_mdna_60].\n2.  **Gaming și Vizualizare Profesională:** Ambele segmente au înregistrat scăderi de 27% ale veniturilor [NVDA_2023_10K_mdna_25, NVDA_2023_10K_mdna_26]. Rezultatele au fost afectate negativ de schimbările economice care au dus la un exces de stocuri la partenerii de distribuție și la producătorii de echipamente originale (OEM) [NVDA_2023_10K_mdna_25, NVDA_2023_10K_mdna_26]. Segmentul general de *Graphics* a scăzut cu 25% [NVDA_2023_10K_mdna_60].\n\n**Perspective Strategice și Evoluție:**\nPentru a gestiona stocurile excedentare, NVIDIA a implementat programe de prețuri și a redus livrările de unități GPU către parteneri (\"undershipping\"), raportând progrese semnificative în stabilizarea nivelurilor de inventar la finalul anului fiscal [NVDA_2023_10K_mdna_25]. \n\nDin punct de vedere tehnologic, compania a continuat să inoveze prin lansarea arhitecturii GPU **Ada Lovelace** (seria RTX 40), a tehnologiei DLSS 3 și a platformelor de rețelistică de înaltă performanță precum **Spectrum-4** (400Gbps) și **Quantum-2** [NVDA_2023_10K_mdna_25, NVDA_2023_10K_mdna_26]. De asemenea, NVIDIA și-a extins prezența în cloud prin serviciul GeForce NOW Ultimate, oferind performanță de clasă RTX 4080 [NVDA_2023_10K_mdna_26].",
+        "persona": "investment_firm",
+        "query_type": "risk_analysis",
+        "sources": [
+          "NVDA_2023_10K_mdna_16",
+          "NVDA_2023_10K_mdna_18",
+          "NVDA_2023_10K_mdna_60",
+          "NVDA_2023_10K_mdna_59",
+          "NVDA_2023_10K_mdna_25",
+          "NVDA_2023_10K_mdna_56",
+          "NVDA_2023_10K_mdna_26",
+          "NVDA_2023_10K_mdna_57"
+        ],
+        "retrieved_chunks": [
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_16",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nFiscal Year 2023 Summary\nYear Ended January 29,2023January 30,2022Change($ in millions, except per share data)Revenue$26,974 $26,914 — %Gross margin56.9 %64.9 %Down 8.0 ptsOperating expenses$11,132 $7,434 Up 50%Income from operations$4,224 $10,041 Down 58%Net income$4,368 $9,752 Down 55%Net income per diluted share$1.74 $3.85 Down 55%",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.6743000149726868
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_18",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\n. Our platforms address four large markets where our expertise is critical: Data Center, Gaming, Professional Visualization, and Automotive.Revenue for fiscal year 2023 revenue was $26.97 billion, flat compared with a year ago.Data Center revenue was up 41% from a year ago led by strong growth from hyperscale customers and also reflects purchases made by several CSP partners to support multi-year cloud service agreements for our new NVIDIA AI cloud service offerings and our research and development activities",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.5040000081062317
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_60",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nRevenue\nRevenue by Reportable Segments\nYear EndedJanuary 29,2023January 30,2022$Change%Change($ in millions)Compute & Networking$15,068 $11,046 $4,022 36 %Graphics11,906 15,868 (3,962)(25)%Total$26,974 $26,914 $60 — %",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.49079999327659607
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_59",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nYear Ended January 29,2023January 30,2022Revenue100.0 %100.0 %Cost of revenue43.1 35.1 Gross profit56.9 64.9 Operating expenses Research and development27.2 19.6 Sales, general and administrative9.1 8.0 Acquisition termination cost5.0 — Total operating expenses41.3 27.6 Income from operations15.6 37.3 Interest income1.0 0.1 Interest expense(1.0)(0.9)Other, net(0.1)0.4 Other income (expense), net(0.1)(0.4)Income before income tax15.5 36.9 Income tax expense (benefit)(0.7)0.7 Net income16.2 %36.2 %\nRevenue\nRevenue by Reportable Segments",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4867999851703644
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_25",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\n. Additionally, we announced the NVIDIA Spectrum-4 end-to-end 400Gbps networking platform and began shipping Quantum-2 in December 2022. Gaming revenue for fiscal year 2023 was $9.07 billion, down 27% from fiscal year 2022. Gaming results were influenced by the rapid change in economic conditions causing excess inventory with our channel partners. We introduced pricing programs for our channel partners and started undershipping GPU supply to the partners so that we could lower inventory in the channel. As we exited fiscal year 2023, we have made meaningful progress in establishing lower inventory levels with our channel partners",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4401000142097473
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_56",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nResults of Operations",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.40380001068115234
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_26",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\n. In Gaming, we announced the new Ada Lovelace GPU architecture, and introduced the first products based on Ada, including the GeForce RTX 4090, RTX 4080, and RTX 4070 Ti desktop GPUs and laptop GPUs featured in over 170 laptop designs. We introduced NVIDIA DLSS 3 for over 50 games and applications. We brought GeForce RTX 4080-class performance to the GeForce NOW Ultimate membership tier.Professional Visualization revenue for fiscal year 2023 was $1.54 billion, down 27% from fiscal year 2022. Professional Visualization results were influenced by the rapid change in economic conditions causing excess inventory with our OEM partners",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.4016000032424927
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_57",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nA discussion regarding our financial condition and results of operations for fiscal year 2023 compared to fiscal year 2022 is presented below",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.36329999566078186
+          }
+        ],
+        "latency_ms": 17815,
+        "cost_usd": 0.01345725,
+        "langsmith_trace_id": "01a09a5b-b2e6-73f2-9e3a-1fd3813e0f3f",
+        "status": "valid",
+        "ingested_entities": [],
+        "ingestion_errors": [],
+        "ingestion_details": [],
+        "reasoning_trace": [
+          "Classified as **investment_firm** / **risk_analysis** — A request for a report summary involves synthesizing financial results and strategic outlook, which is a key activity for investment firms performing performance and risk analysis.",
+          "Resolved scope: NVDA; fiscal years: [2023]",
+          "Searched mdna, financial_statements sections (investment_firm) — 8 candidate chunks found",
+          "Reranked to top 8 chunks via Vertex AI (top score 0.67)",
+          "Not enough high-confidence context — retrying with broader sections (attempt 1)",
+          "Searched risk_factors, mdna, market_risk, financial_statements sections (investment_firm) — 8 candidate chunks found",
+          "Reranked to top 8 chunks via Vertex AI (top score 0.67)",
+          "Not enough high-confidence context — retrying with broader sections (attempt 2)",
+          "Generated answer citing 8 source chunks"
+        ]
+      }
+    },
+    {
+      "case": "taco_bell_unresolved",
+      "question": "Check Taco Bell Funding, LLC financial report from 2023 and summarize it",
+      "expected_companies": [],
+      "expected_years": [
+        2023
+      ],
+      "expected_abstention": true,
+      "passed": true,
+      "result": {
+        "answer": "I could not obtain evidence for the requested company and fiscal year. I cannot provide a supported summary from the available corpus. See the ingestion details.",
+        "persona": "investment_firm",
+        "query_type": "factual",
+        "sources": [],
+        "retrieved_chunks": [],
+        "latency_ms": 11522,
+        "cost_usd": 0.008514,
+        "langsmith_trace_id": "01a09a5b-f88a-7ba3-bb34-dd33abb0db1c",
+        "status": "abstained",
+        "ingested_entities": [],
+        "ingestion_errors": [
+          "Taco Bell Funding, LLC: could not resolve an exact registrant in the SEC ticker catalog. Coverage excludes some registrants without tickers; no other company was substituted."
+        ],
+        "ingestion_details": [],
+        "reasoning_trace": [
+          "Classified as **investment_firm** / **factual** — The user is seeking a summary of a single year's financial report to understand performance and strategy, which is a common factual request for an investment firm.",
+          "Resolved scope: general corpus; fiscal years: [2023]",
+          "Requested evidence unavailable — no unrelated-company/year fallback",
+          "Abstained because the requested evidence is unavailable"
+        ]
+      }
+    },
+    {
+      "case": "mixed_companies",
+      "question": "Compare Apple and Nvidia financial performance in 2023",
+      "expected_companies": [
+        "AAPL",
+        "NVDA"
+      ],
+      "expected_years": [
+        2023
+      ],
+      "expected_abstention": false,
+      "passed": true,
+      "result": {
+        "answer": "In fiscal year 2023, Apple and Nvidia navigated distinct financial paths, with Apple maintaining massive scale despite macroeconomic pressures and Nvidia facing a significant contraction in profitability despite steady top-line revenue.\n\n### Apple: Resilient Scale Amid Currency Headwinds\nApple reported total net sales of $383.3 billion for 2023, representing a 3% (or $11.0 billion) decrease compared to the previous year [AAPL_2023_Item7_2]. Management noted that the entire year-over-year decrease was driven by the weakness of foreign currencies relative to the U.S. dollar [AAPL_2023_Item7_2]. \n\nPerformance drivers for Apple included:\n*   **Product Mix:** Lower net sales of Mac and iPhone products were the primary contributors to the decline, though these were partially offset by growth in the **Services** segment [AAPL_2023_Item7_2].\n*   **Regional Growth:** In the \"Rest of Asia Pacific\" region, net sales grew by 1%, bolstered by iPhone and Services performance, even as Mac and iPad sales softened [AAPL_2023_Item7_10].\n*   **Profitability:** Despite the slight revenue dip, Apple’s net income remained robust at approximately $97.0 billion [AAPL_2023_Item7_2, AAPL_2023_Item8_4]. Interestingly, its diluted earnings per share (EPS) actually increased slightly to $6.13 from $6.11 in 2022, aided by a reduction in the weighted-average shares outstanding [AAPL_2023_Item8_4, AAPL_2023_Item8_36].\n\n### Nvidia: Transition and Margin Pressure\nNvidia’s fiscal year 2023 was characterized by a dramatic shift in its internal business segments and a sharp decline in net earnings. While total revenue remained virtually flat at $26.97 billion, the company's net income plummeted 55% to $4.37 billion [NVDA_2023_10K_mdna_16].\n\nKey performance drivers for Nvidia included:\n*   **Segment Divergence:** Nvidia experienced a tale of two businesses. The **Compute & Networking** segment grew significantly by 36% to $15.1 billion, while the **Graphics** segment fell by 25% to $11.9 billion [NVDA_2023_10K_mdna_60].\n*   **Operational Costs:** Profitability was squeezed by a 50% surge in operating expenses, which rose to $11.1 billion [NVDA_2023_10K_mdna_16]. This included a notable \"acquisition termination cost\" that accounted for 5.0% of revenue [NVDA_2023_10K_mdna_59].\n*   **Margin Contraction:** Gross margin dropped 8.0 percentage points to 56.9%, reflecting the challenging environment for its legacy Graphics business and the costs of internal transitions [NVDA_2023_10K_mdna_16].\n\n### Performance Comparison Summary\n| Metric | Apple (2023) | Nvidia (FY 2023) |\n| :--- | :--- | :--- |\n| **Total Revenue** | $383.3 Billion [AAPL_2023_Item7_2] | $26.97 Billion [NVDA_2023_10K_mdna_16] |\n| **Revenue Growth** | -3% [AAPL_2023_Item7_2] | Flat (—%) [NVDA_2023_10K_mdna_16] |\n| **Net Income** | $97.0 Billion [AAPL_2023_Item7_2] | $4.37 Billion [NVDA_2023_10K_mdna_16] |\n| **Net Income Growth** | ~ -2.8% [AAPL_2023_Item8_4] | -55% [NVDA_2023_10K_mdna_16] |\n\n### Forward-Looking Perspectives\nApple continues to lean on a strategy of frequent new product and service offerings to drive growth across its ecosystem [AAPL_2023_Item7_2]. Meanwhile, Nvidia’s performance suggests a pivot toward its Compute & Networking segment as its primary growth engine, even as it manages the volatility of its Graphics division and the fallout from terminated acquisitions [NVDA_2023_10K_mdna_59, NVDA_2023_10K_mdna_60].",
+        "persona": "investment_firm",
+        "query_type": "comparison",
+        "sources": [
+          "AAPL_2023_Item7_2",
+          "NVDA_2023_10K_mdna_16",
+          "AAPL_2023_Item8_4",
+          "AAPL_2023_Item8_36",
+          "NVDA_2023_10K_mdna_59",
+          "AAPL_2023_Item7_10",
+          "NVDA_2023_10K_mdna_60",
+          "NVDA_2023_10K_mdna_57"
+        ],
+        "retrieved_chunks": [
+          {
+            "chunk_id": "AAPL_2023_Item7_2",
+            "text": "Acest fragment provine din raportul financiar anual (Form 10-K) pentru anul 2023 al companiei **Apple Inc.** și este extras din secțiunea **Item 7** (*Management’s Discussion and Analysis of Financial Condition and Results of Operations*).\n\nThe Company’s total net sales were $383.3 billion and net income was $97.0 billion during 2023.The Company’s total net sales decreased 3% or $11.0 billion during 2023 compared to 2022. The weakness in foreign currencies relative to the U.S. dollar accounted for more than the entire year-over-year decrease in total net sales, which consisted primarily of lower net sales of Mac and iPhone, partially offset by higher net sales of Services.The Company announces new product, service and software offerings at various times during the year",
+            "company": "AAPL",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.19859999418258667
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_16",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nFiscal Year 2023 Summary\nYear Ended January 29,2023January 30,2022Change($ in millions, except per share data)Revenue$26,974 $26,914 — %Gross margin56.9 %64.9 %Down 8.0 ptsOperating expenses$11,132 $7,434 Up 50%Income from operations$4,224 $10,041 Down 58%Net income$4,368 $9,752 Down 55%Net income per diluted share$1.74 $3.85 Down 55%",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.193900004029274
+          },
+          {
+            "chunk_id": "AAPL_2023_Item8_4",
+            "text": "Acest fragment provine din raportul financiar anual (Form 10-K) al companiei **Apple Inc.** pentru anul **2023** (sau un an apropiat). El face parte din **Item 8** (Situațiile financiare consolidate – Contul de profit și pierdere).\n\nbefore provision for income taxes113,736 119,103 109,207 Provision for income taxes16,741 19,300 14,527 Net income$96,995 $99,803 $94,680 Earnings per share:Basic$6.16 $6.15 $5.67 Diluted$6.13 $6.11 $5.61 Shares used in computing earnings per share:Basic15,744,231 16,215,963 16,701,272 Diluted15,812,547 16,325,819 16,864,919",
+            "company": "AAPL",
+            "fiscal_year": 2023,
+            "section": "financial_statements",
+            "score": 0.18690000474452972
+          },
+          {
+            "chunk_id": "AAPL_2023_Item8_36",
+            "text": "This fragment is from filing \"AAPL_2023\", section \"financial_statements\".\n\nNote 3 – Earnings Per Share\nThe following table shows the computation of basic and diluted earnings per share for 2023, 2022 and 2021 (net income in millions and shares in thousands):\n202320222021Numerator:Net income$96,995 $99,803 $94,680 Denominator:Weighted-average basic shares outstanding15,744,231 16,215,963 16,701,272 Effect of dilutive share-based awards68,316 109,856 163,647 Weighted-average diluted shares15,812,547 16,325,819 16,864,919 Basic earnings per share$6.16 $6.15 $5.67 Diluted earnings per share$6.13 $6.11 $5.61",
+            "company": "AAPL",
+            "fiscal_year": 2023,
+            "section": "financial_statements",
+            "score": 0.14560000598430634
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_59",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nYear Ended January 29,2023January 30,2022Revenue100.0 %100.0 %Cost of revenue43.1 35.1 Gross profit56.9 64.9 Operating expenses Research and development27.2 19.6 Sales, general and administrative9.1 8.0 Acquisition termination cost5.0 — Total operating expenses41.3 27.6 Income from operations15.6 37.3 Interest income1.0 0.1 Interest expense(1.0)(0.9)Other, net(0.1)0.4 Other income (expense), net(0.1)(0.4)Income before income tax15.5 36.9 Income tax expense (benefit)(0.7)0.7 Net income16.2 %36.2 %\nRevenue\nRevenue by Reportable Segments",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.14409999549388885
+          },
+          {
+            "chunk_id": "AAPL_2023_Item7_10",
+            "text": "Acest fragment face parte din **Raportul Anual (Form 10-K) pentru anul 2023** al companiei **Apple Inc.** (sau un alt gigant tehnologic cu structură similară), fiind extras din **Item 7 (Management's Discussion and Analysis of Financial Condition and Results of Operations)**. \n\nEl se situează în secțiunea dedicată analizei financiare pe regiuni geografice a vânzărilor nete.\n\nRest of Asia Pacific\nRest of Asia Pacific net sales increased 1% or $240 million during 2023 compared to 2022. The weakness in foreign currencies relative to the U.S. dollar had a significantly unfavorable year-over-year impact on Rest of Asia Pacific net sales. The net sales increase consisted of higher net sales of iPhone and Services, partially offset by lower net sales of Mac and iPad.\nProducts and Services Performance\nThe following table shows net sales by category for 2023, 2022 and 2021 (dollars in millions):",
+            "company": "AAPL",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.1356000006198883
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_60",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nRevenue\nRevenue by Reportable Segments\nYear EndedJanuary 29,2023January 30,2022$Change%Change($ in millions)Compute & Networking$15,068 $11,046 $4,022 36 %Graphics11,906 15,868 (3,962)(25)%Total$26,974 $26,914 $60 — %",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.11270000040531158
+          },
+          {
+            "chunk_id": "NVDA_2023_10K_mdna_57",
+            "text": "This fragment is from filing \"NVDA_2023_10K\", section \"mdna\".\n\nA discussion regarding our financial condition and results of operations for fiscal year 2023 compared to fiscal year 2022 is presented below",
+            "company": "NVDA",
+            "fiscal_year": 2023,
+            "section": "mdna",
+            "score": 0.1096000000834465
+          }
+        ],
+        "latency_ms": 15728,
+        "cost_usd": 0.012857249999999999,
+        "langsmith_trace_id": "01a09a5c-2592-77c0-9185-8437225cd6da",
+        "status": "valid",
+        "ingested_entities": [],
+        "ingestion_errors": [],
+        "ingestion_details": [],
+        "reasoning_trace": [
+          "Classified as **investment_firm** / **comparison** — The user is asking to compare the financial results of two different companies for the same year, which is a typical task for an investment analyst evaluating performance across a sector.",
+          "Resolved scope: AAPL, NVDA; fiscal years: [2023]",
+          "Comparing across AAPL, NVDA — 10 candidate chunks found",
+          "Reranked to top 8 chunks via Vertex AI (top score 0.20)",
+          "Not enough high-confidence context — retrying with broader sections (attempt 1)",
+          "Comparing across AAPL, NVDA — 10 candidate chunks found",
+          "Reranked to top 8 chunks via Vertex AI (top score 0.20)",
+          "Not enough high-confidence context — retrying with broader sections (attempt 2)",
+          "Generated answer citing 8 source chunks"
+        ]
+      }
+    },
+    {
+      "case": "missing_year",
+      "question": "Summarize Nvidia fiscal year 2099 annual report",
+      "expected_companies": [
+        "NVDA"
+      ],
+      "expected_years": [
+        2099
+      ],
+      "expected_abstention": true,
+      "passed": true,
+      "result": {
+        "answer": "I could not obtain evidence for the requested company and fiscal year. I cannot provide a supported summary from the available corpus. See the ingestion details.",
+        "persona": "investment_firm",
+        "query_type": "risk_analysis",
+        "sources": [],
+        "retrieved_chunks": [],
+        "latency_ms": 8030,
+        "cost_usd": 0.0031964999999999997,
+        "langsmith_trace_id": "01a09a5c-630d-78d0-8795-1e70aeb56dc3",
+        "status": "abstained",
+        "ingested_entities": [],
+        "ingestion_errors": [
+          "NVDA 10-K FY2099: no verified 10-K for fiscal year 2099 found on SEC EDGAR for CIK 0001045810"
+        ],
+        "ingestion_details": [],
+        "reasoning_trace": [
+          "Classified as **investment_firm** / **risk_analysis** — Summarizing an entire annual report involves synthesizing performance, strategy, and outlook, which requires interpretation beyond simple fact retrieval.",
+          "Missing NVDA 10-K FY2099 — fetching from SEC EDGAR",
+          "Resolved scope: NVDA; fiscal years: [2099]",
+          "Requested evidence unavailable — no unrelated-company/year fallback",
+          "Abstained because the requested evidence is unavailable"
+        ]
+      }
+    }
+  ]
+}

@@ -29,6 +29,11 @@ class RetrievedChunk(TypedDict):
 
 class AgentState(TypedDict):
     raw_query: str
+    requested_tickers: List[str]
+    requested_years: List[int]
+    scope_doc_ids: List[str]
+    scope_blocked: bool
+    abstained: bool
     classification: Optional[QueryClassification]
     retrieved_chunks: List[RetrievedChunk]
     retry_count: int

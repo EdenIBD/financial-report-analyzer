@@ -1,0 +1,1 @@
+ALTER TABLE filings ADD COLUMN IF NOT EXISTS ingestion_status VARCHAR NOT NULL DEFAULT 'ready';

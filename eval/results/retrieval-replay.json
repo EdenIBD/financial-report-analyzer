@@ -1,0 +1,314 @@
+{
+  "run_at": "2026-09-13T10:41:27.625879+00:00",
+  "hits": 13,
+  "n": 17,
+  "mrr": 0.34803921568627455,
+  "cases": [
+    {
+      "chunk_id": "AAPL_2023_Item1_0",
+      "section": "Item1",
+      "question": "On which day of the year does the Company's fiscal year end?",
+      "fact": "The Company\u2019s fiscal year ends on the last Saturday of September.",
+      "retrieved_ids": [
+        "AAPL_2025_Item8_21",
+        "AAPL_2020_Item8_23",
+        "AAPL_2022_Item8_22",
+        "AAPL_2024_Item8_21",
+        "AAPL_2023_Item8_21",
+        "AAPL_2023_Item7_1",
+        "AAPL_2021_Item8_23",
+        "AAPL_2023_Item7_0"
+      ],
+      "hit": false,
+      "reciprocal_rank": 0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item1_1",
+      "section": "Item1",
+      "question": "What operating system does the iPad line of tablets use?",
+      "fact": "The iPad is a line of multipurpose tablets based on the iPadOS operating system.",
+      "retrieved_ids": [
+        "AAPL_2025_Item1_1",
+        "AAPL_2023_Item1_1",
+        "AAPL_2024_Item1_1",
+        "AAPL_2021_Item1_2",
+        "AAPL_2020_Item1_2",
+        "AAPL_2022_Item1_1",
+        "AAPL_2022_Item1_0",
+        "AAPL_2020_Item1_1"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "chunk_id": "AAPL_2023_Item1A_0",
+      "section": "Item1A",
+      "question": "Can the Company's financial condition be affected by factors that are currently unknown?",
+      "fact": "The Company\u2019s business, reputation, results of operations, financial condition and stock price can be affected by various factors, including those that are currently unknown.",
+      "retrieved_ids": [
+        "AAPL_2020_Item7_65",
+        "AAPL_2025_Item7_35",
+        "AAPL_2020_Item1A_1",
+        "AAPL_2024_Item1A_0",
+        "AAPL_2020_Item1A_80",
+        "AAPL_2023_Item1A_0",
+        "AAPL_2021_Item8_128",
+        "AAPL_2022_Item1A_0"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.16666666666666666
+    },
+    {
+      "chunk_id": "AAPL_2023_Item1A_1",
+      "section": "Item1A",
+      "question": "Why should investors not rely on past financial performance when predicting future results?",
+      "fact": "Past financial performance should not be considered a reliable indicator of future performance.",
+      "retrieved_ids": [
+        "NVDA_2026_10K_risk_factors_136",
+        "NVDA_2023_10K_risk_factors_119",
+        "TSLA_2025_10K_risk_factors_177",
+        "AAPL_2022_Item1A_1",
+        "GOOGL_2025_Item7_48",
+        "AAPL_2021_Item1A_1",
+        "AAPL_2020_Item1A_3",
+        "AAPL_2023_Item1A_1"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.125
+    },
+    {
+      "chunk_id": "AAPL_2023_Item2_0",
+      "section": "Item2",
+      "question": "In which city and state is the Company\u2019s headquarters located?",
+      "fact": "The Company\u2019s headquarters is located in Cupertino, California.",
+      "retrieved_ids": [
+        "AAPL_2023_Item2_0",
+        "NVDA_2026_10K_mdna_2",
+        "AAPL_2024_Item2_0",
+        "GOOGL_2023_Item2_0",
+        "AAPL_2022_Item2_0",
+        "GOOGL_2024_Item2_0",
+        "GOOGL_2025_Item2_0",
+        "AAPL_2025_Item2_0"
+      ],
+      "hit": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item3_0",
+      "section": "Item3",
+      "question": "Care este numele companiei men\u021bionate \u00een fragmentul furnizat?",
+      "fact": "Epic Games este numele companiei men\u021bionate \u00een text.",
+      "retrieved_ids": [
+        "MSFT_2025_Item1_74",
+        "MSFT_2026_Item1_4",
+        "MSFT_2023_Item1_8",
+        "MSFT_2023_Item7_0",
+        "GOOGL_2023_Item8_180",
+        "MSFT_2024_Item1_36",
+        "GOOGL_2024_Item1_73",
+        "AAPL_2021_Item8_85"
+      ],
+      "hit": false,
+      "reciprocal_rank": 0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item3_1",
+      "section": "Item3",
+      "question": "On what date did the District Court rule in favor of the Company on nine out of ten counts in Epic's lawsuit?",
+      "fact": "On September 10, 2021, the District Court ruled in favor of the Company with respect to nine out of the ten counts included in Epic\u2019s claim.",
+      "retrieved_ids": [
+        "AAPL_2022_Item3_1",
+        "AAPL_2021_Item3_3",
+        "AAPL_2023_Item3_1",
+        "AAPL_2022_Item3_2",
+        "AAPL_2023_Item3_2",
+        "AAPL_2024_Item3_8",
+        "AAPL_2021_Item3_4",
+        "AAPL_2025_Item3_8"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "chunk_id": "AAPL_2023_Item5_0",
+      "section": "Item5",
+      "question": "How many shareholders of record were there as of October 20, 2023?",
+      "fact": "As of October 20, 2023, there were 23,763 shareholders of record.",
+      "retrieved_ids": [
+        "AAPL_2023_Item5_0",
+        "MSFT_2023_Item5_0",
+        "GOOGL_2023_Item5_1",
+        "MSFT_2024_Item5_0",
+        "MSFT_2025_Item5_0",
+        "AAPL_2022_Item5_0",
+        "GOOGL_2024_Item5_1",
+        "MSFT_2026_Item5_0"
+      ],
+      "hit": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item5_1",
+      "section": "Item5",
+      "question": "Care a fost pre\u021bul mediu pl\u0103tit pe ac\u021biune pentru r\u0103scump\u0103rarea de ac\u021biuni \u00een perioada 2 iulie 2023 - 5 august 2023?",
+      "fact": "\u00centre 2 iulie 2023 \u0219i 5 august 2023, pre\u021bul mediu pl\u0103tit pe ac\u021biune pentru r\u0103scump\u0103rarea de ac\u021biuni proprii a fost de 191,62$.",
+      "retrieved_ids": [
+        "MSFT_2023_Item5_1",
+        "AAPL_2023_Item5_1",
+        "AAPL_2024_Item5_1",
+        "MSFT_2025_Item5_1",
+        "AAPL_2025_Item5_1",
+        "AAPL_2023_Item5_3",
+        "MSFT_2026_Item5_1",
+        "AAPL_2023_Item5_4"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "chunk_id": "AAPL_2023_Item7_0",
+      "section": "Item7",
+      "question": "Where can the discussion of 2021 financial items and the comparisons between 2022 and 2021 be found?",
+      "fact": "The Company\u2019s Annual Report on Form 10-K for the fiscal year ended September 24, 2022, contains the discussion of 2021 items and year-to-year comparisons between 2022 and 2021.",
+      "retrieved_ids": [
+        "AAPL_2022_Item7_0",
+        "MSFT_2023_Item7_2",
+        "AAPL_2021_Item7_0",
+        "NVDA_2023_10K_mdna_58",
+        "AAPL_2024_Item7_0",
+        "AAPL_2023_Item7_0",
+        "MSFT_2026_mdna_2",
+        "AAPL_2025_Item7_0"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.16666666666666666
+    },
+    {
+      "chunk_id": "AAPL_2023_Item7_1",
+      "section": "Item7",
+      "question": "On which day of the week and month does the Company\u2019s fiscal year end?",
+      "fact": "The Company\u2019s fiscal year ends on the last Saturday of September.",
+      "retrieved_ids": [
+        "AAPL_2025_Item8_21",
+        "AAPL_2024_Item8_21",
+        "AAPL_2020_Item8_23",
+        "AAPL_2022_Item8_22",
+        "AAPL_2023_Item8_21",
+        "AAPL_2023_Item7_1",
+        "AAPL_2021_Item8_23",
+        "AAPL_2024_Item7_2"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.16666666666666666
+    },
+    {
+      "chunk_id": "AAPL_2023_Item7A_0",
+      "section": "Item7A",
+      "question": "What two types of economic risks is the Company exposed to?",
+      "fact": "The Company is exposed to economic risk from interest rates and foreign exchange rates.",
+      "retrieved_ids": [
+        "AAPL_2023_Item7A_0",
+        "AAPL_2024_Item7A_0",
+        "AAPL_2021_Item1A_13",
+        "AAPL_2022_Item1A_4",
+        "AAPL_2020_Item1A_14",
+        "AAPL_2020_Item1A_12",
+        "AAPL_2025_Item7A_0",
+        "AAPL_2021_Item1A_11"
+      ],
+      "hit": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item7A_1",
+      "section": "Item7A",
+      "question": "What effect do interest rate increases have on the Company\u2019s term debt interest expense?",
+      "fact": "Increases in interest rates will increase the interest expense on the Company\u2019s term debt.",
+      "retrieved_ids": [
+        "AAPL_2022_Item7A_8",
+        "AAPL_2024_Item7A_1",
+        "AAPL_2023_Item7A_1",
+        "AAPL_2021_Item7A_8",
+        "AAPL_2025_Item7A_1",
+        "AAPL_2020_Item7A_8",
+        "AAPL_2023_Item7A_2",
+        "AAPL_2025_Item7A_3"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "chunk_id": "AAPL_2023_Item8_0",
+      "section": "Item8",
+      "question": "As of which two dates are the Consolidated Balance Sheets provided?",
+      "fact": "The Consolidated Balance Sheets are provided for the dates of September 30, 2023, and September 24, 2022.",
+      "retrieved_ids": [
+        "GOOGL_2025_Item8_26",
+        "AAPL_2020_Item8_8",
+        "AAPL_2023_Item8_8",
+        "AAPL_2024_Item8_8",
+        "AAPL_2021_Item8_8",
+        "AAPL_2022_Item8_8",
+        "TSLA_2025_10K_financial_statements_34",
+        "MSFT_2023_financial_statements_243"
+      ],
+      "hit": false,
+      "reciprocal_rank": 0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item8_1",
+      "section": "Item8",
+      "question": "Which date is listed in the text following September 24, 2022?",
+      "fact": "The date September 25, 2021 is mentioned in the text.",
+      "retrieved_ids": [
+        "AAPL_2022_Item8_142",
+        "AAPL_2023_Item8_1",
+        "AAPL_2023_Item8_123",
+        "AAPL_2023_Item8_56",
+        "MSFT_2025_financial_statements_185",
+        "AAPL_2022_Item8_101",
+        "MSFT_2024_financial_statements_196",
+        "AAPL_2022_Item8_91"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "chunk_id": "AAPL_2023_Item9A_0",
+      "section": "Item9A",
+      "question": "What is the subject of the evaluation described in the text?",
+      "fact": "The text refers to the Evaluation of Disclosure Controls and Procedures.",
+      "retrieved_ids": [
+        "AAPL_2024_Item8_113",
+        "AAPL_2025_Item8_115",
+        "TSLA_2025_10K_controls_procedures_0",
+        "AAPL_2024_Item9A_0",
+        "AAPL_2025_Item9A_0",
+        "TSLA_2025_10K_controls_procedures_8",
+        "MSFT_2024_financial_statements_264",
+        "MSFT_2023_financial_statements_256"
+      ],
+      "hit": false,
+      "reciprocal_rank": 0
+    },
+    {
+      "chunk_id": "AAPL_2023_Item9A_1",
+      "section": "Item9A",
+      "question": "As of what date were the Company\u2019s disclosure controls and procedures concluded to be effective?",
+      "fact": "The Company\u2019s disclosure controls and procedures were effective as of September 30, 2023.",
+      "retrieved_ids": [
+        "AAPL_2025_Item9A_1",
+        "NVDA_2023_10K_controls_procedures_0",
+        "TSLA_2025_10K_controls_procedures_2",
+        "MSFT_2026_controls_procedures_1",
+        "MSFT_2021_Item9A_0",
+        "MSFT_2025_controls_procedures_1",
+        "AAPL_2020_Item9A_1",
+        "AAPL_2023_Item9A_1"
+      ],
+      "hit": true,
+      "reciprocal_rank": 0.125
+    }
+  ]
+}

@@ -80,84 +80,71 @@ def test_resolve_company_matches_period_inside_name(_mock_index):
     assert resolve_company("Amazon.com Inc")["ticker"] == "AMZN"
 
 
-def test_check_entity_exists_survives_tier2_llm_failure():
-    # Treapta 2 ruleaza la orice intrebare fara o companie deja in corpus, nu
-    # doar cand chiar exista una noua — o eroare tranzitorie aici (rate
-    # limit, retea) nu trebuie sa omoare tot query-ul.
-    with patch("src.agent.nodes.check_entity.extract_entities", return_value=[]), patch(
-        "src.agent.nodes.check_entity.resolve_unknown_companies", side_effect=RuntimeError("429")
-    ), patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"]):
-        state = check_entity_exists(_state("What are common risk factors in tech 10-Ks?"))
-
-    assert state["ingested_entities"] == []
-    assert any("Could not check for an unlisted company" in step for step in state["trace"])
+def test_resolution_failure_blocks_unrelated_corpus():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', side_effect=RuntimeError('429')):
+        state = check_entity_exists(_state('Nvidia 2023'))
+    assert state['scope_blocked']
+    assert state['scope_doc_ids'] == []
+    assert state['ingestion_errors']
 
 
-@patch("src.agent.nodes.check_entity.ingest_company")
-@patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"])
-@patch("src.agent.nodes.check_entity.extract_entities", return_value=["AAPL"])
-def test_known_company_does_not_trigger_ingestion(_extract, _known, mock_ingest):
-    state = check_entity_exists(_state("Ce spune Apple despre lichiditate?"))
-
-    mock_ingest.assert_not_called()
-    assert state["ingested_entities"] == []
-    assert state["ingestion_errors"] == []
-
-
-@patch("src.agent.nodes.check_entity.ingest_company", side_effect=lambda t, *a, **k: _summary(t))
-@patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"])
-@patch("src.agent.nodes.check_entity.extract_entities", return_value=["NVDA"])
-def test_unknown_company_triggers_one_ingestion(_extract, _known, mock_ingest):
-    state = check_entity_exists(_state("Ce spune Nvidia despre risc?"))
-
-    assert mock_ingest.call_count == 1
-    assert state["ingested_entities"] == ["NVDA"]
-    assert state["ingestion_count"] == 1
-    assert state["cost_usd"] == 0.05  # costul ingestiei intra in cost_usd
-    assert any("Indexed NVDA" in step for step in state["trace"])
-    assert state["ingestion_details"] == [
-        {"ticker": "NVDA", "company": "NVDA Corp", "fiscal_year": 2025, "filing_type": "10-K", "chunks": 120}
-    ]
+def test_existing_company_missing_year_triggers_exact_year_ingestion():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', return_value=(['NVDA'], .001, [])), \
+         patch('src.agent.nodes.check_entity.available_filings', side_effect=[[], ['NVDA_2023_10K']]), \
+         patch('src.agent.nodes.check_entity.ingest_company', return_value=_summary('NVDA')) as ingest:
+        state = check_entity_exists(_state('Check NVDA financial report from 2023'))
+    ingest.assert_called_once_with('NVDA', '10-K', 1, fiscal_year=2023)
+    assert state['scope_doc_ids'] == ['NVDA_2023_10K']
+    assert state['requested_years'] == [2023]
+    assert not state['scope_blocked']
 
 
-@patch("src.agent.nodes.check_entity.ingest_company", side_effect=lambda t, *a, **k: _summary(t))
-@patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"])
-@patch("src.agent.nodes.check_entity.extract_entities", return_value=["NVDA", "TSLA"])
-def test_two_unknown_companies_respect_max_ingestions(_extract, _known, mock_ingest):
-    state = check_entity_exists(_state("Compara Nvidia cu Tesla"))
-
-    assert mock_ingest.call_count == MAX_INGESTIONS_PER_QUERY
-    assert state["ingested_entities"] == ["NVDA"]
-    assert any("ingestion limit reached" in e for e in state["ingestion_errors"])
+def test_known_and_unknown_companies_are_both_checked():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', return_value=(['AAPL','NVDA'], .001, [])), \
+         patch('src.agent.nodes.check_entity.available_filings', side_effect=[['AAPL_2023'], [], ['NVDA_2023_10K']]), \
+         patch('src.agent.nodes.check_entity.ingest_company', return_value=_summary('NVDA')) as ingest:
+        state = check_entity_exists(_state('Compare Apple and Nvidia 2023'))
+    assert ingest.call_count == 1
+    assert state['scope_doc_ids'] == ['AAPL_2023','NVDA_2023_10K']
 
 
-@patch("src.agent.nodes.check_entity.ingest_company", side_effect=RuntimeError("EDGAR 429"))
-@patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"])
-@patch("src.agent.nodes.check_entity.extract_entities", return_value=["NVDA"])
-def test_ingestion_failure_becomes_error_not_exception(_extract, _known, _mock_ingest):
-    # un esec de ingestie nu trebuie sa opreasca query-ul: raspunsul se
-    # genereaza in continuare din corpusul existent.
-    state = check_entity_exists(_state("Ce spune Nvidia despre risc?"))
-
-    assert state["ingested_entities"] == []
-    assert state["ingestion_errors"] == ["NVDA: EDGAR 429"]
+def test_complete_filing_does_not_trigger_ingestion():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', return_value=(['AAPL'], 0, [])), \
+         patch('src.agent.nodes.check_entity.available_filings', return_value=['AAPL_2023']), \
+         patch('src.agent.nodes.check_entity.ingest_company') as ingest:
+        state = check_entity_exists(_state('Apple 2023'))
+    ingest.assert_not_called()
+    assert not state['scope_blocked']
 
 
-@patch("src.agent.nodes.check_entity.resolve_unknown_companies", return_value=(["NVDA"], 0.001))
-@patch("src.agent.nodes.check_entity.ingest_company", side_effect=lambda t, *a, **k: _summary(t))
-@patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"])
-@patch("src.agent.nodes.check_entity.extract_entities", return_value=[])
-def test_llm_tier_runs_only_when_corpus_match_finds_nothing(_extract, _known, _ingest, mock_llm):
-    state = check_entity_exists(_state("What does the maker of the H100 report?"))
-
-    mock_llm.assert_called_once()
-    assert state["ingested_entities"] == ["NVDA"]
+def test_unresolved_registrant_abstains_without_other_sources():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', return_value=([], 0, ['Taco Bell Funding, LLC'])), \
+         patch('src.agent.nodes.check_entity.ingest_company') as ingest:
+        state = check_entity_exists(_state('Taco Bell Funding, LLC 2023'))
+    ingest.assert_not_called()
+    assert state['scope_blocked']
+    assert 'SEC ticker catalog' in state['ingestion_errors'][0]
 
 
-@patch("src.agent.nodes.check_entity.resolve_unknown_companies")
-@patch("src.agent.nodes.check_entity.ingest_company")
-@patch("src.agent.nodes.check_entity.known_tickers", return_value=["AAPL"])
-@patch("src.agent.nodes.check_entity.extract_entities", return_value=["AAPL"])
-def test_llm_tier_skipped_when_corpus_match_succeeds(_extract, _known, _ingest, mock_llm):
-    check_entity_exists(_state("Ce spune Apple despre lichiditate?"))
-    mock_llm.assert_not_called()
+def test_failed_attempt_counts_toward_ingestion_limit():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', return_value=(['NVDA','TSLA'], 0, [])), \
+         patch('src.agent.nodes.check_entity.available_filings', return_value=[]), \
+         patch('src.agent.nodes.check_entity.ingest_company', side_effect=RuntimeError('SEC 429')) as ingest:
+        state = check_entity_exists(_state('Compare Nvidia and Tesla 2023'))
+    assert ingest.call_count == MAX_INGESTIONS_PER_QUERY
+    assert state['scope_blocked']
+    assert any('limit reached' in e for e in state['ingestion_errors'])
+
+
+def test_general_question_keeps_general_scope():
+    with patch('src.agent.nodes.check_entity.resolve_unknown_companies', return_value=([], 0, [])):
+        state = check_entity_exists(_state('What are common risk factors?'))
+    assert not state['scope_blocked']
+    assert state['requested_tickers'] == []
+
+
+def test_year_range_and_comparison_are_distinct():
+    from src.agent.nodes.check_entity import requested_years
+    assert requested_years('2021-2023') == [2021,2022,2023]
+    assert requested_years('2021 vs 2023') == [2021,2023]
+    assert requested_years('NVDA FY2023') == [2023]
