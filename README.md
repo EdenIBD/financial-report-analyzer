@@ -44,14 +44,39 @@ flowchart TD
 
 - **Classification:** `gemini-3-flash-preview`, Pydantic structured output, five personas and three query types.
 - **Scope:** the resolved companies, explicit fiscal years and allowed document IDs are persisted in LangGraph state and applied to both retrieval routes, including retries. Missing evidence or failed company resolution blocks unrelated-corpus fallback. An unscoped general question can still search across the corpus.
-- **Dynamic ingestion:** the SEC ticker catalog resolves company names/tickers; it is not a fixed allowlist of the original three companies. A known company can trigger ingestion for a missing fiscal year. Both recent and historical submissions are searched, and XBRL fiscal-year metadata is checked before indexing. The calendar year of `reportDate` alone is insufficient.
-- **Bounds:** at most one filing-ingestion attempt per query, including failures. A comparison requiring more missing filings abstains until the required corpus exists. Ingestion is synchronous and can take several minutes.
+- **Dynamic ingestion:** a known company missing the requested fiscal year can trigger SEC ingestion mid-query; see [below](#dynamic-ingestion) for how it resolves, fetches and bounds this.
 - **Retrieval:** dense search plus Qdrant full-text filtering, merged with RRF. The keyword branch has no BM25 relevance ranking; its ordering is a known limitation. Comparison candidates are collected per company before global reranking.
 - **Verification:** the threshold is 0.55 with at least three qualifying chunks. The current counter allows one extra retrieval pass with broader sections, retaining company/year constraints. Low scores alone do not prove an answer is wrong or right; empty context leads to abstention.
 - **Generation:** `gemini-3-flash-preview`, using the supplied context and `[chunk_id]` citations. `status=valid` means an answer was generated, not that financial claims were independently verified.
 - **Observability:** `graph.stream(..., stream_mode="values")` preserves completed-node state on a later failure. Postgres stores query results, partial estimated costs and LangSmith trace IDs. The interface shows execution summaries, not private model reasoning.
 
-**Registrant coverage:** the SEC ticker catalog does not cover every filing entity. An unresolved name such as Taco Bell Funding, LLC is reported explicitly; the application does not silently substitute its parent or another company. Supporting registrants without tickers and identifying subsidiary disclosures requires additional resolution logic.
+### Dynamic ingestion
+
+The corpus is not fixed to the initial Apple/Microsoft/Alphabet set: a question (or upload) can grow it at request time.
+
+```mermaid
+flowchart TD
+    Q[Query names a company + fiscal year] --> R[Resolve against SEC ticker catalog]
+    R -->|Not found| U[Report unresolved; no substitution]
+    R -->|Found| C{Fiscal year already indexed?}
+    C -->|Yes| Skip[Skip ingestion; retrieve directly]
+    C -->|No| B{Ingestion already attempted this query?}
+    B -->|Yes| Abstain[Abstain; do not chain another ingestion]
+    B -->|No| Fetch[Search recent + historical EDGAR submissions for the CIK]
+    Fetch --> XBRL{Fiscal year confirmed via XBRL metadata?}
+    XBRL -->|No match| Reject[Reject candidate filing]
+    XBRL -->|Match| Mark[Mark filing processing]
+    Mark --> Parse[Parse + chunk + embed]
+    Parse --> Store[(PostgreSQL + Qdrant)]
+    Store --> Done[Mark complete; available for scoped retrieval]
+    Mark -. interrupted .-> Excluded[Excluded from retrieval; retryable]
+```
+
+- **Trigger:** company mentions are resolved against the public SEC ticker catalog (cached locally), not a fixed allowlist. If a resolved company is missing the requested fiscal year in Postgres, ingestion is attempted before retrieval continues.
+- **Fetch:** both recent and historical (shard) EDGAR submissions are searched for the CIK. A filing's `reportDate` is only a coarse candidate filter — the true fiscal year is confirmed from XBRL metadata before the filing is accepted, since a company's fiscal year need not equal the calendar year in `reportDate` (e.g. NVIDIA). Annual 10-Ks are fetched by default; a 10-Q is only fetched when explicitly requested.
+- **Index:** an accepted filing runs through the same parse/chunk/embed pipeline as an upload (see the Ingestion diagram above) and is written to PostgreSQL and Qdrant. It stays `processing` until ingestion completes; a filing interrupted mid-ingestion is excluded from scoped retrieval rather than served partially, and can be retried.
+- **Bounds:** at most one ingestion attempt per query, counting failures, to cap latency and external calls. Ingestion is synchronous and can take several minutes. A comparison requiring more than one missing filing abstains until the corpus already covers what's needed, instead of chaining multiple ingestions in one request.
+- **Coverage limits:** the SEC ticker catalog does not cover every filing entity. An unresolved name such as Taco Bell Funding, LLC is reported explicitly; the application does not silently substitute its parent or another company. Supporting registrants without tickers and identifying subsidiary disclosures would need additional resolution logic.
 
 ## Tech stack
 
