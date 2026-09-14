@@ -1,46 +1,46 @@
-<testsuites id="" name="" tests="14" failures="0" skipped="0" errors="0" time="144.095435">
-<testsuite name="backend-error.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="1" failures="0" skipped="0" time="0.872" errors="0">
-<testcase name="eroare backend — mesaj clar, nu UI gol/spart" classname="backend-error.spec.ts" time="0.872">
+<testsuites id="" name="" tests="14" failures="0" skipped="0" errors="0" time="131.46875599999998">
+<testsuite name="backend-error.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="1" failures="0" skipped="0" time="0.841" errors="0">
+<testcase name="eroare backend — mesaj clar, nu UI gol/spart" classname="backend-error.spec.ts" time="0.841">
 </testcase>
 </testsuite>
-<testsuite name="comparison.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="1" failures="0" skipped="0" time="0.898" errors="0">
-<testcase name="comparatie — query care mentioneaza doua companii" classname="comparison.spec.ts" time="0.898">
+<testsuite name="comparison.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="1" failures="0" skipped="0" time="0.815" errors="0">
+<testcase name="comparatie — query care mentioneaza doua companii" classname="comparison.spec.ts" time="0.815">
 </testcase>
 </testsuite>
-<testsuite name="dynamic-ingestion.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="3" failures="0" skipped="0" time="2.684" errors="0">
-<testcase name="ingestie dinamica — banner pentru compania adaugata in corpus" classname="dynamic-ingestion.spec.ts" time="0.877">
+<testsuite name="dynamic-ingestion.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="3" failures="0" skipped="0" time="2.342" errors="0">
+<testcase name="ingestie dinamica — banner pentru compania adaugata in corpus" classname="dynamic-ingestion.spec.ts" time="0.791">
 </testcase>
-<testcase name="ingestie esuata — eroare explicita per companie, raspunsul tot apare" classname="dynamic-ingestion.spec.ts" time="0.875">
+<testcase name="ingestie esuata — eroare explicita per companie, raspunsul tot apare" classname="dynamic-ingestion.spec.ts" time="0.775">
 </testcase>
-<testcase name="comparatie cu doua companii necunoscute — una ingerata, cealalta blocata de limita" classname="dynamic-ingestion.spec.ts" time="0.932">
-</testcase>
-</testsuite>
-<testsuite name="happy-path.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="1" failures="0" skipped="0" time="0.958" errors="0">
-<testcase name="happy path — query factual despre Apple" classname="happy-path.spec.ts" time="0.958">
+<testcase name="comparatie cu doua companii necunoscute — una ingerata, cealalta blocata de limita" classname="dynamic-ingestion.spec.ts" time="0.776">
 </testcase>
 </testsuite>
-<testsuite name="query-scope.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="3" failures="0" skipped="0" time="1.883" errors="0">
-<testcase name="historical NVIDIA filing displays the requested year and evidence" classname="query-scope.spec.ts" time="0.907">
-</testcase>
-<testcase name="unresolved registrant shows abstention without unrelated sources" classname="query-scope.spec.ts" time="0.543">
-</testcase>
-<testcase name="eagle matches reference placement without intercepting controls" classname="query-scope.spec.ts" time="0.433">
+<testsuite name="happy-path.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="1" failures="0" skipped="0" time="0.824" errors="0">
+<testcase name="happy path — query factual despre Apple" classname="happy-path.spec.ts" time="0.824">
 </testcase>
 </testsuite>
-<testsuite name="reasoning-trace.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="2" failures="0" skipped="0" time="1.149" errors="0">
-<testcase name="reasoning trace — ascuns implicit, vizibil dupa click" classname="reasoning-trace.spec.ts" time="0.59">
+<testsuite name="query-scope.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="3" failures="0" skipped="0" time="1.649" errors="0">
+<testcase name="historical NVIDIA filing displays the requested year and evidence" classname="query-scope.spec.ts" time="0.822">
 </testcase>
-<testcase name="fara reasoning_trace — sectiunea nu apare deloc" classname="reasoning-trace.spec.ts" time="0.559">
+<testcase name="unresolved registrant shows abstention without unrelated sources" classname="query-scope.spec.ts" time="0.479">
 </testcase>
-</testsuite>
-<testsuite name="upload-live.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="2" failures="0" skipped="0" time="146.185" errors="0">
-<testcase name="real legacy filing reports unsupported inline XBRL" classname="upload-live.spec.ts" time="5.027">
-</testcase>
-<testcase name="real Winmark 10-Q reaches ready after parsing and indexing" classname="upload-live.spec.ts" time="141.158">
+<testcase name="eagle matches reference placement without intercepting controls" classname="query-scope.spec.ts" time="0.348">
 </testcase>
 </testsuite>
-<testsuite name="upload-recovery.spec.ts" timestamp="2026-09-13T15:19:45.346Z" hostname="" tests="1" failures="0" skipped="0" time="8.54" errors="0">
-<testcase name="upload polling recovers after a transient failure" classname="upload-recovery.spec.ts" time="8.54">
+<testsuite name="reasoning-trace.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="2" failures="0" skipped="0" time="0.945" errors="0">
+<testcase name="reasoning trace — ascuns implicit, vizibil dupa click" classname="reasoning-trace.spec.ts" time="0.492">
+</testcase>
+<testcase name="fara reasoning_trace — sectiunea nu apare deloc" classname="reasoning-trace.spec.ts" time="0.453">
+</testcase>
+</testsuite>
+<testsuite name="upload-live.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="2" failures="0" skipped="0" time="133.754" errors="0">
+<testcase name="real legacy filing reports unsupported inline XBRL" classname="upload-live.spec.ts" time="5.002">
+</testcase>
+<testcase name="real Winmark 10-Q reaches ready after parsing and indexing" classname="upload-live.spec.ts" time="128.752">
+</testcase>
+</testsuite>
+<testsuite name="upload-recovery.spec.ts" timestamp="2026-09-14T07:24:40.736Z" hostname="" tests="1" failures="0" skipped="0" time="8.478" errors="0">
+<testcase name="upload polling recovers after a transient failure" classname="upload-recovery.spec.ts" time="8.478">
 </testcase>
 </testsuite>
 </testsuites>

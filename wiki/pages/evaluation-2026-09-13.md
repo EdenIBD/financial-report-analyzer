@@ -7,18 +7,20 @@ memory — see each file for the full per-question detail.
 
 ## Golden set (classification)
 
-[`eval/results/golden-set-latest.json`](../../eval/results/golden-set-latest.json), run at 2026-09-13T10:20:41Z, 15 questions, real pipeline:
+[`eval/results/golden-set-latest.json`](../../eval/results/golden-set-latest.json), run at 2026-09-13T15:26:43Z, 15 questions, real pipeline:
 
 | Metric | Result |
 |---|---|
 | Persona classification | **15/15 = 100%** |
 | Query-type classification | **14/15 = 93.3%** |
 | Answers generated (`status: valid`) | 15/15 |
-| Total cost | $0.178093 |
+| Total cost | $0.181626 |
 
 The one query-type miss is the same one from the previous run: an
 internal-controls-weakness question classified as `factual` instead of
 `risk_analysis`. Stable across runs — not new noise from the scoping change.
+
+Citation-ID integrity on this run: **15/15**. This verifies that cited IDs exist in retrieved context, not whether every claim is supported. The prior 14/15 result is preserved in the earlier evidence.
 
 ## Scope regressions (the actual bug report)
 
@@ -65,8 +67,8 @@ This corroborates — via a separate script, not just the remediation job's own 
 
 ## Unit and browser tests
 
-- Backend: **83 passed, 2 skipped** (`python -m pytest tests/`; skips are a missing local 10-Q fixture file, not a real failure). See [`unit-test-inventory.md`](unit-test-inventory.md) for the full per-test list, regenerated alongside this report.
-- Frontend E2E: **11 passed** (`npx playwright test`), including the three new `query-scope.spec.ts` cases (historical-year evidence, unresolved-registrant abstention, eagle watermark placement against the reference layout) and the existing dynamic-ingestion/reasoning-trace/comparison suites.
+- Backend: **91 passed, 2 skipped** (`python -m pytest tests/`; skips are a missing local 10-Q fixture file, not a real failure). See [`unit-test-inventory.md`](unit-test-inventory.md) for the full per-test list, regenerated alongside this report.
+- Frontend E2E: **14 passed** (`npx playwright test`), including the three new `query-scope.spec.ts` cases (historical-year evidence, unresolved-registrant abstention, eagle watermark placement against the reference layout) and the existing dynamic-ingestion/reasoning-trace/comparison suites.
 
 ## Still unmeasured
 
@@ -74,3 +76,7 @@ This corroborates — via a separate script, not just the remediation job's own 
 - **Citation-identifier integrity ≠ claim faithfulness.** A citation that resolves to a real chunk can still misrepresent what that chunk says; nothing here checks that.
 - **Relative-date resolution** ("this year," "last quarter") beyond the explicit-year and simple-range regex in `requested_years()`.
 - **Registrants without tickers** (like Taco Bell Funding, LLC) remain correctly *unresolved and reported*, not correctly *answerable* — extending coverage there needs a different resolution path than the SEC ticker catalog.
+
+## Real upload and manual UI validation
+
+See [[upload-evaluation-2026-09-13]] for all 13 file/variant results. Real browser upload WINA FY2024 Q3: ready, 122 chunks. Dynamic ingestion via UI for previously absent LWAY FY2023: 243 chunks, 269.706 seconds, $0.030287 estimated query cost; cited passages match LWAY/2023. Manual Apple–Microsoft FY2023 comparison: both companies present, all retrieved years 2023, clickable citations opened the matching passages. Raw Markdown delimiters remain visible in answer text; financial table interpretation and overbroad absence-of-risk statements remain qualitative review concerns.

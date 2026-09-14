@@ -27,3 +27,5 @@ Detailed stage results and provenance: `eval/results/upload-matrix-before.json`,
 Reproduce from project root: `python -m eval.run_upload_matrix`. Live upload tests (paid): `cd frontend && RUN_LIVE_UPLOAD=1 npx playwright test e2e/upload-live.spec.ts`.
 
 Live browser upload: Winmark FY2024 10-Q reached ready with 122 chunks; the legacy YUM upload returned the explicit unsupported-inline-XBRL message. Both used the real API, parser and database.
+
+Final repeat on 2026-09-14: 14/14 Playwright cases passed against the rebuilt stack. During Winmark reindexing, PostgreSQL showed processing and `/corpus` excluded WINA (19 ready filings); completion returned ready with 122 chunks. This validates the corrected publication lifecycle.

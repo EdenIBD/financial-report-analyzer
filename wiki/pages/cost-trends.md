@@ -1,43 +1,43 @@
 # Cost trends
 
-Generat automat de `scripts/cost_trends.py` din `query_logs` (97 query-uri cu cost logat).
+Generat automat de `scripts/cost_trends.py` din `query_logs` (129 query-uri cu cost logat).
 
 ## Cost mediu per query_type
 
 | query_type | n | cost mediu (USD) |
 |---|---|---|
-| comparison | 22 | 0.008261 |
-| factual | 34 | 0.008182 |
-| risk_analysis | 33 | 0.012891 |
+| comparison | 29 | 0.009187 |
+| factual | 46 | 0.009455 |
+| risk_analysis | 46 | 0.012678 |
 
-**Observatie:** Query-urile de comparatie costa de ~1.0x fata de cele factuale ($0.008261 vs $0.008182 in medie).
+**Observatie:** Query-urile de comparatie costa de ~1.0x fata de cele factuale ($0.009187 vs $0.009455 in medie).
 
 ## Cost mediu per persona
 
 | persona | n | cost mediu (USD) |
 |---|---|---|
-| audit_firm | 6 | 0.010642 |
-| investment_bank | 7 | 0.011028 |
-| investment_firm | 46 | 0.010675 |
-| legal | 11 | 0.009015 |
-| treasury | 19 | 0.008110 |
+| audit_firm | 9 | 0.011311 |
+| investment_bank | 10 | 0.011255 |
+| investment_firm | 63 | 0.011313 |
+| legal | 16 | 0.009500 |
+| treasury | 23 | 0.008933 |
 
 ## Cost mediu per status
 
 | status | n | cost mediu (USD) |
 |---|---|---|
-| abstained | 2 | 0.005855 |
+| abstained | 8 | 0.004104 |
 | error | 20 | 0.000325 |
-| valid | 75 | 0.011562 |
+| valid | 101 | 0.012329 |
 
 ## Cost mediu cu vs. fara ingestie live
 
 | tip query | n | cost mediu (USD) |
 |---|---|---|
-| cu ingestie live | 3 | 0.053135 |
-| fara ingestie | 94 | 0.007723 |
+| cu ingestie live | 5 | 0.050353 |
+| fara ingestie | 124 | 0.008329 |
 
-**Observatie:** Un query care declanseaza ingestie live costa de ~7x un query obisnuit ($0.053135 vs $0.007723 in medie) — ingestia face un apel LLM de contextual retrieval per chunk, sute per filing.
+**Observatie:** Un query care declanseaza ingestie live costa de ~6x un query obisnuit ($0.050353 vs $0.008329 in medie) — ingestia face un apel LLM de contextual retrieval per chunk, sute per filing.
 
 ## Ce nu poate fi calculat din query_logs
 

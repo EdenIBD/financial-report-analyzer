@@ -149,6 +149,7 @@ def main():
     by_query_type, by_persona, by_status, by_ingestion = aggregate(rows)
     markdown = render_markdown(by_query_type, by_persona, by_status, by_ingestion, len(rows))
 
+    os.makedirs(os.path.dirname(WIKI_PAGE_PATH), exist_ok=True)
     with open(WIKI_PAGE_PATH, "w") as f:
         f.write(markdown)
 

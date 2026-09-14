@@ -1,6 +1,6 @@
 {
   "scope": "Identifier integrity only; not claim faithfulness",
-  "passed": 14,
+  "passed": 15,
   "n": 15,
   "cases": [
     {
@@ -21,8 +21,6 @@
       "question": "Ce litigii majore are Microsoft in curs, conform ultimului 10-K?",
       "cited_ids": [
         "MSFT_2021_financial_statements_225",
-        "MSFT_2021_risk_factors_79",
-        "MSFT_2023_financial_statements_192",
         "MSFT_2023_financial_statements_196",
         "MSFT_2024_financial_statements_193",
         "MSFT_2026_financial_statements_180"
@@ -38,7 +36,6 @@
         "AAPL_2022_Item1A_113",
         "AAPL_2024_Item1A_117",
         "GOOGL_2023_Item1A_111",
-        "GOOGL_2023_Item1A_112",
         "GOOGL_2023_Item1A_99",
         "GOOGL_2024_Item1A_101",
         "GOOGL_2025_Item1A_122"
@@ -56,7 +53,8 @@
         "AAPL_2022_Item8_149",
         "AAPL_2022_Item9A_11",
         "AAPL_2023_Item9A_11",
-        "AAPL_2023_Item9A_6"
+        "AAPL_2023_Item9A_6",
+        "AAPL_2025_Item9A_6"
       ],
       "unknown_ids": [],
       "has_citations": true,
@@ -118,8 +116,9 @@
     {
       "question": "Care a fost venitul net al Microsoft in ultimul an fiscal raportat?",
       "cited_ids": [
-        "MSFT_2021_Item7_32",
         "MSFT_2023_Item7_32",
+        "MSFT_2023_Item7_6",
+        "MSFT_2023_Item7_82",
         "MSFT_2026_mdna_26"
       ],
       "unknown_ids": [],
@@ -131,9 +130,7 @@
       "cited_ids": [
         "MSFT_2021_financial_statements_175",
         "MSFT_2023_financial_statements_148",
-        "MSFT_2024_financial_statements_158",
         "MSFT_2024_financial_statements_7",
-        "MSFT_2025_financial_statements_137",
         "MSFT_2025_financial_statements_138",
         "MSFT_2025_financial_statements_7"
       ],
@@ -147,7 +144,7 @@
         "AAPL_2021_Item7_25",
         "AAPL_2021_Item8_10",
         "AAPL_2025_Item7_18",
-        "GOOGL_2023_Item8_29",
+        "GOOGL_2024_Item8_29",
         "GOOGL_2025_Item8_36"
       ],
       "unknown_ids": [],
@@ -156,10 +153,17 @@
     },
     {
       "question": "Ce impact ar putea avea nivelul actual de indatorare al Google asupra unei eventuale achizitii majore?",
-      "cited_ids": [],
+      "cited_ids": [
+        "GOOGL_2023_Item7_108",
+        "GOOGL_2024_Item7_110",
+        "GOOGL_2025_Item1A_177",
+        "GOOGL_2025_Item1A_61",
+        "GOOGL_2025_Item7_42",
+        "GOOGL_2025_Item7_96"
+      ],
       "unknown_ids": [],
-      "has_citations": false,
-      "all_ids_exist": false
+      "has_citations": true,
+      "all_ids_exist": true
     },
     {
       "question": "Ce expunere la riscul de curs valutar raporteaza Apple si cum il gestioneaza?",
@@ -168,7 +172,8 @@
         "AAPL_2021_Item7A_12",
         "AAPL_2022_Item7A_11",
         "AAPL_2022_Item8_63",
-        "AAPL_2023_Item7A_4"
+        "AAPL_2023_Item7A_4",
+        "AAPL_2025_Item8_50"
       ],
       "unknown_ids": [],
       "has_citations": true,

@@ -71,10 +71,10 @@ Backend dependencies in `requirements.txt` are currently unpinned. Model IDs abo
 
 Results and full evidence are stored under [`eval/results/`](eval/results/); see the [evaluation report](wiki/pages/evaluation-2026-09-13.md) for current metrics and limitations.
 
-- **Golden set:** 15 questions with expected persona and query-type labels, executed through the real graph. The runner now persists answers, retrieved chunks, trace summaries, latency and estimated cost, alongside classifications. Historical results from September 12 were 15/15 persona and 14/15 query type; current results are reported separately.
+- **Golden set:** 15 questions with expected persona and query-type labels, executed through the real graph. The runner now persists answers, retrieved chunks, trace summaries, latency and estimated cost, alongside classifications. Latest completed run: **15/15 persona, 14/15 query type, 15/15 resolvable citation-ID checks**; estimated cost **$0.181626**.
 - **Scope regressions:** live NVIDIA FY2023 in English/Romanian, an Apple/NVIDIA comparison, an unresolved Taco Bell Funding registrant and an unavailable year. Checks enforce requested company/year coverage or abstention without sources. These detect the reported substitution failure, not arbitrary numeric hallucinations.
 - **Retrieval replay:** the original 17 synthetic AAPL FY2023 questions are frozen and replayed against dense retrieval. Source-chunk Hit@8 and MRR are saved per question. This is a small, single-document probe; the source chunk is not an exhaustive annotation of all relevant passages.
-- **Unit and browser tests:** run independently of paid model calls, with mocked external services. Real API integration runs are recorded separately from mocked browser scenarios.
+- **Unit and browser tests:** **91 passed, 2 skipped** in pytest; **14 browser scenarios passed**, including two real API upload cases (Winmark ready; legacy YUM explicitly unsupported). The other browser cases mock responses; the live upload run incurs ingestion cost.
 
 **Still unmeasured:** end-to-end golden-set Recall@8 (its `expected_chunk_ids` remain null) and a calibrated faithfulness rate. Classification accuracy, source-scope checks and citation-ID checks must not be presented as financial-answer accuracy. No unvalidated LLM judge score is used as a portfolio performance claim.
 
