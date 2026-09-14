@@ -1,30 +1,34 @@
-# qdrant_client.query_points() intoarce QueryResponse, nu o lista
+# qdrant_client.query_points() returns a QueryResponse, not a list
 
-## Ce s-a intamplat
+## What happened
 
-Codul dat de spec pentru `retrieve_single`/`retrieve_multi` (`src/agent/nodes/retrieve.py`)
-paseaza rezultatul `qdrant_client.query_points(...)` direct in `reciprocal_rank_fusion`,
-care face `for rank, r in enumerate(dense_results): scores[r.id] = ...` — presupunand ca
-`dense_results` e o lista de obiecte cu `.id`/`.score`.
+The code given by the spec for `retrieve_single`/`retrieve_multi`
+(`src/agent/nodes/retrieve.py`) passed the result of
+`qdrant_client.query_points(...)` directly into `reciprocal_rank_fusion`,
+which does `for rank, r in enumerate(dense_results): scores[r.id] = ...` —
+assuming `dense_results` is a list of objects with `.id`/`.score`.
 
-De fapt `query_points()` intoarce un `QueryResponse` (model pydantic cu un singur camp,
-`points`). Iterand direct peste un model pydantic se obtin tupluri `(nume_camp, valoare)`,
-nu punctele efective — de unde:
+In reality, `query_points()` returns a `QueryResponse` (a pydantic model
+with a single field, `points`). Iterating directly over a pydantic model
+yields `(field_name, value)` tuples, not the actual points — hence:
 
 ```
 AttributeError: 'tuple' object has no attribute 'id'
 ```
 
-Eroarea era complet invizibila din `/query` (raspundea doar `status: "error"`, fara detaliu,
-pentru ca `handle_query` prinde orice exceptie generic) — gasita rulind `graph.invoke()`
-direct, in afara try/except.
+The error was completely invisible from `/query` (it only responded
+`status: "error"`, with no detail, because `handle_query` catches any
+exception generically) — found by running `graph.invoke()` directly,
+outside the try/except.
 
-## Fix aplicat
+## Fix applied
 
-Adaugat `.points` la fiecare din cele 4 apeluri `query_points()` (2 in `retrieve_single`,
-2 in `retrieve_multi`) inainte de a le pasa in `reciprocal_rank_fusion`.
+Added `.points` to each of the 4 `query_points()` calls (2 in
+`retrieve_single`, 2 in `retrieve_multi`) before passing them into
+`reciprocal_rank_fusion`.
 
-## Cand sa revii aici
+## When to revisit
 
-Orice alt loc care apeleaza `qdrant_client.query_points()` sau `search()` direct trebuie
-verificat la fel — nu presupune forma raspunsului fara sa citesti `.points` explicit.
+Any other place that calls `qdrant_client.query_points()` or `search()`
+directly must be checked the same way — don't assume the response shape
+without explicitly reading `.points`.

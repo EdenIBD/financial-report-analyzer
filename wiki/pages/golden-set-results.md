@@ -1,24 +1,24 @@
 # Golden set results
 
-Rulat prin `eval/run_golden_set.py` pe cele 15 intrebari din `eval/golden_set.json`, prin `handle_query()` real (graful complet: classify -> retrieve -> rerank -> verify -> generate).
+Run via `eval/run_golden_set.py` on the 15 questions in `eval/golden_set.json`, through the real `handle_query()` (the full graph: classify -> retrieve -> rerank -> verify -> generate).
 
-## Ce se poate calcula onest
+## What can honestly be calculated
 
-| Metrica | Rezultat |
+| Metric | Result |
 |---|---|
 | persona_classification_accuracy | 15/15 = 100.00% |
 | query_type_classification_accuracy | 14/15 = 93.33% |
-| status = valid (raspuns generat) | 15/15 |
-| cost total (15 query-uri) | $0.178093 |
+| status = valid (answer generated) | 15/15 |
+| total cost (15 queries) | $0.178093 |
 
-## Ce NU s-a calculat, si de ce
+## What was NOT calculated, and why
 
-- **retrieval_recall_at_8** — necesita `expected_chunk_ids` per intrebare; `golden_set.json` le are `null` (nimeni nu a adnotat manual chunk-urile corecte pentru cele 15 intrebari). Nu poate fi calculat fara aceasta adnotare.
-- **faithfulness / judge_score** — necesita un LLM judge care sa verifice daca raspunsul e sustinut de contextul recuperat; neimplementat inca.
+- **retrieval_recall_at_8** — needs `expected_chunk_ids` per question; `golden_set.json` has them as `null` (nobody has manually annotated the correct chunks for these 15 questions). Cannot be computed without that annotation.
+- **faithfulness / judge_score** — needs an LLM judge to verify whether the answer is supported by the retrieved context; not implemented yet.
 
-## Detaliu per intrebare
+## Per-question detail
 
-| Persona asteptata | Persona actuala | Query type asteptat | Query type actual | Status | Cost |
+| Expected persona | Actual persona | Expected query type | Actual query type | Status | Cost |
 |---|---|---|---|---|---|
 | legal | legal ✓ | risk_analysis | risk_analysis ✓ | valid | $0.012969 |
 | legal | legal ✓ | factual | factual ✓ | valid | $0.011791 |

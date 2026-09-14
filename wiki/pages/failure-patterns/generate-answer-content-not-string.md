@@ -1,26 +1,27 @@
-# response.content nu e mereu string — gemini-pro-latest intoarce blocuri structurate
+# response.content is not always a string — gemini-pro-latest returns structured blocks
 
-## Ce s-a intamplat
+## What happened
 
-`generate_answer` facea `state["answer"] = response.content`, presupunand
-ca raspunsul LangChain e intotdeauna un string simplu. Cu `gemini-pro-latest`,
-`response.content` poate fi o lista de blocuri structurate
-(`[{"type": "text", "text": "...", "extras": {"signature": "..."}}]`), nu un
-string — probabil legat de un mecanism de "thinking"/semnatura al modelului.
+`generate_answer` did `state["answer"] = response.content`, assuming
+LangChain's response is always a plain string. With `gemini-pro-latest`,
+`response.content` can be a list of structured blocks
+(`[{"type": "text", "text": "...", "extras": {"signature": "..."}}]`), not a
+string — likely related to a "thinking"/signature mechanism of the model.
 
-FastAPI valida raspunsul `/query` contra `QueryResponse` (care declara
-`answer: str | None`), asa ca orice raspuns generat cu succes de LLM
-arunca `ResponseValidationError` si `/query` intorcea **500 Internal Server
-Error** — un raspuns bun, generat corect, era aruncat la ultimul pas.
+FastAPI validated the `/query` response against `QueryResponse` (which
+declares `answer: str | None`), so any answer the LLM successfully
+generated raised a `ResponseValidationError` and `/query` returned a
+**500 Internal Server Error** — a good, correctly generated answer was
+being thrown away at the last step.
 
-## Fix aplicat
+## Fix applied
 
-Inlocuit `response.content` cu `response.text` — proprietatea LangChain care
-extrage robust textul indiferent daca `content` e string sau lista de
-blocuri (verificat direct: functioneaza pentru ambele forme).
+Replaced `response.content` with `response.text` — the LangChain property
+that robustly extracts the text regardless of whether `content` is a
+string or a list of blocks (verified directly: works for both forms).
 
-## Cand sa revii aici
+## When to revisit
 
-Orice alt loc care citeste `.content` direct de pe un raspuns LangChain
-(nu doar `generate.py`) ar trebui sa foloseasca `.text` in loc, ca sa nu
-depinda de forma exacta intoarsa de un anume model.
+Any other place that reads `.content` directly off a LangChain response
+(not just `generate.py`) should use `.text` instead, so it doesn't depend
+on the exact shape a given model returns.

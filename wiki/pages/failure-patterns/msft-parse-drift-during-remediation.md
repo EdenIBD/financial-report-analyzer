@@ -1,21 +1,21 @@
 # MSFT parsing has drifted since original ingestion — discovered mid-remediation, may have introduced misalignment
 
-Data: 2026-09-13
-Context: in timp ce rulam `scripts/fix_contextual_sentences.py` (remedierea
-pentru [contextual-retrieval-wrong-company.md](contextual-retrieval-wrong-company.md)),
-scriptul a esuat cu "index N nu mai exista dupa re-chunking" pentru ~29 din
-cele 225 de chunk-uri MSFT ramase in ultimul lot. Investigand de ce, am gasit
-o problema mai larga si mai veche, independenta de bug-ul pe care il reparam.
+Date: 2026-09-13
+Context: while running `scripts/fix_contextual_sentences.py` (the remediation
+for [contextual-retrieval-wrong-company.md](contextual-retrieval-wrong-company.md)),
+the script failed with "index N no longer exists after re-chunking" for ~29
+of the remaining 225 MSFT chunks in the last batch. Investigating why
+uncovered a broader, older issue, independent of the bug being fixed.
 
-## Ce s-a gasit
+## What was found
 
-Re-parsand HTML-ul brut (`data/raw/MSFT_*.html`, nemodificat) cu `parse.py`
-**din stadiul lui curent**, textul extras pentru sectiunile canonice ale MSFT
-e mai scurt decat la ingestia originala — pe undeva, in una din editarile
-succesive ale `parse.py` de-a lungul sesiunilor anterioare (proiectul nu are
-istoric git de consultat), granitele de sectiune pentru MSFT s-au schimbat.
+Re-parsing the raw HTML (`data/raw/MSFT_*.html`, unmodified) with `parse.py`
+**in its current state**, the extracted text for MSFT's canonical sections
+is shorter than at original ingestion — somewhere, in one of the successive
+edits to `parse.py` across earlier sessions (the project has no git history
+to consult), MSFT's section boundaries shifted.
 
-| Filing | Sectiune | Chunk-uri stocate | Chunk-uri la re-parsare azi | Diferenta |
+| Filing | Section | Stored chunks | Chunks on re-parse today | Diff |
 |---|---|---|---|---|
 | MSFT_2021 | financial_statements | 305 | 304 | -1 |
 | MSFT_2021 | risk_factors | 149 | 143 | -6 |
@@ -34,25 +34,27 @@ istoric git de consultat), granitele de sectiune pentru MSFT s-au schimbat.
 | MSFT_2026 | mdna | 126 | 117 | -9 |
 | MSFT_2026 | risk_factors | 166 | 152 | -14 |
 
-**GOOGL, AAPL si NVDA nu au aceasta problema** — re-parsarea lor azi produce
-exact acelasi numar de chunk-uri ca la ingestie, pe toate sectiunile
-canonice. Doar MSFT e afectat, pe toate cele 5 filing-uri.
+**GOOGL, AAPL and NVDA do not have this problem** — re-parsing them today
+produces exactly the same chunk count as at ingestion, across all canonical
+sections. Only MSFT is affected, across all 5 filings.
 
-Pentru MSFT_2023/financial_statements, primul index la care chunk-ul
-re-generat difera de cel stocat e **indexul 26 din 273** — deci nu e doar o
-problema la coada sectiunii, diferenta incepe devreme si se propaga.
+For MSFT_2023/financial_statements, the first index where the newly
+regenerated chunk differs from the stored one is **index 26 of 273** — so
+it's not just a problem at the tail of the section, the difference starts
+early and propagates.
 
-## De ce conteaza pentru remedierea in curs
+## Why it matters for the ongoing remediation
 
-`fix_contextual_sentences.py` repara un chunk_id existent re-parsand sectiunea
-lui si luand textul brut de la `chunk_index`-ul respectiv din rezultatul
-proaspat. Presupunerea (valabila pentru GOOGL/AAPL/NVDA, verificata) era ca
-re-parsarea azi reproduce identic segmentarea originala. **Pentru MSFT, asta
-e falsa** — scriptul a rescris deja urmatoarele chunk-uri MSFT cu text
-provenit dintr-o segmentare care nu se mai aliniaza garantat cu chunk-urile
-vecine (ramase din segmentarea veche, mai lunga):
+`fix_contextual_sentences.py` repairs an existing chunk_id by re-parsing its
+section and taking the raw text at that same `chunk_index` from the fresh
+result. The assumption (valid for GOOGL/AAPL/NVDA, verified) was that
+re-parsing today reproduces the original segmentation identically. **For
+MSFT, that's false** — the script had already rewritten the following MSFT
+chunks with text coming from a segmentation that is no longer guaranteed to
+line up with their neighboring chunks (left over from the old, longer
+segmentation):
 
-| Filing | Sectiuni afectate, chunk-uri deja rescrise |
+| Filing | Affected sections, chunks already rewritten |
 |---|---|
 | MSFT_2021 | financial_statements 135, mdna 43, risk_factors 46, controls_procedures 6 |
 | MSFT_2023 | financial_statements 117, mdna 60, risk_factors 42, controls_procedures 10 |
@@ -60,122 +62,125 @@ vecine (ramase din segmentarea veche, mai lunga):
 | MSFT_2025 | financial_statements 112, mdna 33, risk_factors 56, controls_procedures 8 |
 | MSFT_2026 | financial_statements 122, mdna 40, risk_factors 55, controls_procedures 7 |
 
-Nota: "rescris" nu inseamna neaparat "gresit" — inseamna ca granitele de
-chunk s-au putut deplasa, deci setul complet de chunk-uri al unei sectiuni
-(cele rescrise + cele ramase netouched la coada, cu segmentarea veche) ar
-putea avea acum suprapuneri sau goluri fata de textul complet al sectiunii.
-Nu a fost inca verificat daca exista goluri reale de continut sau daca
-efectul e benign (doar granite usor deplasate, fara pierdere neta). Scriptul
-de remediere a fost **oprit** in acest punct, fara sa continue peste MSFT,
-tocmai ca sa nu adanceasca o eventuala problema inainte de o decizie.
+Note: "rewritten" doesn't necessarily mean "wrong" — it means the chunk
+boundaries may have shifted, so a section's full chunk set (the rewritten
+ones + the ones left untouched at the tail, with the old segmentation)
+could now have overlaps or gaps relative to the section's full text. It
+hasn't been verified yet whether there's a real content gap or whether the
+effect is benign (just slightly shifted boundaries, no net loss). The
+remediation script was **stopped** at this point, without continuing over
+MSFT, specifically to avoid deepening a potential problem before a
+decision was made.
 
-## Ce nu s-a atins
+## What was not touched
 
-`legal_proceedings` si `market_risk` pentru MSFT NU apar in tabelul de drift
-— acelea au fost reparate normal, fara risc de dezaliniere. La fel, tot ce
-s-a reparat pentru GOOGL/AAPL/NVDA e verificat corect si sigur.
+`legal_proceedings` and `market_risk` for MSFT do NOT appear in the drift
+table — those were repaired normally, with no risk of misalignment.
+Likewise, everything repaired for GOOGL/AAPL/NVDA is verified correct and
+safe.
 
-## Optiuni de remediere (decizie in asteptare)
+## Remediation options (decision pending)
 
-1. **Re-ingestie completa, curata, doar pentru (doc_id, sectiune) afectate**
-   la MSFT: sterge chunk-urile existente din Postgres+Qdrant pentru acele
-   perechi, re-parseaza + re-chunk-uieste + re-contextualizeaza + re-embedeaza
-   totul de la zero, cu indici 0..N noi, consistenti. Cea mai sigura, dar
-   inseamna re-facut ~600 chunk-uri MSFT deja atinse plus restul sectiunii
-   (nu doar cele afectate initial) — comparabil ca timp/cost cu remedierea
-   deja facuta (~3 ore).
-2. Accepta starea curenta ca e, documentata ca risc cunoscut necuantificat
-   (posibile goluri/suprapuneri minore in cateva sectiuni MSFT), fara alt
-   cost — dar fara sa se stie exact daca vreun fragment de continut real a
-   fost pierdut din corpus.
-3. Investigheaza mai intai daca exista vreun gol real de continut (comparand
-   text-ul complet al sectiunii vechi reconstituit din chunk-uri stocate,
-   inainte de a fi rescrise, cu cel nou) — dar chunk-urile deja rescrise
-   si-au pierdut deja continutul vechi (nu exista backup), deci comparatia
-   se poate face doar pe chunk-urile inca netouched (legal_proceedings,
-   market_risk, si coada nefixata din celelalte sectiuni).
+1. **A full, clean re-ingestion, only for the affected (doc_id, section)
+   pairs** in MSFT: delete the existing chunks from Postgres+Qdrant for
+   those pairs, re-parse + re-chunk + re-contextualize + re-embed
+   everything from scratch, with new, consistent 0..N indices. Safest, but
+   means redoing the ~600 MSFT chunks already touched plus the rest of the
+   section (not just the initially affected ones) — comparable in
+   time/cost to the remediation already done (~3 hours).
+2. Accept the current state as is, documented as a known, unquantified risk
+   (possible minor gaps/overlaps in a few MSFT sections), at no further
+   cost — but without knowing for sure whether any real content fragment
+   was lost from the corpus.
+3. First investigate whether there's an actual content gap (comparing the
+   old section's full text, reconstructed from the stored chunks before
+   they were rewritten, against the new one) — but the chunks already
+   rewritten have already lost their old content (no backup exists), so the
+   comparison can only be done on chunks still untouched
+   (legal_proceedings, market_risk, and the unfixed tail of the other
+   sections).
 
-**Decizie luata (2026-09-13): optiunea 1** — re-ingestie completa, curata,
-doar pentru perechile (doc_id, sectiune) din tabelul de mai sus.
+**Decision made (2026-09-13): option 1** — a full, clean re-ingestion, only
+for the (doc_id, section) pairs listed in the table above.
 
-## Incident operational: doua intreruperi, una a produs un gol real de continut
+## Operational incident: two interruptions, one produced a real content gap
 
-`scripts/reingest_msft_drifted_sections.py`, versiunea initiala, facea
-**sterge intai, insereaza dupa** per sectiune (simetric cu cum arata orice
-migratie "curata" pe hartie). Pe masina asta insa, Docker Desktop s-a oprit
-de doua ori in timpul rularii (motiv probabil: repaus/sleep al laptopului,
-nu o eroare de cod) — de fiecare data, `docker compose exec` a raportat
-"completed, exit code 0" prin sistemul de notificari, un fals pozitiv (
-procesul a fost omorat odata cu daemon-ul Docker, nu s-a terminat normal).
+`scripts/reingest_msft_drifted_sections.py`, the initial version, did
+**delete first, insert after** per section (symmetric to how any "clean"
+migration looks on paper). On this machine, however, Docker Desktop stopped
+twice during the run (likely cause: the laptop sleeping, not a code error)
+— each time, `docker compose exec` reported "completed, exit code 0"
+through the notification system, a false positive (the process was killed
+along with the Docker daemon, it did not finish normally).
 
-Consecinta reala a ordinii sterge-apoi-insereaza: la a doua intrerupere,
-job-ul murise la mijlocul insertului pentru `MSFT_2021/risk_factors` —
-sectiunea veche (149 chunk-uri) fusese deja stearsa complet, iar insertul
-nou ajunsese doar la 108 din 143 tinta. Timp de cateva ore (pana la
-verificarea urmatoare), acea sectiune a avut **un gol real de continut**:
-35 de chunk-uri de text financiar real, indisponibile pentru retrieval, nu
-doar etichetate gresit — o regresie mai grava decat bug-ul pe care remedierea
-incerca sa-l repare.
+The real consequence of the delete-then-insert ordering: on the second
+interruption, the job had died midway through the insert for
+`MSFT_2021/risk_factors` — the old section (149 chunks) had already been
+fully deleted, and the new insert had only reached 108 of a 143 target. For
+a few hours (until the next check), that section had a **real content
+gap**: 35 chunks of real financial text, unavailable to retrieval, not
+just mislabeled — a worse regression than the bug the remediation was
+trying to fix.
 
-**Lectie si fix aplicat**: ordinea a fost inversata — **insereaza intai
-(complet), sterge dupa** (`delete_stale_old_style_chunks`, apelat abia dupa
-ce noul set de chunk-uri e complet inserat). Chunk-urile vechi si cele noi
-au formate de `chunk_id` diferite (`{doc_id}_Item8_{n}` vechi vs
-`{doc_id}_financial_statements_{n}` nou), deci nu se suprascriu — pot
-coexista temporar fara sa produca goluri. Retrieval-ul filtreaza pe coloana
-`section`, nu pe `chunk_id`, deci coexistenta temporara a doua segmentari nu
-afecteaza corectitudinea query-urilor, doar adauga cateva chunk-uri
-redundante pana la pasul de curatare. O intrerupere la mijloc, cu aceasta
-ordine, lasa cel mult continut vechi redundant — niciodata un gol.
+**Lesson and fix applied**: the order was reversed — **insert first
+(fully), delete after** (`delete_stale_old_style_chunks`, called only after
+the new chunk set is fully inserted). The old and new chunks have different
+`chunk_id` formats (`{doc_id}_Item8_{n}` old vs.
+`{doc_id}_financial_statements_{n}` new), so they don't overwrite each
+other — they can coexist temporarily without creating gaps. Retrieval
+filters on the `section` column, not on `chunk_id`, so temporarily
+coexisting segmentations don't affect query correctness, only add a few
+redundant chunks until the cleanup step. An interruption partway through,
+with this ordering, leaves at most redundant old content — never a gap.
 
-## Rezolvare finala (2026-09-13)
+## Final resolution (2026-09-13)
 
-Re-ingestia curata pentru toate cele 16 perechi (doc_id, sectiune) din
-tabelul de mai sus s-a terminat cu succes: 819 chunk-uri vechi sterse, 761
-noi indexate, cost total $0.05. Verificat direct: toate cele 16 sectiuni au
-acum exact numarul de chunk-uri asteptat de la re-parsarea curenta, toate cu
-`chunk_id` in formatul nou consistent — nici o dezaliniere ramasa.
+The clean re-ingestion for all 16 (doc_id, section) pairs in the table
+above finished successfully: 819 old chunks deleted, 761 new ones indexed,
+total cost $0.05. Verified directly: all 16 sections now have exactly the
+chunk count expected from the current parser, all with `chunk_id` in the
+new, consistent format — no remaining misalignment.
 
-**A patra optimizare**: scriptul repeta necondiționat toate sectiunile la
-fiecare repornire, chiar si pe cele deja terminate cu succes — la a patra
-repornire, asta insemna sa refaca ore de munca deja corecta inainte sa
-ajunga la treaba noua. Adaugat `already_done()`: verifica local (fara apel
-LLM) daca sectiunea are deja exact numarul tinta de chunk-uri in formatul
-nou, si sare peste daca da. Rezultat: repornirea finala a durat 13 minute
-(doar cele 6 sectiuni ramase, nu toate cele 16), nu ore.
+**A fourth optimization**: the script unconditionally repeated every
+section on each restart, even ones already finished successfully — by the
+fourth restart, that meant redoing hours of already-correct work before
+reaching new work. Added `already_done()`: checks locally (no LLM call)
+whether a section already has exactly the target chunk count in the new
+format, and skips it if so. Result: the final restart took 13 minutes (only
+the 6 remaining sections, not all 16), not hours.
 
-**Recontrol pe tot corpusul** dupa remediere: cele 2440+146 chunk-uri
-initial afectate au scazut la 159 ramase — dar aproape toate (158/159) sunt
-in sectiuni orfane (`Item1`, `Item2`, `Item5`), ramasite dinainte de
-migrarea la taxonomia canonica, pe care `retrieve.py` nu le mai filtreaza
-niciodata (`PERSONA_SECTIONS`/`FALLBACK_SECTIONS` folosesc doar cele 6
-categorii canonice). Aceste chunk-uri sunt **inaccesibile la retrieval,
-indiferent de continutul lor** — repararea propozitiei lor de context nu ar
-schimba niciun comportament real al sistemului, deci nu a fost facuta.
-Bug-ul e rezolvat complet pentru tot ce conteaza functional; cele 158
-chunk-uri orfane raman ca o curatenie separata, de facut (sters, nu reparat)
-daca se decide vreodata.
+**Full-corpus recheck** after remediation: the 2440+146 chunks initially
+affected dropped to 159 remaining — but almost all (158/159) are in
+orphaned sections (`Item1`, `Item2`, `Item5`), leftovers from before the
+migration to the canonical taxonomy, which `retrieve.py` no longer ever
+filters on (`PERSONA_SECTIONS`/`FALLBACK_SECTIONS` use only the 6 canonical
+categories). Those chunks are **unreachable at retrieval, regardless of
+their content** — fixing their context sentence wouldn't change any real
+system behavior, so it wasn't done. The bug is fully resolved for
+everything that matters functionally; the 158 orphaned chunks remain a
+separate cleanup item (to delete, not repair) if ever decided.
 
-**A treia intrerupere, auto-provocata**: in timp ce job-ul de re-ingestie rula
-(cu ordinea deja corectata insert-first), am rulat `docker compose up -d
---build frontend` pentru un update de design — si `api` a fost repornit
-odata cu el (compose reconciliaza intreg proiectul, nu doar serviciul cerut),
-omorand din nou exec-ul cu SIGKILL (exit 137). Verificare directa dupa aceea
-a confirmat ca design-ul insert-first si-a facut treaba: nici un gol de
-continut, doar sectiuni ramase partial completate (ex: MSFT_2025/mdna avea
-151 chunk-uri — 113 vechi + 38 noi, coexistand, nu suprascrise). Lectie
-suplimentara: **niciun `docker compose up`/`--build`, pe orice serviciu, cat
-timp un exec de migratie de date ruleaza in fundal** — nu doar "nu rebuild pe
-serviciul care ruleaza exec-ul", ci pe intregul proiect compose.
+**A third, self-inflicted interruption**: while the re-ingestion job was
+running (with the ordering already fixed to insert-first), a
+`docker compose up -d --build frontend` was run for a design update — and
+`api` was restarted along with it (compose reconciles the whole project,
+not just the requested service), again killing the exec with SIGKILL (exit
+137). A direct check afterward confirmed the insert-first design had done
+its job: no content gap, just sections left partially completed (e.g.
+MSFT_2025/mdna had 151 chunks — 113 old + 38 new, coexisting, not
+overwritten). Additional lesson: **no `docker compose up`/`--build`, on any
+service, while a data-migration exec is running in the background** — not
+just "don't rebuild the service running the exec", but the entire compose
+project.
 
-**Lectie generala pentru munca de migratie de date pe aceasta masina**:
-notificarile de "job completed" de la procese `docker compose exec` de lunga
-durata nu sunt de incredere daca Docker Desktop se poate opri singur (sleep)
-— verificarea trebuie facuta mereu direct in baza de date/Qdrant dupa
-finalizare, nu doar pe baza codului de iesire raportat. A doua lectie:
-orice script de migratie care modifica date in productie ar trebui sa fie
-implicit rezistent la intrerupere (insert-first, delete-after, sau
-tranzactii atomice), nu doar "de obicei ruleaza pana la capat".
+**General lesson for data-migration work on this machine**: "job
+completed" notifications from long-running `docker compose exec` processes
+are not trustworthy if Docker Desktop can stop itself (sleep) — verification
+must always be done directly against the database/Qdrant after completion,
+not just from the reported exit code. Second lesson: any migration script
+that modifies production data should be interruption-resistant by design
+(insert-first, delete-after, or atomic transactions), not just "usually
+runs to completion".
 
 ## Independent verification — 2026-09-13
 

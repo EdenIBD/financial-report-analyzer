@@ -1,33 +1,34 @@
-# retrieve_multi nu producea niciun raspuns fara o companie numita explicit
+# retrieve_multi produced no answer at all without an explicitly named company
 
-## Ce s-a intamplat
+## What happened
 
-Confirmat live in timpul unei demonstratii: query-ul "care este diferenta
-dintre factorii de risk din 2024 vs 2025" a fost clasificat corect
-(`investment_firm`, `comparison`), dar `extract_entities()` nu a gasit nicio
-companie cunoscuta numita explicit (query-ul se refera la ani, nu la
-companii) — a intors `[]`. Bucla `for ticker in entities` din `retrieve_multi`
-nu a rulat deloc, `retrieved_chunks` a ramas gol, si `generate_answer` nu a
-produs niciun raspuns (`status: "error"`, `answer: null`).
+Confirmed live during a demo: the query "what's the difference between the
+risk factors in 2024 vs 2025" was classified correctly (`investment_firm`,
+`comparison`), but `extract_entities()` found no known company named
+explicitly (the query refers to years, not companies) — it returned `[]`.
+The `for ticker in entities` loop in `retrieve_multi` never ran,
+`retrieved_chunks` stayed empty, and `generate_answer` produced no answer
+(`status: "error"`, `answer: null`).
 
-Deja identificat ca risc teoretic la review-ul de cod anterior (angle B,
-finding "retrieve_multi returneaza retrieved_chunks gol, fara nicio eroare,
-cand extract_entities nu gaseste niciun ticker cunoscut") — confirmat empiric
-la prima utilizare reala dupa ce reranker-ul a devenit functional.
+Already flagged as a theoretical risk in an earlier code review (angle B,
+finding "retrieve_multi returns empty retrieved_chunks, with no error, when
+extract_entities finds no known ticker") — confirmed empirically on first
+real use after the reranker became functional.
 
-## Fix aplicat
+## Fix applied
 
-`src/agent/nodes/retrieve.py::retrieve_multi`: daca `extract_entities`
-intoarce `[]`, se foloseste fallback pe toate cele 3 companii cunoscute
-(`list(KNOWN_ENTITIES.keys())`) in loc sa se opreasca silentios — corpusul
-are oricum doar 3 companii, deci cautarea in toate 3 e un fallback sigur si
-ieftin, nu o presupunere riscanta.
+`src/agent/nodes/retrieve.py::retrieve_multi`: if `extract_entities`
+returns `[]`, fall back to all 3 known companies
+(`list(KNOWN_ENTITIES.keys())`) instead of silently stopping — the corpus
+only has 3 companies anyway, so searching all 3 is a safe, cheap fallback,
+not a risky assumption.
 
-## Cand sa revii aici
+## When to revisit
 
-Daca corpusul se extinde la mai multe companii, fallback-ul "cauta in toate"
-devine scump/zgomotos — la punctul acela, `extract_entities` (sau un
-inlocuitor bazat pe LLM, mentionat deja ca urmatorul pas in build-spec.md
-sectiunea 4) trebuie sa gestioneze explicit si comparatii "in timp" (acelasi
-companie, ani diferiti), nu doar comparatii intre companii — design-ul
-actual al lui `retrieve_multi` nu diferentiaza deloc dupa `fiscal_year`.
+If the corpus grows to more companies, the "search everything" fallback
+becomes expensive/noisy — at that point, `extract_entities` (or an
+LLM-based replacement, already mentioned as the next step in build-spec.md
+section 4) needs to explicitly handle "over time" comparisons too (same
+company, different years), not just cross-company comparisons —
+`retrieve_multi`'s current design doesn't differentiate by `fiscal_year` at
+all.

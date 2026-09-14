@@ -1,32 +1,38 @@
-# gemini-embedding-2 raspunde 404 pe Vertex AI, desi apare in catalog
+# gemini-embedding-2 returns 404 on Vertex AI, despite appearing in the catalog
 
-## Ce s-a intamplat
+## What happened
 
-`src/retrieval/embed.py` folosea `model="gemini-embedding-2"` (marcat "confirmat" in
-build-spec.md). La primul apel real `embed_content(model="gemini-embedding-2", ...)`
-in modul Vertex AI (`genai.Client(vertexai=True, project=..., location="us-central1")`),
-API-ul a raspuns:
+`src/retrieval/embed.py` used `model="gemini-embedding-2"` (marked
+"confirmed" in build-spec.md). On the first real call,
+`embed_content(model="gemini-embedding-2", ...)` in Vertex AI mode
+(`genai.Client(vertexai=True, project=..., location="us-central1")`), the
+API responded:
 
 ```
 404 NOT_FOUND: Publisher model
-`projects/<proiect>/locations/us-central1/publishers/google/models/gemini-embedding-2`
+`projects/<project>/locations/us-central1/publishers/google/models/gemini-embedding-2`
 was not found or your project does not have access to it.
 ```
 
-`client.models.list()` chiar listeaza `publishers/google/models/gemini-embedding-2`
-ca model existent — dar listarea nu garanteaza ca modelul e de fapt invocabil pentru
-proiectul/regiunea curenta (posibil preview/allowlist, neclar din raspunsul API).
+`client.models.list()` does in fact list
+`publishers/google/models/gemini-embedding-2` as an existing model — but
+listing doesn't guarantee the model is actually callable for the current
+project/region (possibly preview/allowlisted, unclear from the API
+response).
 
-## Fix aplicat
+## Fix applied
 
-Testat direct `gemini-embedding-001` (acelasi proiect, aceeasi regiune `us-central1`) —
-functioneaza, si intoarce exact **3072 dimensiuni**, identic cu ce era deja configurat
-in `qdrant_setup.py` (`VectorParams(size=3072)`). Schimbat `embed_document`/`embed_query`
-din `src/retrieval/embed.py` sa foloseasca `gemini-embedding-001`. Nicio alta schimbare
-de cod necesara — interfata `embed_content(..., config={"task_type": ...})` e identica.
+Tested `gemini-embedding-001` directly (same project, same `us-central1`
+region) — it works, and returns exactly **3072 dimensions**, identical to
+what was already configured in `qdrant_setup.py`
+(`VectorParams(size=3072)`). Changed `embed_document`/`embed_query` in
+`src/retrieval/embed.py` to use `gemini-embedding-001`. No other code
+change needed — the `embed_content(..., config={"task_type": ...})`
+interface is identical.
 
-## Cand sa revii aici
+## When to revisit
 
-Daca modelul redevine indisponibil sau se schimba din nou pricing/versiune, verifica
-intai empiric cu un apel real (`embed_content`) inainte sa presupui ca un nume de model
-listat in catalog e si invocabil — `client.models.list()` nu e o garantie de acces real.
+If the model becomes unavailable again, or pricing/versioning changes
+again, verify empirically first with a real call (`embed_content`) before
+assuming a model name listed in the catalog is actually callable —
+`client.models.list()` is not a guarantee of real access.

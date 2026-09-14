@@ -1,39 +1,43 @@
-# build-spec.md din 12 sept a cerut reintroducerea a 2 bug-uri critice deja reparate
+# The Sept 12 build-spec.md asked to reintroduce 2 already-fixed critical bugs
 
-## Ce s-a intamplat
+## What happened
 
-O versiune noua a `build-spec.md` a dat cod "complet" pentru `retrieve_multi` si
-`verify_context` care nu tinea cont de fix-urile aplicate deja azi (documentate
-in `verify-context-infinite-retry-loop.md` si `retrieve-multi-no-entity-fallback.md`):
+A new version of `build-spec.md` gave "complete" code for `retrieve_multi`
+and `verify_context` that didn't account for the fixes already applied that
+day (documented in `verify-context-infinite-retry-loop.md` and
+`retrieve-multi-no-entity-fallback.md`):
 
-- **`verify.py`**: codul dat revenea la varianta originala — `verify_context`
-  ca functie de rutare care muta `state["retry_count"]` direct. Aplicarea ei
-  ar fi reintrodus bucla infinita retrieve<->rerank (deja confirmata: 300+
-  iteratii, oprita doar de rate-limit extern Google).
-- **`retrieve.py`**: `retrieve_multi` dat explicit nu avea fallback-ul pe
-  `KNOWN_ENTITIES` cand `extract_entities` nu gaseste nicio companie —
-  exact bug-ul confirmat live ("factorii de risc 2024 vs 2025" fara raspuns).
+- **`verify.py`**: the given code reverted to the original version —
+  `verify_context` as a routing function that mutates `state["retry_count"]`
+  directly. Applying it would have reintroduced the infinite
+  retrieve<->rerank loop (already confirmed: 300+ iterations, stopped only
+  by an external Google rate limit).
+- **`retrieve.py`**: the `retrieve_multi` given explicitly had no fallback
+  onto `KNOWN_ENTITIES` when `extract_entities` finds no company — exactly
+  the bug confirmed live ("risk factors 2024 vs 2025" with no answer).
 
-**NU s-au aplicat aceste doua bucati de cod.** Structura noua data pentru
-`retrieve_multi` (pattern `base_filter`, `limit=10`, `top_k=5`) a fost adoptata,
-dar cu fallback-ul pastrat peste ea.
+**These two pieces of code were NOT applied.** The new structure given for
+`retrieve_multi` (the `base_filter` pattern, `limit=10`, `top_k=5`) was
+adopted, but with the fallback kept on top of it.
 
-## Alte discrepante gasite si verificate direct (nu presupuse)
+## Other discrepancies found and verified directly (not assumed)
 
-- `gemini-embedding-2` (cerut din nou in `embed.py`/`qdrant_setup.py`/`cost.py`) —
-  re-testat direct, tot 404. Ramas pe `gemini-embedding-001` (deja in productie,
-  8250 vectori reali).
-- `gemini-3-flash` (cerut nou pentru classify+generate) — testat direct, 404,
-  nu exista. Inlocuit cu `gemini-3-flash-preview`, verificat functional.
-- `gemini-3.1-flash-lite` (cerut pentru contextual retrieval) — testat direct,
-  functioneaza. Aplicat ca atare (imbunatatire reala, nu conflict).
+- `gemini-embedding-2` (requested again in `embed.py`/`qdrant_setup.py`/`cost.py`) —
+  retested directly, still 404. Stayed on `gemini-embedding-001` (already in
+  production, 8250 real vectors).
+- `gemini-3-flash` (newly requested for classify+generate) — tested directly,
+  404, doesn't exist. Replaced with `gemini-3-flash-preview`, verified
+  working.
+- `gemini-3.1-flash-lite` (requested for contextual retrieval) — tested
+  directly, works. Applied as given (a real improvement, not a conflict).
 
-## Cand sa revii aici
+## When to revisit
 
-Orice varianta viitoare a spec-ului care da cod "complet" pentru `verify.py`
-sau `retrieve.py::retrieve_multi` trebuie comparata linie cu linie cu versiunea
-curenta din repo inainte de a fi aplicata — nu presupune ca o versiune "mai
-noua" a documentului reflecta neaparat fix-urile deja facute in cod. Verifica
-mereu modelele Gemini/Vertex printr-un apel real inainte de a le adopta dintr-un
-document, indiferent cat de sigur suna ("verificat", "confirmat") — lineup-ul
-se schimba des si documentul poate fi el insusi gresit sau neactualizat.
+Any future version of the spec that gives "complete" code for `verify.py`
+or `retrieve.py::retrieve_multi` must be compared line by line against the
+current version in the repo before being applied — don't assume a "newer"
+version of the document necessarily reflects fixes already made in the
+code. Always verify Gemini/Vertex models with a real call before adopting
+them from a document, no matter how confident it sounds ("verified",
+"confirmed") — the lineup changes often and the document itself can be
+wrong or stale.

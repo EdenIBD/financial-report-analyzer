@@ -1,39 +1,42 @@
-# Edgar10QParser nu clasifica corect sectiunile unui 10-K
+# Edgar10QParser does not correctly classify a 10-K's sections
 
-## Ce s-a intamplat
+## What happened
 
-`sec-parser` (v0.58.1, PyPI) nu are `Edgar10KParser` — doar `Edgar10QParser`.
-Clasificarea semantica de sectiuni a lui `Edgar10QParser` e specifica structurii
-unui 10-Q (Item 1-4 in Part I, Item 1-6 in Part II, cu alte sensuri decat in 10-K)
-si nu recunoaste Item-urile specifice 10-K: 1A, 7, 7A, 8, 9A. Aceste titluri
-apar in arbore ca `TitleElement` simplu (nu `TopSectionTitle`) sau sunt marcate
-`InvalidTopSectionIn10Q`, cu warning la parsing.
+`sec-parser` (v0.58.1, PyPI) has no `Edgar10KParser` — only `Edgar10QParser`.
+`Edgar10QParser`'s semantic section classification is specific to a 10-Q's
+structure (Item 1-4 in Part I, Item 1-6 in Part II, with different meanings
+than in a 10-K) and doesn't recognize 10-K-specific Items: 1A, 7, 7A, 8, 9A.
+These titles show up in the tree as a plain `TitleElement` (not
+`TopSectionTitle`) or get flagged `InvalidTopSectionIn10Q`, with a parsing
+warning.
 
-## Fix aplicat
+## Fix applied
 
-`src/ingestion/parse.py` foloseste `Edgar10QParser` + `TreeBuilder` doar pentru
-arborele de elemente HTML (parsing structural — detectia titlurilor e corecta
-indiferent de clasificarea semantica gresita). Sectionarea se face pe regex al
-textului titlului (`Item N[Litera]`), nu pe `section_type`-ul parserului.
+`src/ingestion/parse.py` uses `Edgar10QParser` + `TreeBuilder` only for the
+HTML element tree (structural parsing — title detection is correct
+regardless of the wrong semantic classification). Sectioning is done via a
+regex on the title text (`Item N[Letter]`), not the parser's `section_type`.
 
-## Caz particular: Google
+## Special case: Google
 
-Regexul initial cerea spatiu obligatoriu dupa punct (`Item 1A. `). Pe filing-ul
-GOOGL 2023, titlurile sunt intr-un element separat, fara text dupa punct
-(`"ITEM 1."`) — regexul strict a picat complet, 0 sectiuni gasite. Fix: regex
-relaxat la `\.?(\s|$)` (accepta si finalul stringului, nu doar spatiu).
+The initial regex required a mandatory space after the period (`Item 1A. `).
+In the GOOGL 2023 filing, the titles sit in a separate element with no text
+after the period (`"ITEM 1."`) — the strict regex failed completely, 0
+sections found. Fix: regex relaxed to `\.?(\s|$)` (also accepts end of
+string, not just a space).
 
-## Caveat cunoscut, neremediat: Microsoft
+## Known caveat, unfixed: Microsoft
 
-Pe MSFT, primele 1-3 caractere ale unor titluri se pierd in continutul extras
-(ex: "RISK FACTORS" → continutul incepe cu "K FACTORS"). Nu afecteaza care
-sectiune e identificata, doar inceputul textului. Marcat cu comentariu
-`# ponytail:` in cod. De verificat daca afecteaza retrieval-ul (improbabil pe
-dense embeddings, posibil pe keyword/full-text matching daca cineva cauta
-exact termenul trunchiat).
+For MSFT, the first 1-3 characters of some titles are lost from the
+extracted content (e.g. "RISK FACTORS" → the content starts with "K
+FACTORS"). Doesn't affect which section is identified, only the start of
+the text. Flagged with a `# ponytail:` comment in the code. Still to check
+whether this affects retrieval (unlikely on dense embeddings, possible on
+keyword/full-text matching if someone searches for the exact truncated
+term).
 
-## Cand sa revii aici
+## When to revisit
 
-Daca extinzi corpusul la alte companii, formatul de titlu poate diferi (cum a
-fost cazul Google) — repeta validarea manuala (afisare output, nu presupunere)
-pe 2-3 documente noi inainte de a rula pe tot corpusul.
+If the corpus expands to other companies, the title format may differ (as
+happened with Google) — repeat manual validation (inspect the output,
+don't assume) on 2-3 new documents before running against the whole corpus.

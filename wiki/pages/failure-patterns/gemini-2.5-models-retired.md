@@ -1,46 +1,48 @@
-# gemini-2.5-flash / gemini-2.5-pro raspund 404 pentru cont nou
+# gemini-2.5-flash / gemini-2.5-pro return 404 for a new account
 
-## Ce s-a intamplat
+## What happened
 
-`src/agent/nodes/classify.py` (`CLASSIFY_MODEL = "gemini-2.5-flash"`) si
-`src/agent/nodes/generate.py` (`GENERATE_MODEL = "gemini-2.5-pro"`) — alese initial
-cu comentariu `# TODO: confirma modelul` — esuau la primul apel real prin
-`ChatGoogleGenerativeAI`, cu:
+`src/agent/nodes/classify.py` (`CLASSIFY_MODEL = "gemini-2.5-flash"`) and
+`src/agent/nodes/generate.py` (`GENERATE_MODEL = "gemini-2.5-pro"`) — initially
+chosen with a `# TODO: confirm the model` comment — failed on the first real
+call through `ChatGoogleGenerativeAI`, with:
 
 ```
 404 NOT_FOUND: This model models/gemini-2.5-flash is no longer available to new
 users. Please update your code to use models/gemini-3.6-flash...
 ```
 
-La fel ca la `gemini-embedding-2` (vezi failure-pattern separat), modelul **apare
-in catalogul `client.models.list()`**, dar nu e de fapt invocabil — de data asta
-motivul e explicit in eroare: retras pentru conturi noi.
+Same as with `gemini-embedding-2` (see the separate failure pattern), the
+model **appears in the `client.models.list()` catalog**, but isn't actually
+callable — this time the error itself states the reason: retired for new
+accounts.
 
-Eroarea aparea in graf ca `status: "error"` fara niciun detaliu, pentru ca
-`handle_query` prinde orice exceptie din `graph.invoke()` intr-un `except Exception:`
-generic, fara sa logheze mesajul (cod dat exact de spec). Diagnosticat rulind
-`graph.invoke()` direct, in afara try/except-ului, ca sa vada traceback-ul real.
+The error surfaced in the graph as `status: "error"` with no detail, because
+`handle_query` catches any exception from `graph.invoke()` in a generic
+`except Exception:`, without logging the message (code given exactly as
+specified). Diagnosed by running `graph.invoke()` directly, outside the
+try/except, to see the real traceback.
 
-## Fix aplicat
+## Fix applied
 
-Testat direct (`generate_content`, nu doar `models.list()`) mai multe modele
-disponibile prin acelasi API key:
+Tested directly (`generate_content`, not just `models.list()`) several
+models available through the same API key:
 
-| Model | Rezultat |
+| Model | Result |
 |---|---|
-| gemini-2.5-flash | 404 (retras) |
-| gemini-2.5-pro | 404 (retras) |
+| gemini-2.5-flash | 404 (retired) |
+| gemini-2.5-pro | 404 (retired) |
 | gemini-3.6-flash | OK |
 | gemini-flash-latest | OK |
 | gemini-pro-latest | OK |
 | gemini-3.1-pro-preview | OK |
 
-Ales `gemini-flash-latest` (classify) si `gemini-pro-latest` (generate) — alias-uri
-"latest" in loc de versiuni fixe, ca sa nu se repete problema la urmatoarea retragere
-de model.
+Chose `gemini-flash-latest` (classify) and `gemini-pro-latest` (generate) —
+"latest" aliases instead of pinned versions, so the same problem doesn't
+recur on the next model retirement.
 
-## Cand sa revii aici
+## When to revisit
 
-`handle_query` inghite tacut orice exceptie din graf — daca reapar erori "error"
-fara raspuns, ruleaza `graph.invoke()` direct (fara try/except) ca sa vezi
-traceback-ul real, nu presupune cauza.
+`handle_query` silently swallows any exception from the graph — if "error"
+responses with no answer show up again, run `graph.invoke()` directly
+(without try/except) to see the real traceback, don't assume the cause.

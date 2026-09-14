@@ -1,33 +1,36 @@
- # langsmith_trace_id era intotdeauna null in raspunsul /query
+# langsmith_trace_id was always null in the /query response
 
-## Ce s-a intamplat
+## What happened
 
-`src/api/tracing.py::get_current_run_id()` foloseste `get_current_run_tree()` din
-`langsmith.run_helpers`, apelat in `handle_query` (`main.py`) **dupa** ce
-`graph.invoke()` s-a terminat deja. Contextul de run al LangSmith (populat prin
-Python contextvars) exista doar cat timp codul ruleaza *in interiorul* unui apel
-urmarit (traced) — dupa ce acel apel se termina si iese din stack, contextul
-dispare, deci `get_current_run_tree()` intoarce mereu `None` cand e apelat "dupa
-fapt", chiar daca graph.invoke() a fost el insusi urmarit corect.
+`src/api/tracing.py::get_current_run_id()` uses `get_current_run_tree()`
+from `langsmith.run_helpers`, called inside `handle_query` (`main.py`)
+**after** `graph.invoke()` had already finished. LangSmith's run context
+(populated via Python contextvars) only exists while code is running
+*inside* a traced call — once that call finishes and unwinds the stack, the
+context is gone, so `get_current_run_tree()` always returns `None` when
+called "after the fact", even though `graph.invoke()` itself was correctly
+traced.
 
-Verificat empiric: LangGraph traceaza automat FIECARE nod din graf (classify,
-retrieve_single, rerank...) in LangSmith cand `LANGCHAIN_TRACING_V2=true` — deci
-infrastructura de baza exista si functioneaza (confirmat cu apel direct la API-ul
-LangSmith, `GET /api/v1/runs/query`, care arata run-uri reale cu clasificare,
-chunk-uri recuperate, cost). Problema era doar la nivelul lui `handle_query`,
-care nu avea el insusi un context de trace activ in care sa "prinda" id-ul.
+Verified empirically: LangGraph automatically traces EVERY node in the
+graph (classify, retrieve_single, rerank...) in LangSmith when
+`LANGCHAIN_TRACING_V2=true` — so the underlying infrastructure exists and
+works (confirmed with a direct call to the LangSmith API,
+`GET /api/v1/runs/query`, which shows real runs with classification,
+retrieved chunks, cost). The problem was only at the `handle_query` level,
+which had no active trace context of its own in which to "catch" the id.
 
-## Fix aplicat
+## Fix applied
 
-Adaugat `@traceable(name="handle_query")` din pachetul `langsmith` pe functia
-`handle_query` — asta creeaza un run-tree activ pentru toata executia functiei,
-in interiorul caruia `get_current_run_tree()` (apelat dupa `graph.invoke()`, tot
-in interiorul functiei decorate) gaseste id-ul real. Testat direct: fara
-decorator, `run_tree` e `None`; cu decorator, e un UUID real.
+Added `@traceable(name="handle_query")` from the `langsmith` package on the
+`handle_query` function — this creates an active run-tree for the whole
+execution of the function, inside which `get_current_run_tree()` (called
+after `graph.invoke()`, still inside the decorated function) finds the real
+id. Tested directly: without the decorator, `run_tree` is `None`; with the
+decorator, it's a real UUID.
 
-## Cand sa revii aici
+## When to revisit
 
-Daca se adauga alte functii care apeleaza `graph.invoke()` din afara lui
-`handle_query` (ex: un script CLI separat) si au nevoie de trace_id, trebuie
-decorate la fel cu `@traceable`, altfel `get_current_run_id()` va intoarce `None`
-acolo si.
+If other functions are added that call `graph.invoke()` from outside
+`handle_query` (e.g. a separate CLI script) and need the trace_id, they
+must be decorated the same way with `@traceable`, otherwise
+`get_current_run_id()` will return `None` there too.

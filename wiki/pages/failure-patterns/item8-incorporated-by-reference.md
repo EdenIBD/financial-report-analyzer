@@ -1,51 +1,56 @@
-# Item 8 incorporat prin referinta: sectiune "gasita", dar practic goala
+# Item 8 incorporated by reference: section "found", but practically empty
 
-Data: 2026-09-12
-Descoperit la: primul filing ingerat dinamic din afara corpusului fix (NVDA 10-K FY2026).
+Date: 2026-09-12
+Discovered during: the first filing dynamically ingested from outside the fixed corpus (NVDA 10-K FY2026).
 
-## Ce s-a intamplat
+## What happened
 
-`parse_filing` + `validate_sections` au trecut curat pe NVDA_2026: toate cele 6
-categorii canonice gasite, validare OK. Dar dimensiunile spun altceva:
+`parse_filing` + `validate_sections` passed cleanly on NVDA_2026: all 6
+canonical categories found, validation OK. But the sizes tell a different
+story:
 
-| categorie | NVDA_2026 |
+| category | NVDA_2026 |
 |---|---|
-| risk_factors | 114.252 caractere |
-| mdna | 33.685 |
-| market_risk | 4.160 |
-| controls_procedures | 3.372 |
+| risk_factors | 114,252 characters |
+| mdna | 33,685 |
+| market_risk | 4,160 |
+| controls_procedures | 3,372 |
 | legal_proceedings | 171 |
 | **financial_statements** | **155** |
 
-Continutul lui `financial_statements` e integral:
+The entire content of `financial_statements` is:
 
 > "The information required by this Item is set forth in our Consolidated
 > Financial Statements..."
 
-Adica un pointer, nu situatiile financiare. La fel `legal_proceedings` (171
-caractere, trimite la Nota 12). NVIDIA incorporeaza Item 8 si Item 3 prin
-referinta la alte parti ale documentului, in loc sa puna continutul sub titlul
-Item-ului — perfect legal si obisnuit la SEC, dar invizibil pentru un parser
-care sectioneaza dupa titluri de Item.
+In other words, a pointer, not the financial statements. Same for
+`legal_proceedings` (171 characters, points to Note 12). NVIDIA
+incorporates Item 8 and Item 3 by reference to other parts of the document,
+instead of putting the content under the Item's own heading — perfectly
+legal and common at the SEC, but invisible to a parser that sections by
+Item headings.
 
-## De ce conteaza
+## Why it matters
 
-`financial_statements` e in `PERSONA_SECTIONS` pentru 4 din 5 persona-uri
-(audit_firm, investment_firm, investment_bank, treasury). Pentru un filing
-ingerat asa, acele query-uri filtreaza pe o sectiune care are un singur chunk
-inutil. Nu e o eroare — e un raspuns slab, fara niciun semnal ca ceva lipseste.
+`financial_statements` is in `PERSONA_SECTIONS` for 4 of the 5 personas
+(audit_firm, investment_firm, investment_bank, treasury). For a filing
+ingested this way, those queries filter on a section with a single, useless
+chunk. It isn't an error — it's a poor answer with no signal that anything
+is missing.
 
-Corpusul fix (Apple/Microsoft/Google) nu arata problema: acolo
-`financial_statements` are ~3.100 chunk-uri in total, deci continutul chiar e
-sub titlul Item-ului. E o diferenta intre filer-i, exact clasa de bug de la
-Google (titluri fara spatiu dupa punct), doar ca de data asta esecul e tacut.
+The fixed corpus (Apple/Microsoft/Google) doesn't show the problem: there,
+`financial_statements` has ~3,100 chunks in total, so the content really is
+under the Item heading. It's a difference between filers — the same class
+of bug as Google's (titles without a space after the period), just this
+time the failure is silent.
 
-## Ce NU s-a facut
+## What was NOT done
 
-`validate_sections` verifica prezenta, nu dimensiunea. Un prag de lungime
-minima per sectiune ar prinde cazul asta, dar ar respinge si filing-uri
-legitime — pragul corect nu poate fi ghicit dintr-un singur exemplu. De decis
-dupa ce mai sunt ingerate cateva companii din afara corpusului, nu acum.
+`validate_sections` checks presence, not size. A minimum-length threshold
+per section would catch this case, but would also reject legitimate
+filings — the right threshold can't be guessed from a single example. To be
+decided once a few more companies outside the fixed corpus have been
+ingested, not now.
 
-Urmarirea corecta a referintelor incrucisate ("see Note 12") ar insemna un
-parser de alt nivel decat sectionarea dupa titluri — nu intra in scopul curent.
+Properly following cross-references ("see Note 12") would mean a different
+tier of parser than heading-based sectioning — out of scope for now.
